@@ -1,0 +1,127 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model GuardianInfo
+@{
+    ViewBag.Title = ClientPages.AddGuardian;
+    ViewBag.CurArea = MenuArea.Clients;
+
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.AuntUncle.ToString(), Text = Relationship.AuntUncle, Selected = Model.Relationship == RelationshipEnum.AuntUncle });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Grandparent.ToString(), Text = Relationship.Grandparent, Selected = Model.Relationship == RelationshipEnum.Grandparent });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Guardian.ToString(), Text = Relationship.Guardian, Selected = Model.Relationship == RelationshipEnum.Guardian });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Other.ToString(), Text = Relationship.Other, Selected = Model.Relationship == RelationshipEnum.Other });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Parent.ToString(), Text = Relationship.Parent, Selected = Model.Relationship == RelationshipEnum.Parent });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Sibling.ToString(), Text = Relationship.Sibling, Selected = Model.Relationship == RelationshipEnum.Sibling });
+
+    if (Model.Address == null)
+    {
+        Model.Address = new www.therapycorner.com.account.AddressInfo();
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.LastFirst), "details","client", new { id = Model.Client.UniqueId },null) &gt; @ClientPages.AddGuardian</h2>
+@using (Html.BeginForm("create", "guardian", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Client.LastName)
+    @Html.HiddenFor(m => m.Client.FirstName)
+    @Html.HiddenFor(m => m.Version)
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.FirstName)
+            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.MiddleName)
+            @Html.TextBoxFor(m => m.MiddleName, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.MiddleName, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.LastName)
+                @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = "50" })
+                @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Suffix)
+                @Html.TextBoxFor(m => m.Suffix, new { @class = "form-control", maxlength = "20" })
+                @Html.ValidationMessageFor(m => m.Suffix, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label>@Dictionary.Relationship</label>
+                @Html.DropDownList("Relationship", valuesModel, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Relationship, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.IsPrimary)
+                @Html.CheckBoxFor(m=>m.IsPrimary, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.IsPrimary, "", new { @class = "text-danger" })
+            </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.AutoShare)
+            @Html.CheckBoxFor(m => m.AutoShare, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.AutoShare, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Phone)
+            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", maxlength = "20" })
+            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Mobile)
+            @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", maxlength = "20" })
+            @Html.ValidationMessageFor(m => m.Mobile, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Email)
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line1)
+            @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line2)
+            @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.City)
+            @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.State)
+            @Html.Partial("_StateSelector", Model.Address.State ?? "")
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.PostalCode)
+            @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+        </div>
+    </section>
+
+ 
+
+  
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = Model.Client.UniqueId })'">@Dictionary.Cancel</button></p>
+
+}
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

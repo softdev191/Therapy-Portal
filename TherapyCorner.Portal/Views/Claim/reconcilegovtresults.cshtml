@@ -1,0 +1,72 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ReconcileResponse
+@{
+    ViewBag.Title = ClaimsPages.ReconcileGovt;
+    ViewBag.CurArea = MenuArea.Billing;
+    if (Model.EntityList == null)
+    {
+        Model.EntityList = new www.soundpower.biz.common.GenericEntityList();
+    }
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(PaymentsPages.Payments, "index","payment") &gt; >@Html.ActionLink(ClaimsPages.ReconcileGovt, "reconcilegovt") &gt; @ClaimsPages.Results</h2>
+
+    @Html.AntiForgeryToken()
+
+
+        <ul>
+            <li>@string.Format(ClaimsPages.ClaimsProcessed,Model.RecordCount-Model.EntityList.Count)</li>
+            <li>@string.Format(ClaimsPages.Issues, Model.EntityList.Count)</li>
+            <li>@string.Format(ClaimsPages.Lines, Model.RecordCount)</li>
+       </ul>
+
+
+
+<h3>@string.Format(ClaimsPages.Issues,"")</h3>
+
+
+    <table class="sortable">
+    <thead>
+        <tr>
+            <th class="IdText"><a href="#">@ClaimsPages.LineNumber</a></th>
+            <th ><a href="#">@ClaimsPages.Issue</a></th>
+            <th class="IdText"></th>
+         
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.EntityList.Count > 0)
+        {
+         foreach (var p in Model.EntityList)
+            {
+             
+            <tr>
+
+                <td>
+                    @p.UniqueId
+                </td>
+                <td>
+                    @p.Name
+                </td>
+               <td>
+                   @if(!string.IsNullOrWhiteSpace(p.AlternateId))
+                   {
+                       @Html.ActionLink(ClaimsPages.Details,"details",new { id = p.AlternateId })
+                   }
+               </td>
+
+
+            </tr>
+        }
+        }
+    </tbody>
+</table>
+
+
+

@@ -1,0 +1,55 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ReferencedInsuranceCompanyList
+
+@{
+    ViewBag.Title = Dictionary.Insurance;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+}
+<link rel="stylesheet" type="text/css" href="~/Content/insurance.css" />
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing","home") &gt; @Dictionary.Insurance</h2>
+<p>
+    <button onclick="window.location ='@Url.Action("addinsurance")'">@Dictionary.Add</button>
+</p>
+
+<div class="scrollTableContainer CredTable"  >
+    <div class="scrollTableArea InsTable">
+        <table class="scrollable sortable">
+            <thead>
+                <tr>
+                    <th> <div class="tdSingleButton"></div></th>
+                    <th> <div class="LongNameText"><a>@Dictionary.Company</a></div></th>
+                    <th class="HideMobile"><div class="NumberText"><a>@SharedPages.Patientcount</a></div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var p in Model)
+                    {
+                        if (!p.IsActive )
+                        {
+                            continue;
+                        }
+                        <tr>
+                            <td>
+                                <div class="tdSingleButton">
+
+                                        <a href="@Url.Action("insurancedetails",new { id = p.CompanyId })">
+                                            <img src="~/images/magnify.png" />
+                                        </a>
+                                  
+
+                                </div>
+                            </td>
+                            <td><div class="LongNameText">@p.Name</div></td>
+                            <td class="HideMobile"><div class="NumberText">@Html.ActionLink(p.ClientCount.GetValueOrDefault(0).ToString(), "index", "client", new { insurance = p.CompanyId },null)</div></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

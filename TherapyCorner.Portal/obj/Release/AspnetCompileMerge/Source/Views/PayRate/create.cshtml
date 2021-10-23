@@ -1,0 +1,59 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.CreatePayRateRequest 
+
+@{
+    ViewBag.Title = PayRatePages.AddRate;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+ 
+
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.PayRates, "index") &gt; @PayRatePages.AddRate</h2>
+
+    @using (Html.BeginForm("Create", "PayRate", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+
+
+        <div class="halfspace ">
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Name)
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.StartDate)
+                @Html.TextBoxFor(m => m.StartDate, new { @class = "form-control DateText", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.StartDate , "", new { @class = "text-danger" })
+
+
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.UnitRate)
+                @Html.TextBoxFor(m => m.UnitRate, new { @class = "form-control NumberText", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.UnitRate, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label for="DefaultPayroll">@PayRatePages.DefaultPayroll</label>
+                @Html.TextBoxFor(m => m.DefaultPayroll, "{0:N2}", new { @class = "form-control NumberText", maxlength = "6" })
+                @Html.ValidationMessageFor(m => m.DefaultPayroll, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="halfspace ">
+            <h3>@www.therapycorner.com.company.ResStrings.Dictionary.Disciplines </h3>
+            @Html.Action("checklist", "Discipline", new { selected = Model.Disciplines })
+            </div>
+
+            <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+            }
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

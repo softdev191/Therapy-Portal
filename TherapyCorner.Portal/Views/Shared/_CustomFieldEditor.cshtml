@@ -1,0 +1,84 @@
+﻿@using www.therapycorner.com.account;
+
+@model FieldType
+
+    @{ 
+        string value = ViewBag.FieldValue;
+        int index = ViewBag.FieldNumber;
+        string prefix = ViewBag.FieldPrefix;
+        string controlNamePrefix = string.Format("{0}[{1}].", prefix, index);
+        bool showValidation = true;
+    }
+
+<div class="form-group">
+    @Html.Hidden(string.Format("{0}.Index",prefix), index)
+    @Html.Hidden(string.Format("{0}{1}", controlNamePrefix, "FieldId"), Model.FieldId)
+    <label>@Model.Label</label>
+    @switch(Model.Type)
+    {
+        case www.soundpower.biz.common.ValueTypeEnum.Date:
+            @Html.TextBox(string.Format("{0}{1}", controlNamePrefix, "Value"),value,new { @class = "form-control DateText", maxlength = 10 })
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.Boolean:
+            bool bv = false;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                bool.TryParse(value, out bv);
+            }
+
+            @Html.CheckBox(string.Format("{0}{1}", controlNamePrefix, "Value"), bv, new { @class = "form-control" })
+
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.Integer:
+        case www.soundpower.biz.common.ValueTypeEnum.Decimal:
+            @Html.TextBox(string.Format("{0}{1}", controlNamePrefix, "Value"), value, new { @class = "form-control NumberText",type="number", maxlength = 10 })
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.String:
+            @Html.TextBox(string.Format("{0}{1}", controlNamePrefix, "Value"), value, new { @class = "form-control", maxlength = Model.Max.GetValueOrDefault(1000) })
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.ReferenceList:
+            if (Model.ReferenceList=="CaseWorker")
+            {
+                string nme = "";
+                www.soundpower.biz.common.GenericEntityList caseWorkers = ViewBag.CaseWorkers;
+                if(caseWorkers!=null)
+                {
+                    var worker = caseWorkers.Find(w => w.UniqueId == value);
+                    if (worker!=null)
+                    {
+                        nme = string.Format("{0} {1}", worker.Name, worker.AlternateId);
+                    }
+                }
+                @Html.Hidden(string.Format("{0}{1}", controlNamePrefix, "Value"), value);
+
+                <a href='javascript:AddCaseWorker( @Model.FieldId)'><img src="~/images/add.png"/></a>
+                @Html.TextBox(string.Format("CaseWorker{0}",Model.FieldId),nme, new { @class = "form-control" })
+                @Html.ValidationMessage(string.Format("Caseworker{0}", Model.FieldId), new { @class = "text-danger" })
+               
+                <script>
+                   
+                    setTimeout(function(){ InitializeCaseWorker(@Model.FieldId, "@string.Format("{0}{1}", controlNamePrefix, "Value")");},1000);
+                </script>
+            }
+            else
+            {
+                List<SelectListItem> options = new List<SelectListItem>();
+                if(!Model.Required )
+                {
+                    options.Add(new SelectListItem() { Value = "", Text = "" });
+
+                }
+                foreach (var s in Model.ReferenceList.Split(','))
+                {
+                    options.Add(new SelectListItem() { Value = s, Text = s, Selected = s == value });
+                }
+
+                @Html.DropDownList(string.Format("{0}{1}", controlNamePrefix, "Value"),options,new { @class = "form-control" })
+            }
+            break;
+    }
+    @if (showValidation)
+    {
+    @Html.ValidationMessage(string.Format("{0}{1}", controlNamePrefix, "Value"), new { @class = "text-danger" })
+    }
+</div>

@@ -1,0 +1,168 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model InsurancePolicy
+@{
+    ViewBag.Title = ClientPages.AddPolicy;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    ReferencedInsuranceCompanyList companies = ViewBag.Companies;
+    bool hasGovt = ViewBag.HasGovt;
+
+    var svcCompanies = new List<SelectListItem>();
+    List<string> mcidlist = new List<string>();
+    foreach (var s in companies)
+    {
+
+        svcCompanies.Add(new SelectListItem() { Value = s.CompanyId.ToString(), Text = s.Name, Selected = Model.Company.UniqueId == s.CompanyId.ToString() });
+        mcidlist.Add("{" + string.Format("cid: '{0}', mcid: '{1}'", s.CompanyId, s.Version) + "}");
+    }
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Child.ToString(), Text = Relationship.Child, Selected = Model.Relationship == InsuranceRelationshipEnum.Child });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Other.ToString(), Text = Relationship.Other, Selected = Model.Relationship == InsuranceRelationshipEnum.Other });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Self.ToString(), Text = Relationship.Self, Selected = Model.Relationship == InsuranceRelationshipEnum.Self });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Spouse.ToString(), Text = Relationship.Spouse, Selected = Model.Relationship == InsuranceRelationshipEnum.Spouse });
+
+    if(Model.Address==null)
+    {
+        Model.Address = new www.therapycorner.com.account.AddressInfo();
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.LastFirst), "details", "client", new { id = Model.Client.UniqueId }, null) &gt; @ClientPages.AddPolicy</h2>
+@using (Html.BeginForm("create", "insurancepolicy", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Client.FirstName)
+    @Html.HiddenFor(m => m.Client.LastName)
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.PolicyId)
+    @Html.HiddenFor(m => m.Company.Context)
+
+
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Company</label>
+        @Html.DropDownList("Company.UniqueId", svcCompanies, new { @class = "form-control", onchange = "PopulateMCID()" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.FirstName)
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.LastName)
+        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Gender)
+        @Html.EditorFor(m => m.Gender)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.DoB)
+        @Html.TextBoxFor(m => m.DoB, new { @class = "form-control DateText", maxlength = 10 })
+        @Html.ValidationMessageFor(m => m.DoB, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.IdNo)
+        @Html.TextBoxFor(m => m.IdNo, new { @class = "form-control", maxlength = 20 })
+        @Html.ValidationMessageFor(m => m.IdNo, "", new { @class = "text-danger" })
+    </div>
+    @if (hasGovt)
+    {
+        <div class="form-group">
+            <label>MCID</label>
+            @Html.TextBoxFor(m => m.MCID, new { @class = "form-control", maxlength = "16" })
+            @Html.ValidationMessageFor(m => m.MCID, "", new { @class = "text-danger" })
+        </div>
+    }
+</section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Phone)
+            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", maxlength = "15" })
+            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line1)
+            @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line2)
+            @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.City)
+            @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.State)
+            @Html.Partial("_StateSelector", Model.Address.State ?? "")
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.PostalCode)
+            @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Number)
+            @Html.TextBoxFor(m => m.Number, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.Number, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.PatientIdNo)
+            @Html.TextBoxFor(m => m.PatientIdNo, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.PatientIdNo, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Relationship)
+            @Html.DropDownList("Relationship", valuesModel, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.IsPrimary)
+            @Html.CheckBoxFor(m => m.IsPrimary, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Start)
+            @Html.TextBoxFor(m => m.Start, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.Start, "", new { @class = "text-danger" })
+        </div>
+
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = Model.Client.UniqueId })'">@Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        var hasGovt = @hasGovt.ToString().ToLower();
+        var companies = [ @Html.Raw(string.Join(",",mcidlist)) ];
+        $(document).ready(function () {
+            PopulateMCID();
+        });
+        function PopulateMCID() {
+            if (hasGovt) {
+                var selID = $("#Company_UniqueId").val();
+                companies.forEach(function ( val) {
+                    if (val.cid == selID) {
+                        $("#MCID").val(val.mcid);
+                    }
+                });
+            }
+        }
+
+    </script>
+}

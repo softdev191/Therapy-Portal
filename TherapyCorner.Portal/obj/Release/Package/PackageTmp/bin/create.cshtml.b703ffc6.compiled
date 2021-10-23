@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/FreqDur/create.cshtml" hash="76fac76b" filehash="23faf55d55bc" flags="110000" assembly="App_Web_ejx4qjdr" type="ASP._Page_Views_FreqDur_create_cshtml">
+    <filedeps>
+        <filedep name="/Views/FreqDur/create.cshtml" />
+    </filedeps>
+</preserve>

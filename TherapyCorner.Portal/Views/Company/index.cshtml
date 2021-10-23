@@ -1,0 +1,61 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+@using www.therapycorner.com.company;
+
+@model CompanyInfo
+
+@{
+    ViewBag.Title = Dictionary.Administration;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ReferencedGovernmentProgramList programs = ViewBag.Programs;
+}
+
+<h2 class="breadcrumb">@Dictionary.Administration</h2>
+<section class="halfspace">
+    <h3>@CompanyPages.ContactInformation <a href="@Url.Action("edit")"><img style="height:32px" src="~/images/edit.png"/></a></h3>
+    <address>
+        @Model.Name<br/>
+        @Model.Address.Line1<br />
+     @if (!string.IsNullOrWhiteSpace(Model.Address.Line2))
+     {
+        @Model.Address.Line2<br />
+
+     }
+        @Model.Address.City, @Model.Address.State  @Model.Address.PostalCode<br />
+        @Model.Phone<br/>
+        @Model.Email
+        @if (!string.IsNullOrWhiteSpace(Model.NPI))
+        {
+            <br/><span>NPI #@Model.NPI</span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.TaxId))
+        {
+            <br /><span>Tax #@Model.TaxId</span>
+        }
+    </address>
+</section>
+<section class="halfspace">
+    <h3>@Dictionary.GovtPrograms <a href="@Url.Action("governmentprogram")"><img  style="height:32px" src="~/images/magnify.png"/></a></h3>
+    <table class="sortable" style="width:100%">
+        <thead>
+            <tr>
+                <th>@Dictionary.Agency</th>
+                <th>@www.therapycorner.com.company.ResStrings.Dictionary.AgencyProvider</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(programs!=null && programs.Count>0)
+            {
+                foreach(var p in programs)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Code</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+</section>

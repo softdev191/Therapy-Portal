@@ -1,0 +1,33 @@
+﻿@model www.therapycorner.com.account.CompanyInfo
+
+
+@Html.HiddenFor(m => m.CompanyId)
+@Html.HiddenFor(m => m.Version)
+@Html.HiddenFor(m => m.Name)
+@Html.HiddenFor(m => m.TaxId)
+@Html.HiddenFor(m => m.Email)
+@Html.HiddenFor(m => m.Phone)
+
+<div class="form-group" id="CHIDs">
+
+            <label class="CHLabels" >SFTP User Id</label>
+
+    @Html.TextBoxFor(m => m.ClearingHouse.UserId, new { @class = "form-control", maxlength = "20" })
+</div>
+<div class="form-group" id="CHPasses">
+
+            <label class="CHLabels" >SFTP Password</label>
+
+    @Html.PasswordFor(m => m.ClearingHouse.Password, new { @class = "form-control", maxlength = "50" })
+</div>
+<div class="form-group" id="CHPasses">
+    <label class="CHLabels">Real Time Sender Id</label>
+
+    @Html.TextBoxFor(m => m.ClearingHouse.RealTimeUser, new { @class = "form-control", maxlength = "50" })
+</div>
+<div class="form-group" id="CHPasses">
+
+            <label class="CHLabels" >Realtime Password</label>
+
+    @Html.PasswordFor(m => m.ClearingHouse.RealTimePass, new { @class = "form-control", maxlength = "50" })
+</div>

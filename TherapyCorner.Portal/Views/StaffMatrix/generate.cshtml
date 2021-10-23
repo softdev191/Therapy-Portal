@@ -1,0 +1,59 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MatrixRowList
+
+@{
+    ViewBag.Title = SharedPages.StaffMatrix;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+
+    MatrixFieldList fields = ViewBag.Fields;
+    if (fields !=null && fields.Count>0)
+    {
+        fields.Sort((a, b) => a.OrderNumber.CompareTo(b.OrderNumber));
+
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index","staff") &gt; @SharedPages.StaffMatrix</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="window.open('@Url.Action("export")','_blank')">@SharedPages.ExportCSV</button>
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+          @if(fields!=null && fields.Count>0)
+          {
+              foreach(var f in fields)
+              {
+                  <th><a href="#">@f.Header</a></th>
+              }
+          }
+           </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        @foreach(var f in fields)
+                        {
+                            var rv = p.Values.Find(v => v.FieldId == f.OrderNumber);
+                            <td>
+                                @if(rv!=null)
+                                {
+                                    @rv.Value
+                                }
+                            </td>
+                        }
+                        </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

@@ -1,0 +1,18 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model DisciplineInfoList
+
+@{
+    www.soundpower.biz.common.GenericEntityList selected = ViewBag.SelectedDisciplines;
+    string isChecked= "";
+}
+<div style="overflow:auto;height:150px;">
+    @foreach(var d in Model)
+    {
+        isChecked = selected.Exists(s => s.UniqueId == d.DisciplineId.ToString()) ? "checked" : "";
+        <input type="checkbox" name="DisciplineId" value="@d.DisciplineId" @isChecked /> @d.Name <br/>
+    }
+</div>
+

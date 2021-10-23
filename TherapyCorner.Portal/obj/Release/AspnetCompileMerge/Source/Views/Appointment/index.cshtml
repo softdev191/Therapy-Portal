@@ -1,0 +1,37 @@
+﻿@using TherapyCorner.Portal.ResourceText;
+
+@{
+    ViewBag.Title = CalendarPages.MyCalendar;
+    ViewBag.CurArea = MenuArea.Calendar;
+
+}
+<h2 class="breadcrumb"> @CalendarPages.MyCalendar</h2>
+<section>
+    <span style="float:right"><input type="checkbox" id="chkCancelled" onclick="ToggleCancelled()" /> Show Cancelled</span>
+
+        <button onclick="window.location='@Url.Action("scheduleunavailable")'">@CalendarPages.ScheduleUnavail</button>
+ 
+
+
+
+</section>
+<section style="margin-top:10px;">
+    <div id="calendar">
+       </div>
+
+</section>
+
+@section scripts
+{
+
+
+  @Scripts.Render("~/bundles/calendar")
+@Styles.Render("~/Content/calendar")
+
+
+    <script>
+        $(document).ready(function () {
+            InitializeCalendar("agendaWeek", "@Url.Action("UserMeetings", new { id = UserAuthorization.CurrentUser.UserId })","listMonth");
+        });
+        </script>
+    }

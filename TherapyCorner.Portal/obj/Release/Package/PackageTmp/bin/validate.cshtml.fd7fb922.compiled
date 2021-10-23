@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Profile/validate.cshtml" hash="76fac76b" filehash="ffffee5171d596ed" flags="110000" assembly="App_Web_iojz54r2" type="ASP._Page_Views_Profile_validate_cshtml">
+    <filedeps>
+        <filedep name="/Views/Profile/validate.cshtml" />
+    </filedeps>
+</preserve>

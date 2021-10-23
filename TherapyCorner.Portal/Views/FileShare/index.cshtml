@@ -1,0 +1,52 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+
+
+@model www.therapycorner.com.account.MessageContracts.CreateVerificationRequest
+@{
+    ViewBag.Title = "Secure File Share";
+    Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    string eml = ViewBag.Email;
+    string ph = ViewBag.Mobile;
+}
+
+<h2>Secure File Share</h2>
+        @if (!string.IsNullOrWhiteSpace(eml))
+        {
+<p>Please select from the option below to be sent an identity confirmation code</p>
+<section>
+
+    @using (Html.BeginForm("index", "fileshare", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+        @Html.Hidden("Email", eml)
+        @Html.Hidden("Mobile", ph)
+        <div class="form-group">
+            <input type="radio" name="ByEmail" value="true" checked /> @string.Format(ProfilePages.ForgotEmail, eml) <br />
+            @if (!string.IsNullOrWhiteSpace(ph))
+            {
+                <input type="radio" name="ByEmail" value="false" checked /><span>
+                    @string.Format(ProfilePages.ForgotMobile, ph)
+                </span>
+
+            }
+
+        </div>
+
+        <div class="form-group">
+            <button style="margin-left:200px" type="submit">@Dictionary.Continue</button>
+        </div>
+        }
+
+</section>
+        }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}
+
+
+

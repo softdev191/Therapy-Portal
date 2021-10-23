@@ -1,0 +1,92 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model www.therapycorner.com.company.MessageContracts.CreateAppointmentRequest
+
+@{
+    ViewBag.Title = @CalendarPages.ScheduleMakeup;
+    ViewBag.CurArea = MenuArea.Calendar;
+
+    ClientService  svc = ViewBag.Service;
+    int? duration = ViewBag.DurationTime;
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(CalendarPages.MyCalendar, "index", "appointment") &gt; @Html.ActionLink(SharedPages.PotMakeups,"makeups","appointment") &gt; @CalendarPages.ScheduleMakeup </h2>
+@using (Html.BeginForm("createmakeup", "appointment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("ClientId", svc.Client.UniqueId)
+
+    @Html.Hidden("ServiceId", svc.Service.UniqueId)
+    @Html.HiddenFor(m=>m.MeetingCount)
+    @Html.HiddenFor(m => m.ClientServiceId)
+    <div class="halfspace">
+        <div class="form-group">
+            <label>@Dictionary.Client</label>
+            @svc.Client.FirstMILast
+
+
+        </div>
+
+        <div class="form-group">
+            <label>@Dictionary.Service</label>
+            @svc.Service.Name 
+
+
+        </div>
+
+
+        <div class="form-group">
+            <label>@Dictionary.Date</label>
+            @Html.TextBoxFor(m => m.InitialDate, "{0:MM/dd/yyyy}", new { @class = "form-control DateText", maxlength = "10", onchange = "UpdateMakeupAvailability()" })
+            @Html.ValidationMessageFor(m => m.InitialDate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.StartTime</label>
+            @Html.TextBoxFor(m => m.StartDT, "{0:h:mm tt}", new { @class = "form-control", maxlength = "10", onchange = "SetMakeupEndTime()", style = "width:118px;" })
+            @Html.ValidationMessageFor(m => m.StartDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.EndTime</label><br />
+            <span id="spEndTime"></span>
+        </div>
+    </div>
+
+        <div class="halfspace">
+            <div class="form-group"> <label>@Dictionary.FreqDur</label><br /><span id="spFreqDur">@svc.Duration.Name</span></div>
+            <div class="form-group"> <label>@Dictionary.Location</label><br /><span id="spLocation">@svc.Location.ToString()</span></div>
+            <div>
+                <label>@Dictionary.Availability</label>
+
+                <div id="availcalendar">
+                </div>
+
+            </div>
+        </div>
+
+
+        <p style="text-align:right">
+            <button id="btnSave" onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("makeups")'">@Dictionary.Cancel</button>
+
+
+        </p>
+}
+
+@section scripts
+{
+
+
+
+    @Scripts.Render("~/bundles/calendar")
+    @Styles.Render("~/Content/calendar")
+    @Scripts.Render("~/bundles/createappointment")
+
+
+    <script>
+        $(document).ready(function () {
+            InitializeMakeup(@svc.Provider.UniqueId,@svc.Client.UniqueId,@duration.GetValueOrDefault(60));
+        });
+    </script>
+}

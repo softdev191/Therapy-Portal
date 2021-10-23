@@ -1,0 +1,59 @@
+﻿@using www.therapycorner.com.company;
+@using TherapyCorner.Portal.ResourceText;
+@model QuestionAnswer
+@{
+    string parentPrefix = ViewBag.Prefix;
+    int index = ViewBag.Index;
+    string prefix = string.Format("{0}[{1}].", parentPrefix, index);
+    bool readOnly = ViewBag.ReadOnly;
+    bool? toggleApprove = ViewBag.ToggleApprove;
+    string changeAction = toggleApprove.GetValueOrDefault(false) ?  "DisableApprove()":"";
+}
+<div class="form-group">
+    <label>@Model.Question.Label</label>
+    @if (readOnly)
+    {
+        <br/><span>&nbsp; &nbsp;@(Model.Question.Type== www.soundpower.biz.common.ValueTypeEnum.Boolean ? (Model.Answer==true.ToString() ? Dictionary.Yes: Dictionary.No):Model.Answer )
+    </span>
+        @Html.Hidden(prefix + "Answer", Model.Answer)
+        
+    }
+    else
+    {
+        switch (Model.Question.Type)
+        {
+            case www.soundpower.biz.common.ValueTypeEnum.Date:
+            @Html.TextBox(prefix + "Answer", Model.Answer, new { @class = "form-control DateText", maxlength = 10, onchange = changeAction })
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.Integer:
+        case www.soundpower.biz.common.ValueTypeEnum.Decimal:
+            @Html.TextBox(prefix + "Answer", Model.Answer, new { @class = "form-control NumberText", type = "number", maxlength = 10, onchange = changeAction })
+            break;
+        case www.soundpower.biz.common.ValueTypeEnum.Boolean:
+            bool bv = false;
+            if (!string.IsNullOrWhiteSpace(Model.Answer))
+            {
+                bool.TryParse(Model.Answer, out bv);
+            }
+
+            @Html.CheckBox(prefix + "Answer", bv, new { @class = "form-control", onclick = changeAction })
+
+            break;
+        default:
+    @Html.TextArea(prefix + "Answer", Model.Answer, new { @class = "form-control", onchange = changeAction })
+                break;
+
+        }
+        @Html.ValidationMessage(prefix + "Answer", new { @class = "text-danger" })
+    }
+    @Html.Hidden(prefix+"Question.QuestionId",Model.Question.QuestionId)
+    @Html.Hidden(prefix + "Question.Order", Model.Question.Order)
+    @Html.Hidden(prefix + "Question.Type", Model.Question.Type)
+    @Html.Hidden(prefix + "Question.Label", Model.Question.Label)
+    @Html.Hidden(prefix + "Question.Max", Model.Question.Max)
+    @Html.Hidden(prefix + "Question.Min", Model.Question.Min)
+    @Html.Hidden(string.Format("{0}.Index", parentPrefix), index)
+
+
+
+</div>

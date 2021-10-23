@@ -1,0 +1,45 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model PeriodicReportList 
+@{
+    ViewBag.Title = ReportPages.Pending;
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Calendar, "index", "appointment") &gt; @ReportPages.Pending</h2>
+
+
+        <table class="sortable">
+            <thead>
+                <tr>
+                    <th><div class="tdSingleButton"></div></th>
+                    <th><div class="NameText"><a href="#">@Dictionary.Client</a></div></th>
+                    <th><div class="DateText"><a href="#">@ReportPages.CreatedAt </a></div></th>
+                    <th class='HideSmall'><div class="IdText"><a href="#">@Dictionary.Type</a></div></th>
+                  <th class='HideSmall'><div class="IdText"><a href="#">@Dictionary.Disciplines</a></div></th>
+                    <th class='HideMedium'><div class="IdText"><a href="#">@Dictionary.Status</a></div></th>
+                </tr>
+            </thead>
+            <tbody >
+                @if (Model!=null && Model.Count>0)
+                {
+                    foreach(var p in Model)
+                    {
+                        <tr>
+                            <td><div class="tdSingleButton"><a href="@Url.Action("details",new { id = p.ReportId })">
+    <img src="~/images/edit.png" />
+</a></div></td>
+                            <td><div class="NameText">@p.Client.Name</div></td>
+                            <td><div class="DateText">@p.CreatedAt.ToShortDateString()</div></td>
+                            <td class='HideSmall'><div class="IdText">@www.therapycorner.com.company.ResStrings.ReportPeriod.ResourceManager.GetString(p.Type.GetValueOrDefault().ToString())</div></td>
+                            <td class='HideSmall'><div class="IdText">@p.Discipline.Name</div></td>
+                          <td class='HideMedium'><div class="IdText">@p.Status.ToString()</div></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+
+
+

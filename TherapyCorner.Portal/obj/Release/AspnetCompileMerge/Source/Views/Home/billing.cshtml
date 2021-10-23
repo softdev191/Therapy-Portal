@@ -1,0 +1,134 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ClaimInfoList
+
+@{
+    ViewBag.Title = "Billing";
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+    ViewBag.CurArea = MenuArea.Billing;
+    var token = UserAuthorization.CurrentUser;
+    var groupings = from c in Model
+                    let pw = c.PendingWith == null ? "" : (c.PendingWith.Context== "GovtProgram" ? string.Format("g{0}",c.PendingWith.UniqueId): string.Format("i{0}",c.PendingWith.AlternateId))
+                    group c by pw into g
+                    let lst = g.ToList()
+                    let nme = lst[0].PendingWith==null ? "" : lst[0].PendingWith.Name 
+                    orderby nme
+                    select new { Id = g.Key, Value = g.Sum(i => i.AmountDue),  Claims = lst, Pending=lst[0].PendingWith };
+    int x = 0;
+
+}
+<style>
+    .headerbar {
+        font-weight: bold;
+        background-color: lightgrey;
+        border: outset thin black;
+        padding: 3px;
+        cursor: pointer;
+    }
+
+    .childarea {
+        padding: 5px;
+        display: none;
+    }
+
+    .tamount {
+        float: right;
+        width:105px;
+        text-align:right;
+    }
+</style>
+<h2 class="breadcrumb">@Dictionary.Billing</h2>
+<section>
+    <div class="halfspace">
+       <img src="@Url.Action("agepie","claim")"/>
+    </div>
+    <div class="halfspace">
+        <div>
+            <div class="counterbox" style="background-color:red" onclick="window.location='@Url.Action("index","claim",new { status = TherapyCorner.Portal.Controllers.ClaimController.slClaimsReqAttn,grouping=1})'"><img src="~/images/spinner.gif" id="spinClaims" /><strong id="spClaims"></strong><span>@SharedPages.ClaimsReqAttention</span></div>
+
+        </div>
+        <div>
+            <img src="@Url.Action("agebar","claim")" />
+
+        </div>
+    </div>
+
+</section>
+<section style="margin-bottom:15px">
+    @foreach (var g in groupings)
+    {
+        x++;
+        var g2 = from l in g.Claims
+                 orderby l.Status
+                 group l by l.Status into sg
+                 select new { Name = ClaimsPages.ResourceManager.GetString(sg.Key.ToString()), Count = sg.Count(), Value = sg.Sum(i => i.AmountDue), ID=(int)sg.Key };
+        var pendingType = g.Pending == null ? "" : g.Pending.Context;
+        var pendingId = "";
+        var nme = "Other";
+        if (pendingType=="GovtProgram")
+        {
+            pendingId = g.Pending.UniqueId;
+            nme = g.Pending.Name;
+        }
+        else if(pendingType== "InsurancePolicy")
+        {
+            pendingId = g.Pending.AlternateId;
+            var nmeEnd = g.Pending.Name.IndexOf('(');
+            nme = g.Pending.Name.Substring(0,nmeEnd);
+        }
+    <div class="headerbar" onclick="ToggleArea(@x)">
+        <span class="tamount">@g.Value.ToString("c")</span>@nme
+        <span class="tamount">@g.Claims.Count.ToString("N0")</span>
+    </div>
+        <div class="childarea sortable" id="@string.Format("Area{0}", x)">
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th ><a href="#">@Dictionary.Status</a></th>
+                        <th class="NumberText"><a href="#">Count</a></th>
+                        <th class="NumberText"><a href="#">Value</a></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in g2)
+                    {
+                        
+                        <tr>
+          
+                            <td>
+                                @Html.ActionLink(p.Name, "index", "claim", new { grouping=2, status=p.ID, pendingType=pendingType, pendingId=pendingId  }, null)
+                            </td>
+                                <td class="NumberText">
+                                @p.Count.ToString("N0")
+                            </td>
+                            <td class="NumberText">
+                                @p.Value.ToString("c")
+                            </td>
+    
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/counterscripts")
+
+
+        <script>
+            $(document).ready(function () {
+                FetchClaims();
+            });
+
+            function ToggleArea(id) {
+                $("#Area" + id).toggle();
+            }
+        </script>
+    
+    }

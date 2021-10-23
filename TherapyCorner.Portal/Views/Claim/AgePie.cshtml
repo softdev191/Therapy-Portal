@@ -1,0 +1,9 @@
+﻿@model List<TherapyCorner.Portal.Controllers.ClaimController.ClaimsByAge>
+@{
+    var myChart = new Chart(width: 400, height: 400);
+    myChart.AddTitle("Outstanding Claims");
+    myChart.AddSeries(name: "Outstanding Claims", chartType: "Pie", xValue: (from i in Model select string.Format("{0}\n({1})", i.Name,i.Count)).ToArray(), yValues: (from i in Model select i.Count).ToArray());
+    myChart.Write();
+}
+
+

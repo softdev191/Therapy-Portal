@@ -1,0 +1,79 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+
+@model CompanyInfo
+
+@{
+    ViewBag.Title = ProfilePages.EditProfile;
+}
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index") &gt; @CompanyPages.ContactInformation</h2>
+@using (Html.BeginForm("edit", "company", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.CompanyId)
+<section class="halfspace form-horizontal">
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name)
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Phone)
+        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", maxlength = "15" })
+        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.NPI)
+        @Html.TextBoxFor(m => m.NPI, new { @class = "form-control", maxlength = "10" })
+        @Html.ValidationMessageFor(m => m.NPI, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.TaxId)
+        @Html.TextBoxFor(m => m.TaxId, new { @class = "form-control", maxlength = "12" })
+        @Html.ValidationMessageFor(m => m.TaxId, "", new { @class = "text-danger" })
+    </div>
+</section>
+    <section class="halfspace form-horizontal">
+       
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line1)
+            @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line2)
+            @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.City)
+            @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.State)
+            @Html.Partial("_StateSelector", Model.Address.State)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.PostalCode)
+            @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

@@ -1,0 +1,115 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClientServiceList
+@{
+    ViewBag.Title = SharedPages.UnapprovedServices;
+    ViewBag.CurArea = MenuArea.Clients;
+
+  
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @SharedPages.UnapprovedServices</h2>
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="IdText"><a href="#">@Dictionary.ID</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Name</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Service</a></th>
+            <th class="DateText"><a href="#">@Dictionary.StartedOn</a></th>
+            <th class="DateText"><a href="#">@ClientPages.LastScheduled</a></th>
+            <th class="DateText"><a href="#">@Dictionary.ApprovedTo</a></th>
+          <th class="NameText"><a href="#">@Dictionary.CaseWorker</a></th>
+            <th class="td2Button"></th>
+ </tr>
+    </thead>
+    <tbody>
+        @if(Model!=null && Model.Count>0)
+        {
+            foreach(var r in Model)
+            {
+                <tr>
+                    <td>@Html.ActionLink(r.Client.UniqueId,"details","client",new { id = r.Client.UniqueId },null)</td>
+                    <td>@r.Client.LastFirstMI</td>
+                    <td>@r.Service.Name</td>
+                    <td>@r.Start.ToShortDateString()</td>
+                    <td>@(r.LastAppointment.HasValue ? r.LastAppointment.Value.ToShortDateString() : "")</td>
+                      <td>@(r.ApprovedTo.HasValue ? r.ApprovedTo.Value.ToShortDateString() : "")
+                    </td>
+                    <td>
+                        @if(r.CaseWorker != null)
+                        {
+                            @r.CaseWorker.Name <br/> @r.CaseWorker.AlternateId 
+                        }
+                    </td>
+                    <td><a href="javascript:MakeComment(@r.Client.UniqueId)">@Dictionary.Comment</a></td>
+           </tr>
+            }
+        }
+    </tbody>
+</table>
+<div id="modalComment" style="display:none" title="@ClientPages.MakeComment">
+    <p>@ClientPages.CommentInstr </p>
+
+        @Html.TextArea("Comment", new { @class = "form-control" })
+    
+</div>
+
+@section scripts
+{
+<script>
+    var diagComment;
+    var pendingId;
+           $(document).ready(function () {
+               diagComment = $("#modalComment").dialog({
+                   autoOpen: false,
+                   width: 365,
+                   modal: true,
+                   buttons: { "@Dictionary.Create": function () { SaveComment(); }, "@Dictionary.Cancel": function () { diagComment.dialog("close"); } }
+               });
+           });
+
+    function MakeComment(id)
+    {
+        pendingId = id;
+               $("#Comment").val("");
+               diagComment.dialog("open");
+
+           }
+
+           function SaveComment()
+           {
+               diagComment.dialog("close");
+               TurnFreezePaneOn();
+               var addr = window.location.origin + "/client/quickcomment";
+
+               $.ajax({
+                   url: addr,
+                   type: "POST",
+                   dataType: "json",
+                   data: {
+                       id: pendingId,
+                       comment: $("#Comment").val()
+                   },
+                   success: function (data) {
+                       CompleteAddComment(data);
+                   }
+               });
+           }
+
+           function CompleteAddComment(returndata) {
+               TurnFreezePaneOff();
+               if (returndata.IsFailure) {
+                   var msgs = ProcessResponseBase(returndata);
+                   msgs.DisplayResponseResults();
+                   return;
+               }
+               $("#SystemMessages").append(CreateSuccessMessage("@ClientPages.Commented"));
+           }
+</script>
+
+
+}

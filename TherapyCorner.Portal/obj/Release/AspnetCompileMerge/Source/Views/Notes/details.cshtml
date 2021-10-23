@@ -1,0 +1,355 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model SessionNote
+@{
+    ViewBag.Title = NotePages.SessionNotes;
+    var token = UserAuthorization.CurrentUser;
+    bool editing = (Model.Status == FilingStatusEnum.Pending || Model.Status == FilingStatusEnum.Rejected) && token.User.UniqueId == Model.Provider.AlternateId;
+    bool reviewing = Model.Status == FilingStatusEnum.Submitted && !Model.ApprovedAt.HasValue && token.IsSupervisor;
+    bool isEval = ViewBag.IsEval;
+    bool canOverride = token.IsAdmin && ViewBag.CanOverride;
+    www.soundpower.biz.common.GenericEntityList areas = ViewBag.Areas;
+    GoalInfoList goals = ViewBag.Goals;
+    if (Model.Areas == null)
+    {
+        Model.Areas = new www.soundpower.biz.common.GenericEntityList();
+
+    }
+    ViewBag.ReadOnly = !editing;
+    int index = 0;
+    www.soundpower.biz.common.GenericEntityList ShareOptions = ViewBag.ShareOptions;
+    if (Model.Answers != null && Model.Answers.Count > 0)
+    {
+        Model.Answers.Sort((a, b) => a.Question.Order.GetValueOrDefault(0).CompareTo(b.Question.Order.GetValueOrDefault(0)));
+    }
+    string returnField = ViewBag.ReturnField;
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.Name), "details", "client", new { id = Model.Client.UniqueId }, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = Model.Client.UniqueId }, null) &gt; @Html.ActionLink(CalendarPages.Appointment, "details", "appointment", new { id = Model.Appointment.MeetingId }, null) &gt;@NotePages.SessionNotes</h2>
+@if (Model.ApprovedAt.HasValue)
+{
+    <p><button onclick="PrintMe(@Model.NoteId)">@Dictionary.ToPDF</button><button type="button" onclick="ShareMe()">@Dictionary.Share</button></p>
+    <div id="modalShare" style="display:none" title="@Dictionary.Share">
+        <p>@NotePages.ShareInstr </p>
+        @using (Html.BeginForm("share", "notes", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmShare" }))
+        {
+            <div>
+                @Html.Hidden("Id", Model.NoteId)
+                @Html.AntiForgeryToken()
+                @if (ShareOptions != null && ShareOptions.Count > 0)
+                {
+                    foreach (var o in ShareOptions)
+                    {
+                        <input type="checkbox" name="Destination" value="@o.UniqueId" /> @o.Name <br />
+                    }
+                }
+            </div>
+        }
+
+    </div>
+}
+<div class="halfspace">
+    <div class="form-group"><label>@Dictionary.Service</label><br />&nbsp;&nbsp;@Model.Service.Name</div>
+    <div class="form-group"><label>@NotePages.Time</label><br />&nbsp;&nbsp;@Model.Appointment.Start.ToString("g")</div>
+    <div class="form-group"><label>@Dictionary.Status</label><br />&nbsp;&nbsp;@Model.Status.ToString()</div>
+</div>
+<div class="halfspace">
+    <div class="form-group"><label>@Dictionary.Client</label><br />&nbsp;&nbsp;@Model.Client.Name</div>
+    <div class="form-group"><label>@Dictionary.Provider</label><br />&nbsp;&nbsp;@Model.Provider.Name</div>
+</div>
+@using (Html.BeginForm("save", "note", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.Hidden("ReturnField");
+    @Html.HiddenFor(m => Model.NoteId)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Client.Name)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Provider.UniqueId)
+    @Html.HiddenFor(m => m.Provider.Name)
+    @Html.HiddenFor(m => m.Provider.Context)
+    @Html.HiddenFor(m => m.Provider.AlternateId)
+    @Html.HiddenFor(m => m.Service.UniqueId)
+    @Html.HiddenFor(m => m.Service.Name)
+    @Html.HiddenFor(m => m.Service.Context)
+    @Html.HiddenFor(m => m.Service.AlternateId)
+    @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.SubmittedAt)
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.Appointment.MeetingId)
+    @Html.HiddenFor(m => m.Appointment.Title)
+    @Html.HiddenFor(m => m.Appointment.Start)
+    @Html.HiddenFor(m => m.Appointment.End)
+    @Html.HiddenFor(m => m.StartTicks)
+    @Html.HiddenFor(m => m.EndTicks)
+    @Html.HiddenFor(m => m.Reason)
+    @Html.HiddenFor(m => m.ActionType)
+    <div class="form-group halfspace">
+        <label>@Dictionary.StartTime</label>
+        @if (editing || canOverride)
+        {
+            <input type="text" data-val="true" data-val-required="@Dictionary.Required" class="form-control TimeEntry" value="@Model.StartTimeString" id="StartTimeText" name="StartTimeText" />
+            @Html.ValidationMessage("StartTimeText", new { @class = "text-danger" })
+        }
+        else
+        {
+            <br /><span>&nbsp; &nbsp;@Model.StartTimeString</span>
+        }
+
+    </div>
+    <div class="form-group halfspace">
+        <label>@Dictionary.EndTime</label>
+        @if (editing || canOverride)
+        {
+            <input type="text" data-val="true" data-val-required="@Dictionary.Required" class="form-control TimeEntry" value="@Model.EndTimeString" id="EndTimeText" name="EndTimeText" />
+            @Html.ValidationMessage("EndTimeText", new { @class = "text-danger" })
+        }
+        else
+        {
+            <br /><span>&nbsp; &nbsp;@Model.EndTimeString</span>
+        }
+
+    </div>
+    if (canOverride)
+    {
+        <p style="text-align:right"><button type="button" onclick="SaveTime()">@Dictionary.Save</button></p>
+
+    }
+
+    if (!isEval)
+    {
+        <div class="halfspace">
+            <h3>@NotePages.AreasWorked</h3>
+            <div class="FormSection">
+                @foreach (var a in areas)
+                {
+                    var selected = Model.Areas.Find(sa => sa.UniqueId == a.UniqueId);
+                    if (editing)
+                    {
+                        <input type="checkbox" id="SelectedArea" name="SelectedArea" value="@a.UniqueId" @(selected != null ? "checked" : "") /> @a.Name <a href="javascript:HighlightGoals(@a.UniqueId)">@NotePages.HighlightGoals</a><br />
+                    }
+                    else
+                    {
+                        if (selected != null)
+                        {
+                            @a.Name <a href="javascript:HighlightGoals(@a.UniqueId)">@NotePages.HighlightGoals</a><br />
+                        }
+                    }
+                }
+            </div>
+        </div>
+        <div class="halfspace">
+            <h3>@Dictionary.Goals</h3>
+            <div class="FormSection">
+                @foreach (var g in goals)
+                {
+                    <div class="form-group GoalArea @string.Format("GoalArea{0}", g.Area.UniqueId)">
+                        <p>
+                            <span><a href="@Url.Action("goaldetails","client",new { id = g.GoalId, client=Model.Client.UniqueId })"><img style="width:25px" src="~/images/magnify.png" /></a></span>
+                            @g.Statement
+                        </p>
+                        <p style="text-align:right">@g.Success of @g.Attempts @g.Units</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    <h3>@NotePages.Notes</h3>
+    <div class="NotesQuestions">
+        @{
+            ViewBag.Prefix = "Answers";
+        }
+        @foreach (var q in Model.Answers)
+        {
+            ViewBag.Index = index;
+            @Html.Partial("_QuestionAnswer", q)
+            index++;
+        }
+    </div>
+
+    if (isEval && Model.GoalUpdates != null && Model.GoalUpdates.Count > 0)
+    {
+        <h3>@NotePages.GoalUpdates</h3>
+        <div class="NotesQuestions">
+            @{
+                ViewBag.Prefix = "GoalUpdates";
+                index = 0;
+            }
+            @foreach (var q in Model.GoalUpdates)
+            {
+                if (q.Goal.Client == null)
+                {
+                    q.Goal.Client = Model.Client;
+                }
+                ViewBag.Index = index;
+                @Html.Partial("_GoalUpdate", q)
+                index++;
+            }
+        </div>
+
+    }
+}
+@if (isEval)
+{
+    <h3>
+        @NotePages.GoalsToAdd
+    @if (Model.NoteId != "New" && editing)
+    {
+        <button onclick="window.location='@Url.Action("creategoal",new { id = Model.NoteId })'">@NotePages.AddGoal</button>
+    }
+</h3>
+if (Model.NoteId == "New")
+{
+    <p><i>@NotePages.SaveBeforeAdd</i></p>
+}
+else
+{
+    <table style="border:none">
+        <tbody>
+            @if (Model.NewGoals != null && Model.NewGoals.Count > 0)
+            {
+                foreach (var f in Model.NewGoals)
+                {
+                    <tr>
+                        @if (editing)
+                        {
+                            <td style="border:none" class="tdSingleButton"><div><a href='javascript:RemoveGoal(@f.GoalId,"@f.Statement.Replace("\"","'")",@Model.NoteId)'><img src="~/images/delete.png" /></a></div></td>
+                        }
+                        <td style="border:none">
+                            <p>@f.Statement</p>
+                            <p style="text-align:right"> @f.Success / @f.Attempts  @f.Units</p>
+
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    if (editing)
+    {
+        <div id="modalRemoveGoal" style="display:none" title="@NotePages.RemoveGoal">
+            <p>@NotePages.RemoveGoalInstr </p>
+            <p id="rGoal"></p>
+        </div>
+    }
+}
+}
+
+@if (reviewing)
+{
+    <div id="modalReject" style="display:none" title="@Dictionary.Reject">
+        <p>@NotePages.RejectInstr </p>
+        @Html.TextArea("RejectReason", new { style = "width:95%" })
+    </div>
+    <div id="modalApprove" style="display:none" title="@Dictionary.Approve">
+        <p>@NotePages.ApproveInstr </p>
+        <select name="ServiceAction" id="ServiceAction">
+            <option value="@ServiceActionEnum.Continue.ToString()">@ServiceActionEnum.Continue</option>
+            <option value="@ServiceActionEnum.Discontinue.ToString()">@ServiceActionEnum.Discontinue</option>
+            <option value="@ServiceActionEnum.Terminate.ToString()">@ServiceActionEnum.Terminate</option>
+        </select>
+
+    </div>
+}
+<h3>@Dictionary.Attachments</h3>
+<table style="border:none">
+    <tbody>
+        @if (Model.Attachments != null && Model.Attachments.Count > 0)
+        {
+            foreach (var f in Model.Attachments)
+            {
+                <tr>
+                    @if (editing)
+                    {
+                        <td style="border:none" class="tdSingleButton"><div><a href="javascript:RemoveFile('@f.Id','@string.Format("{0}.{1}",f.Name,f.Extension).Replace("'","")',@Model.NoteId)"><img src="~/images/delete.png" /></a></div></td>
+                    }
+                    <td style="border:none" class="tdSingleButton"><div><a href="@Url.Action("attachment",new { id = Model.NoteId, f=f.Id })" target="_blank"><img src="~/images/magnify.png" /></a></div></td>
+                    <td style="border:none">@string.Format("{0}.{1}", f.Name, f.Extension)</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@if (editing)
+{
+    if (Model.NoteId == "New")
+    {
+        <p><i>@NotePages.SaveBeforeAttach</i></p>
+    }
+    else
+    {
+        using (Html.BeginForm("attach", "notes", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFile", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <div style="margin:10px;">
+                <input type="file" name="file" class="form-control" style="display:inline-block;height:50px" />&nbsp;<button onclick="submitit()" type="submit">@Dictionary.AddFile </button>
+            </div>
+            <input type="hidden" name="id" value="@Model.NoteId" />
+        }
+
+        <div id="modalRemove" style="display:none" title="@NotePages.RemoveAttachment">
+            <p>@NotePages.RemoveAttachmentInstr </p>
+            <p id="rAttach"></p>
+        </div>
+    }
+
+    <p style="text-align:right">
+        <button onclick="SaveMe()">@Dictionary.Save</button>
+        @if (Model.Appointment.Start < DateTime.UtcNow)
+        {
+            <button type="button" onclick="SubmitMe()">@Dictionary.Submit</button>
+        }
+    </p>
+    if (isEval)
+    {
+        <div id="modalSubmit" style="display:none" title="@Dictionary.Submit">
+            <p>@NotePages.ConfirmSubmit </p>
+
+        </div>
+    }
+}
+@if (reviewing)
+{
+    <p style="text-align:right"><button onclick="RejectMe()">@Dictionary.Reject</button><button type="button" onclick="ApproveMe()">@Dictionary.Approve</button></p>
+
+}
+
+<div id="modalReminder" style="display:none" title="@SharedPages.SaveReminder">
+    <p>@SharedPages.SaveReminderText</p>
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <link type="text/css" rel="stylesheet" href="~/Content/WorkFormStyle.css" />
+    <script type="text/javascript" src="~/Scripts/SessionNoteScripts.js">
+
+    </script>
+
+    <script type="text/javascript" src="~/Scripts/SaveReminderScript.js">
+
+    </script>
+    @if (editing)
+    {
+        <script>
+        $(document).ready(function () {
+            InitiateReminder("@DateTime.UtcNow.AddMinutes(20).ToString("r")",SaveMe);
+        }
+            );
+        </script>
+        if (!string.IsNullOrWhiteSpace(returnField))
+        {
+            <script>
+
+            $(document).ready(function () { $("#@returnField").focus(); });
+            </script>
+        }
+    }
+
+}
+
+
+
+
+

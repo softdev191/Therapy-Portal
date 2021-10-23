@@ -1,0 +1,35 @@
+﻿
+
+    .ProfileInfo
+    {
+        height:450px;
+        overflow-y:auto;
+    }
+
+    .ServiceList
+    {
+        width:458px;
+    }
+
+
+
+
+
+@media (max-width: 480px) {
+
+    #tabs
+    {
+        width:370px;
+    }
+
+    .ServiceList
+    {
+        width:364px
+    }
+
+    .LongNameText
+    {
+        width:306px;
+    }
+
+}

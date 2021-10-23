@@ -1,0 +1,408 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model InsurancePolicy
+@{
+    ViewBag.Title = ClientPages.UpdatePolicy;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    ReferencedInsuranceCompanyList companies = ViewBag.Companies;
+    bool hasGovt = ViewBag.HasGovt;
+    var svcCompanies = new List<SelectListItem>();
+    ClientServiceList services = ViewBag.Services;
+    ReferencedInsuranceCompany curCompany = null;
+    if (services != null)
+    {
+        if (Model.End.HasValue)
+        {
+            services.RemoveAll(s => s.Start >= Model.End.Value);
+        }
+        services.RemoveAll(s => Model.Start >= s.End.GetValueOrDefault(DateTime.MaxValue));
+
+    }
+    foreach (var s in companies)
+    {
+
+        svcCompanies.Add(new SelectListItem() { Value = s.CompanyId.ToString(), Text = s.Name, Selected = Model.Company.UniqueId == s.CompanyId.ToString() });
+        if (s.CompanyId.ToString() == Model.Company.UniqueId)
+        {
+            curCompany = s;
+        }
+    }
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Child.ToString(), Text = Relationship.Child, Selected = Model.Relationship == InsuranceRelationshipEnum.Child });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Other.ToString(), Text = Relationship.Other, Selected = Model.Relationship == InsuranceRelationshipEnum.Other });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Self.ToString(), Text = Relationship.Self, Selected = Model.Relationship == InsuranceRelationshipEnum.Self });
+    valuesModel.Add(new SelectListItem() { Value = InsuranceRelationshipEnum.Spouse.ToString(), Text = Relationship.Spouse, Selected = Model.Relationship == InsuranceRelationshipEnum.Spouse });
+
+    if (Model.Address == null)
+    {
+        Model.Address = new www.therapycorner.com.account.AddressInfo();
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.LastFirst), "details", "client", new { id = Model.Client.UniqueId }, null) &gt; @ClientPages.UpdatePolicy</h2>
+@using (Html.BeginForm("update", "insurancepolicy", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmSave" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Client.FirstName)
+    @Html.HiddenFor(m => m.Client.LastName)
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.PolicyId)
+    @Html.HiddenFor(m => m.Company.Context)
+
+
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Company</label>
+        @Html.DropDownList("Company.UniqueId", svcCompanies, new { @class = "form-control", value = Model.Company.UniqueId, onchange = "DisableEligibility()" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.FirstName)
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.LastName)
+        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.DoB)
+        @Html.TextBoxFor(m => m.DoB, new { @class = "form-control DateText", maxlength = 10 })
+        @Html.ValidationMessageFor(m => m.DoB, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Gender)
+        @Html.EditorFor(m => m.Gender)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.IdNo)
+        @Html.TextBoxFor(m => m.IdNo, new { @class = "form-control", maxlength = 20 })
+        @Html.ValidationMessageFor(m => m.IdNo, "", new { @class = "text-danger" })
+    </div>
+    @if (hasGovt)
+    {
+        <div class="form-group">
+            <label>MCID</label>
+            @Html.TextBoxFor(m => m.MCID, new { @class = "form-control", maxlength = "16" })
+            @Html.ValidationMessageFor(m => m.MCID, "", new { @class = "text-danger" })
+        </div>
+    }
+</section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Phone)
+            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", maxlength = "15" })
+            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line1)
+            @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.Line2)
+            @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.City)
+            @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.State)
+            @Html.Partial("_StateSelector", Model.Address.State ?? "")
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.PostalCode)
+            @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Number)
+            @Html.TextBoxFor(m => m.Number, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.Number, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.PatientIdNo)
+            @Html.TextBoxFor(m => m.PatientIdNo, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.PatientIdNo, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Relationship)
+            @Html.DropDownList("Relationship", valuesModel, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.IsPrimary)
+            @Html.CheckBoxFor(m => m.IsPrimary, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Start)
+            @Html.TextBoxFor(m => m.Start, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.Start, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.End)
+            @Html.TextBoxFor(m => m.End, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.End, "", new { @class = "text-danger" })
+        </div>
+    </section>
+}
+@if (hasGovt)
+{
+    <section class="halfspace">
+        <h3>@ClientPages.Waivers</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="td2Button"></th>
+                    <th class="DateText">@Dictionary.From</th>
+                    <th class="DateText">@Dictionary.To</th>
+                    <th class="NameText">@Dictionary.Service</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Waivers != null && Model.Waivers.Count > 0)
+                {
+                    foreach (var w in Model.Waivers)
+                    {
+                        if (w.Start.HasValue)
+                        {
+                            <tr>
+                                <td><div><a href='javascript:RemoveWaiver(@w.WaiverId,"@w.Service.Name","@w.Start.Value.ToShortDateString()","@w.End.Value.ToShortDateString()")'><img src="~/images/delete.png" /></a></div></td>
+                                <td>@w.Start.Value.ToShortDateString()</td>
+                                <td>@w.End.Value.ToShortDateString()</td>
+                                <td>@w.Service.Name</td>
+                            </tr>
+                        }
+                        else
+                        {
+
+                            <tr>
+                                <td>
+                                    <div>
+                                        <a href='javascript:RemoveWaiver(@w.WaiverId,"@w.Service.Name","@Dictionary.Pending","@Dictionary.Pending")'><img src="~/images/delete.png" /></a>
+                                        <a href='javascript:SaveWaiver(@w.WaiverId)'><img src="~/images/check.png" /></a>
+                                    </div>
+                                </td>
+
+                                <td colspan="2" nowrap="nowrap">
+                                    @using (Html.BeginForm("confirmwaiver", "insurancepolicy", FormMethod.Post, new { role = "form", id = string.Format("frmWaiver{0}", w.WaiverId) }))
+                                    {
+                                        @Html.Hidden("wid", w.WaiverId)
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("Id", w.PolicyId)
+                                        <input id="@string.Format("WaiverStart{0}", w.WaiverId)" name="WaiverStart" class="form-control DateText" style="display:inline" data-val="true" data-val-required="@www.therapycorner.com.account.ResStrings.ValidationText.Required" />
+                                        <input id="@string.Format("WaiverEnd{0}", w.WaiverId)" name="WaiverEnd" class="form-control DateText" style="display:inline" data-val="true" data-val-required="@www.therapycorner.com.account.ResStrings.ValidationText.Required" />
+                                    }
+                                </td>
+
+                                <td>@w.Service.Name</td>
+                            </tr>
+
+                        }
+                    }
+                }
+                @if (services != null && services.Count > 0)
+                {
+
+                    <tr>
+                        <td><div><a href='javascript:AddWaiver()'><img src="~/images/add.png" /></a></div></td>
+                        <td colspan="3">
+                            @using (Html.BeginForm("addwaiver", "insurancepolicy", FormMethod.Post, new { role = "form", id = "frmAddWaiver" }))
+                            {
+                                <select name="Service" id="Service" class="form-control" style="width:250px">
+                                    @foreach (var s in services)
+                                    {
+                                        <option value="@s.Id">@string.Format("{0} ({1}-{2})", s.Service.Name, s.Start.ToShortDateString(), s.End.HasValue ? s.End.Value.ToShortDateString() : "")</option>
+                                    }
+                                </select>
+                                @Html.Hidden("Id", Model.PolicyId)
+                                @Html.AntiForgeryToken()
+                            }
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+
+
+    </section>
+}
+@if (!Model.End.HasValue && curCompany.AllowEligibility.GetValueOrDefault(false))
+{
+    <section class="halfspace">
+        <h3>Eligibility Requests</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="tdSingleButton"></th>
+                    <th class="DateText">As Of</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Eligibilities != null && Model.Eligibilities.Count > 0)
+                {
+                    foreach (var w in Model.Eligibilities)
+                    {
+
+                            <tr>
+                                <td><div>
+                                    @if (!string.IsNullOrWhiteSpace(w.AlternateId))
+                                    {
+                                    <a href='@Url.Action("eligibility",new { id = w.UniqueId })' target="_blank"><img src="~/images/magnify.png" /></a>
+                                    }
+                                    </div></td>
+                                <td>@(string.IsNullOrWhiteSpace(w.AlternateId) ? "Pending" : w.AlternateId)</td>
+
+                            </tr>
+                     
+                    }
+                }
+              
+            </tbody>
+        </table>
+    </section>
+    }
+
+    <p style="text-align:right">
+        <button onclick="submitit();$('#frmSave').submit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = Model.Client.UniqueId })'">@Dictionary.Cancel</button>
+        @if ((Model.Waivers == null || Model.Waivers.Count == 0) && Model.ClaimsCount.GetValueOrDefault(0) == 0)
+        {
+            <button type="button" onclick="DeleteMe()">@Dictionary.Delete</button>
+        }
+        @if (!Model.End.HasValue && curCompany.AllowEligibility.GetValueOrDefault(false))
+        {
+            <button type="button" id="btnEligibility" onclick="RequestEligibility()">Request Eligibility</button>
+
+        }
+    </p>
+
+    <div id="modalDelete" style="display:none" title="@Dictionary.Delete">
+        <p>@ClientPages.DeletePolicyInstr </p>
+        @using (Html.BeginForm("delete", "insurancepolicy", FormMethod.Post, new { role = "form", id = "frmDel" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Id", Model.PolicyId)
+
+        }
+    </div>
+
+    <div id="modalEligibility" style="display:none" title="Eligibility Request">
+        <p>Are you sure you want to make a new eligibility request?</p>
+        @using (Html.BeginForm("requesteligibility", "insurancepolicy", FormMethod.Post, new { role = "form", id = "frmEligibility" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Id", Model.PolicyId)
+
+        }
+    </div>
+
+    <div id="modalDeleteWaiver" style="display:none" title="@ClientPages.DeleteWaiver">
+        <p>@ClientPages.DelWaiverInstr <span id="DelWaiver"></span></p>
+        @using (Html.BeginForm("deletewaiver", "insurancepolicy", FormMethod.Post, new { role = "form", id = "frmDelWaiver" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("WaiverId")
+            @Html.Hidden("Id", Model.PolicyId)
+
+        }
+    </div>
+    @section scripts
+{
+        @Scripts.Render("~/bundles/jqueryval")
+        <script>
+            var diagRemove, diagRemoveWaiver, diagEligibility;
+
+            $(document).ready(function () {
+                diagRemove = $("#modalDelete").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+                });
+
+                diagRemoveWaiver = $("#modalDeleteWaiver").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmDelWaiver(); }, "No": function () { diagRemoveWaiver.dialog("close"); } }
+                });
+
+                diagEligibility = $("#modalEligibility").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmEligibility(); }, "No": function () { diagEligibility.dialog("close"); } }
+                });
+
+                $("#frmAddWaiver").validate({ errorClass: "inputinvalid" });
+            });
+
+            function DisableEligibility() {
+                $("#btnEligibility").attr("disabled", "disabled");
+            }
+            function DeleteMe() {
+
+                diagRemove.dialog("open");
+            }
+
+
+            function RequestEligibility() {
+
+                diagEligibility.dialog("open");
+            }
+
+            function RemoveWaiver(id, name, start, end) {
+
+                var info = name + "(" + start + " - " + end + ")";
+                $("#DelWaiver").text(info);
+                $("#WaiverId").val(id);
+                diagRemoveWaiver.dialog("open");
+            }
+
+            function ConfirmDel() {
+                submitit();
+                diagRemove.dialog("close");
+                $("#frmDel").submit();
+            }
+
+
+            function ConfirmEligibility() {
+                submitit();
+                diagEligibility.dialog("close");
+                $("#frmEligibility").submit();
+            }
+
+            function ConfirmDelWaiver() {
+                submitit();
+                diagRemove.dialog("close");
+                $("#frmDelWaiver").submit();
+            }
+
+            function AddWaiver() {
+
+                $("#frmAddWaiver").submit();
+
+            }
+
+            function SaveWaiver(id) {
+                var validator = $("#frmWaiver" + id).validate();
+                if (validator.form() && $("#WaiverStart" + id).val() != "" && $("#WaiverEnd" + id).val() != "") {
+                    submitit();
+                    $("#frmWaiver" + id).submit();
+                }
+            }
+        </script>
+    }

@@ -1,0 +1,72 @@
+﻿   .MessageList{
+        width:1083px;
+    }
+
+   .NotRead
+   {
+       font-weight:bold;
+   }
+    .NameText
+    {
+        overflow:hidden
+    }
+
+    .LongNameText
+    {
+        overflow:hidden;
+    }
+
+    .SentMsgs .LongNameText
+    {
+        width:435px;
+    }
+
+    .DateTimeText
+    {
+        width:175px;
+        overflow:hidden;
+    }
+    @media (max-width: 600px) {
+    .MessageList {
+        width: 548px;
+    }
+   .LongNameText
+   {
+       width:250px;
+   }
+
+       .SentMsgs .LongNameText
+    {
+        width:285px;
+    }
+        .DateTimeText
+        {
+            width:105px;
+        }
+       .NameText
+       {
+           width:90px;
+       }
+    .HideSmall
+    {
+        display:none;
+    }
+}
+
+    @media (max-width: 400px) {
+
+    .MessageList{
+        width:358px;
+    }
+    .LongNameText
+    {
+        width:200px;
+    }
+
+
+    .tdSingleButton
+    {
+        width:20px
+    }
+    
+}

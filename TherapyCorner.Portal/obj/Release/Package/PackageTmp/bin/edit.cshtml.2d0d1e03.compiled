@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Credential/Edit.cshtml" hash="76fac76b" filehash="ffffebb831ab1293" flags="110000" assembly="App_Web_auh5crch" type="ASP._Page_Views_Credential_Edit_cshtml">
+    <filedeps>
+        <filedep name="/Views/Credential/Edit.cshtml" />
+    </filedeps>
+</preserve>

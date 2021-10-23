@@ -1,0 +1,31 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model PayrollRate
+
+@{
+    ViewBag.Title = string.Format("{0} ({1})", StaffPages.EditStaff, Model.Staff.Name);
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt; @Html.ActionLink(Model.Staff.Name, "details", new { id = Model.Staff.UniqueId }) &gt; @StaffPages.EditPayRate</h2>
+@using (Html.BeginForm("editpayrate", "staff", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Staff.UniqueId)
+    @Html.HiddenFor(m => m.Staff.Name)
+    @Html.HiddenFor(m => m.Staff.Context)
+    @Html.HiddenFor(m => m.Label)
+    @Html.HiddenFor(m => m.PayRateId)
+ 
+    <section class="halfspace form-horizontal">
+        <div class="form-group">
+            <label>@Model.Label</label>
+            @Html.TextBoxFor(m => m.Amount, "{0:N2}", new { @class = "form-control Numeric", maxlength = "6" })
+            @Html.ValidationMessageFor(m => m.Amount, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <p style="text-align:right"><button  onclick="submitit()">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details", new { id = Model.Staff.UniqueId })'">@Dictionary.Cancel</button></p>
+}
+    

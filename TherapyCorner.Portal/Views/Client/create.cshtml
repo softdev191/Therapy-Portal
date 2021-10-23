@@ -1,0 +1,269 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model CreateClientModel
+@{
+    ViewBag.Title = ClientPages.NewClient;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = "", Text = "" });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.AuntUncle.ToString(), Text = Relationship.AuntUncle, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.Other) == RelationshipEnum.AuntUncle });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Grandparent.ToString(), Text = Relationship.Grandparent, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.Other) == RelationshipEnum.Grandparent });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Guardian.ToString(), Text = Relationship.Guardian, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.Other) == RelationshipEnum.Guardian });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Other.ToString(), Text = Relationship.Other, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.AuntUncle) == RelationshipEnum.Other });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Parent.ToString(), Text = Relationship.Parent, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.Other) == RelationshipEnum.Parent });
+    valuesModel.Add(new SelectListItem() { Value = RelationshipEnum.Sibling.ToString(), Text = Relationship.Sibling, Selected = Model.GuardianRelationship.GetValueOrDefault(RelationshipEnum.Other) == RelationshipEnum.Sibling });
+
+    ServiceInfoList services = ViewBag.Services;
+    ReferencedGovernmentProgramList govts = ViewBag.Govt;
+    ReferencedInsuranceCompanyList insurances = ViewBag.Insurance;
+    if (Model.Diagnosis==null)
+    {
+        Model.Diagnosis = new www.soundpower.biz.common.GenericEntityList();
+    }
+    if (Model.Address==null)
+    {
+        Model.Address = new www.therapycorner.com.account.AddressInfo();
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @ClientPages.NewClient</h2>
+@using (Html.BeginForm("create", "client", FormMethod.Post,new { id = "frmAdd" }))
+{
+    @Html.AntiForgeryToken()
+<h3>@Dictionary.Name</h3>
+<section class="halfspace">
+    <div class="form-group">
+       @Html.LabelFor(m => m.FirstName)
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.MiddleName)
+        @Html.TextBoxFor(m => m.MiddleName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.MiddleName, "", new { @class = "text-danger" })
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        @Html.LabelFor(m => m.LastName)
+        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Suffix)
+        @Html.TextBoxFor(m => m.Suffix, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.Suffix, "", new { @class = "text-danger" })
+    </div>
+</section>
+<h3>@Dictionary.Demographics</h3>
+<section class="halfspace">
+    <div class="form-group">
+        @Html.LabelFor(m => m.DoB)
+        @Html.TextBoxFor(m => m.DoB, new { @class = "form-control DateText", maxlength = "10" })
+        @Html.ValidationMessageFor(m => m.DoB, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Gender)
+        @Html.EditorFor(m => m.Gender)
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        <label>Diagnosis</label>
+        @Html.Partial("_Diagnosis", Model.Diagnosis)
+    </div>
+
+</section>
+<h3>@Dictionary.ContactInfo</h3>
+<section class="halfspace">
+    <div class="form-group">
+        @Html.LabelFor(m => m.Phone)
+        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.Line1)
+        @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.Line2)
+        @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.City)
+        @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.State)
+        @Html.Partial("_StateSelector", Model.Address.State ?? "")
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.PostalCode)
+        @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+        @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+    </div>
+</section>
+<h3>@ClientPages.PrimaryGuardian</h3>
+<section class="halfspace">
+<div class="form-group">
+    @Html.LabelFor(m => m.GuardianFirstName)
+    @Html.TextBoxFor(m => m.GuardianFirstName, new { @class = "form-control", maxlength = "50" })
+    @Html.ValidationMessageFor(m => m.GuardianFirstName, "", new { @class = "text-danger" })
+</div>
+<div class="form-group">
+    @Html.LabelFor(m => m.GuardianMiddleName)
+    @Html.TextBoxFor(m => m.GuardianMiddleName, new { @class = "form-control", maxlength = "50" })
+    @Html.ValidationMessageFor(m => m.GuardianMiddleName, "", new { @class = "text-danger" })
+</div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.GuardianLastName)
+        @Html.TextBoxFor(m => m.GuardianLastName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.GuardianLastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.GuardianSuffix)
+        @Html.TextBoxFor(m => m.GuardianSuffix, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.GuardianSuffix, "", new { @class = "text-danger" })
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Relationship</label>
+        @Html.DropDownList("GuardianRelationship", valuesModel, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.GuardianRelationship, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.GuardianMobile)
+        @Html.TextBoxFor(m => m.GuardianMobile, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.GuardianMobile, "", new { @class = "text-danger" })
+    </div>
+</section>
+<div>
+    <input type="checkbox" id="GuardianMatch" onclick="ToggleGuardian()" /> @ClientPages.GuardianMatch
+</div>
+<div id="GuardianContactInfo">
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianPhone)
+            @Html.TextBoxFor(m => m.GuardianPhone, new { @class = "form-control", maxlength = "20" })
+            @Html.ValidationMessageFor(m => m.GuardianPhone, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianEmail)
+            @Html.TextBoxFor(m => m.GuardianEmail, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.GuardianEmail, "", new { @class = "text-danger" })
+        </div>
+    </section>
+    <section class="halfspace">
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianLine1)
+            @Html.TextBoxFor(m => m.GuardianLine1, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.GuardianLine1, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianLine2)
+            @Html.TextBoxFor(m => m.GuardianLine2, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.GuardianLine2, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianCity)
+            @Html.TextBoxFor(m => m.GuardianCity, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.GuardianCity, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @{ 
+                ViewBag.StatePrefix = "GuardianState";
+            }
+            @Html.LabelFor(m => m.GuardianState)
+            @Html.Partial("_StateSelector", Model.GuardianState ?? "")
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GuardianPostalCode)
+            @Html.TextBoxFor(m => m.GuardianPostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.GuardianPostalCode, "", new { @class = "text-danger" })
+        </div>
+    </section>
+</div>
+<h3>@www.therapycorner.com.company.ResStrings.Dictionary.DrName</h3>
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Name</label>
+        @Html.TextBoxFor(m => m.DrName, new { @class = "form-control", maxlength = "100" })
+        @Html.ValidationMessageFor(m => m.DrName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.AutoShareHCP)
+        <input type="checkbox" class="form-control" id="AutoShareHCP" name="AutoShareHCP" value="true" @(Model.AutoShareHCP.GetValueOrDefault() ? "checked" : "")/> 
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        @Html.LabelFor(m => m.DrPhone)
+        @Html.TextBoxFor(m => m.DrPhone, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.DrPhone, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.DrEmail)
+        @Html.TextBoxFor(m => m.DrEmail, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.DrEmail, "", new { @class = "text-danger" })
+    </div>
+</section>
+<p style="text-align:right"><button onclick="SendForm()" type="submit">@Dictionary.Add</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+
+                }
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+<link type="text/css" href="~/Content/DiagnosisStyle.css"  rel="stylesheet"/>
+
+    <script src="~/Scripts/DiagnosisScripts.js"></script>
+    <script>
+        function ToggleGuardian()
+        {
+            if($("#GuardianMatch:checked").length>0)
+            {
+                $("#GuardianContactInfo").hide();
+            }
+            else
+            {
+                $("#GuardianContactInfo").show();
+                SetGuardianContact();
+            }
+        }
+
+        function SendForm()
+        {
+            if ($("#GuardianMatch:checked").length > 0) {
+                SetGuardianContact();
+            }
+            submitit();
+        }
+
+        function SetGuardianContact()
+        {
+            $("#GuardianPhone").val($("#Phone").val());
+            $("#GuardianEmail").val($("#Email").val());
+            $("#GuardianLine1").val($("#Address_Line1").val());
+            $("#GuardianLine2").val($("#Address_Line2").val());
+            $("#GuardianCity").val($("#Address_City").val());
+            $("#GuardianState").val($("#Address_State").val());
+            $("#GuardianPostalCode").val($("#Address_PostalCode").val());
+        }
+    </script>
+}

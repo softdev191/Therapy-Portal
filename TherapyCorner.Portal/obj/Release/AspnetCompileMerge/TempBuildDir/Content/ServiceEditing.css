@@ -1,0 +1,27 @@
+﻿.ServiceLocations
+{
+    margin-left:10px;
+}
+
+.SelectionList
+{
+    margin-left:10px;
+    overflow-y:auto;
+    height:300px;
+    width:100%;
+}
+
+@media (max-width: 600px) {
+
+    .HideSmall
+    {
+        display:none;
+    }
+}
+
+@media all and (min-width:768px) {
+    .SideMenu > ul
+    {
+        height:1300px !important;
+    }
+}

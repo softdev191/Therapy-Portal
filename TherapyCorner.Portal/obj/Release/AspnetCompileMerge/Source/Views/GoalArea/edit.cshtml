@@ -1,0 +1,186 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model GoalArea
+
+@{
+    ViewBag.Title = GoalAreaPages.EditArea;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+
+
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.Disciplines, "index", "discipline") &gt; @Html.ActionLink(Model.Discipline.Name, "edit", "discipline", new { id = Model.Discipline.UniqueId },null) &gt; @GoalAreaPages.EditArea </h2>
+
+
+        @using (Html.BeginForm("edit", "goalarea", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.AreaId )
+            @Html.HiddenFor(m => m.IsActive)
+            @Html.HiddenFor(m => m.BeenUsed)
+            @Html.HiddenFor(m => m.Discipline.UniqueId )
+            @Html.HiddenFor(m => m.Version)
+            @Html.HiddenFor(m => m.Discipline.Name)
+            @Html.HiddenFor(m => m.Discipline.Context)
+              <div class="form-group">
+                    @Html.LabelFor(m => m.Name)
+                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                </div>
+               
+            <div >
+                <label>@Dictionary.Templates </label>
+                <table class="sortable">
+                    <thead>
+                        <tr>
+                            <th class="td2Button"></th>
+                            <th style="min-width:150px"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Title </a></th>
+                            <th class="NumberText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Successes</a></th>
+                           <th class="NumberText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Attempts</a></th>
+                            <th class="IdText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Units</a></th>
+                     </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Templates != null && Model.Templates.Count > 0)
+                        {
+                            foreach (var p in Model.Templates)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="td2Button">
+                                            <a href="@Url.Action("updatetemplate","goalarea",new { id = p.GoalId, areaId=Model.AreaId  })">
+                                                <img src="~/images/edit.png" />
+                                            </a>
+                                            <a href="javascript:RemoveTemplate(@p.GoalId)">
+                                                <img src="~/images/delete.png" />
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td id="@string.Format("template{0}",p.GoalId)">@p.Statement</td>
+                                    <td class="NumberText">@p.Success</td>
+                                    <td class="NumberText">@p.Attempts</td>
+                                    <td class="IdText">@p.Units</td>
+                              </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+
+            <p style="text-align:right;margin-top:10px;">
+                <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("edit","discipline",new { id = Model.Discipline.UniqueId })'">@Dictionary.Cancel</button>
+                <button type="button" onclick="window.location='@Url.Action("createtemplate", new { id = Model.AreaId })'">@GoalAreaPages.CreateTemplate </button>
+
+                @if (!Model.BeenUsed.GetValueOrDefault(true))
+                {
+                    <button type="button" onclick="RemoveMe()">@Dictionary.Delete</button>
+
+                }
+                else if (!Model.IsActive)
+                {
+                    <button type="button" onclick="ActivateMe()">@Dictionary.Activate</button>
+
+                }
+                else 
+                {
+                    <button type="button" onclick="DeactivateMe()">@Dictionary.Deactivate</button>
+
+                }
+
+            </p>
+        }
+    </section>
+    <div id="modalDelete" style="display:none" title="@GoalAreaPages.RemoveArea">
+        <p>@GoalAreaPages.RemoveAreaInstr </p>
+        @using (Html.BeginForm("Remove", "GoalArea", FormMethod.Post, new { role = "form", id = "frmDel" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Id", Model.AreaId);
+            @Html.Hidden("DisciplineId", Model.Discipline.UniqueId);
+
+        }
+    </div>
+<div id="modalDeleteTemplate" style="display:none" title="@GoalAreaPages.RemoveTemplate">
+    <p>@GoalAreaPages.RemoveTemplateInstr </p>
+    <p id="rTemplate"></p>
+    @using (Html.BeginForm("RemoveTemplate", "GoalArea", FormMethod.Post, new { role = "form", id = "frmDelTemplate" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("areaId", Model.AreaId);
+        @Html.Hidden("TemplateId");
+
+    }
+</div>
+
+
+    @using (Html.BeginForm("activate", "GoalArea", FormMethod.Post, new { role = "form", id = "frmActivate" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.AreaId );
+
+    }
+    @using (Html.BeginForm("deactivate", "GoalArea", FormMethod.Post, new { role = "form", id = "frmDeactivate" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.AreaId);
+
+    }
+    @section scripts
+{
+        @Scripts.Render("~/bundles/jqueryval")
+
+        <script>
+            var diagRemove,diagTemplate;
+
+            $(document).ready(function () {
+                diagRemove = $("#modalDelete").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+                });
+                diagTemplate = $("#modalDeleteTemplate").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmDelTemplate(); }, "No": function () { diagRemove.dialog("close"); } }
+                });
+               
+            });
+
+            function RemoveMe()
+            {
+                diagRemove.dialog("open");
+            }
+
+
+            function RemoveTemplate(id) {
+                $("#TemplateId").val(id);
+                $("#rTemplate").text($("#template"+id).text());
+                diagTemplate.dialog("open");
+            }
+
+            function ConfirmDel() {
+                submitit();
+                diagRemove.dialog("close");
+                $("#frmDel").submit();
+            }
+            function ConfirmDelTemplate() {
+                submitit();
+                diagTemplate.dialog("close");
+                $("#frmDelTemplate").submit();
+            }
+            function ActivateMe() {
+                submitit();
+                $("#frmActivate").submit();
+            }
+            function DeactivateMe() {
+                submitit();
+                $("#frmDeactivate").submit();
+            }
+        </script>
+    }

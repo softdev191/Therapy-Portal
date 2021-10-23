@@ -1,0 +1,53 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClientServiceList
+@{
+    ViewBag.Title = SharedPages.MissingRx;
+    ViewBag.CurArea = MenuArea.Clients;
+
+  
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @SharedPages.MissingRx</h2>
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="IdText"><a href="#">@Dictionary.ID</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Name</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Service</a></th>
+            <th class="DateText"><a href="#">@Dictionary.StartedOn</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Physician</a></th>
+            <th class="IdText"></th>
+ </tr>
+    </thead>
+    <tbody>
+        @if(Model!=null && Model.Count>0)
+        {
+            foreach(var r in Model)
+            {
+                <tr>
+                    <td>@Html.ActionLink(r.Client.UniqueId,"details","client",new { id = r.Client.UniqueId },null)</td>
+                    <td>@r.Client.LastFirstMI</td>
+                    <td>@r.Service.Name</td>
+                    <td>@r.Start.ToShortDateString()</td>
+                    <td>
+                        @if (r.Physician!=null)
+                        {
+                            @r.Physician.UniqueId<br/>
+                            @r.Physician.Name <br/>
+                            @r.Physician.AlternateId <br/>
+                        }
+                    </td>
+          
+                    <td>@Html.ActionLink("View Service","update",new { id = r.Id })</td>
+           </tr>
+            }
+        }
+    </tbody>
+</table>
+
+

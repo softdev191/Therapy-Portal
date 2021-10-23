@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Shared/ChildProcessedError.cshtml" hash="76fac76b" filehash="ffffbaa731b49f70" flags="110000" assembly="App_Web_5vbvbcv2" type="ASP._Page_Views_Shared_ChildProcessedError_cshtml">
+    <filedeps>
+        <filedep name="/Views/Shared/ChildProcessedError.cshtml" />
+    </filedeps>
+</preserve>

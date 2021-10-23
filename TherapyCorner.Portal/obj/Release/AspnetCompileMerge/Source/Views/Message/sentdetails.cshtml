@@ -1,0 +1,84 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MessageInfo
+
+@{
+    ViewBag.Title = MessagePages.ReadMessage;
+    ViewBag.CurArea = MenuArea.Messages;
+}
+<link rel="stylesheet" type="text/css" href="~/Content/MessageStyles.css" />
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Messages, "index") &gt; @Html.ActionLink(MessagePages.SentMessages,"sent") &gt; @MessagePages.ReadMessage</h2>
+
+<section style="padding-bottom:10px;">
+    <button onclick="DeleteMessages()" >@Dictionary.Delete</button>
+
+</section>
+<section>
+    <div class="form-group">
+        <label>@MessagePages.To</label>
+        <span class="form-control"  style="height:auto">
+            @string.Join("; ", (from r in Model.Recipients select r.Name))
+        </span>
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Date</label>
+        <span class="form-control">
+            @Model.SentAt.ToString("r")
+        </span>
+    </div>
+    @if (Model.Client != null)
+    {
+    <div class="form-group">
+        <label>@Dictionary.Client</label>
+        <span class="form-control">
+            @Html.ActionLink(Model.Client.LastFirstMI,"details","client",new { id = Model.Client.UniqueId},null)
+        </span>
+    </div>
+    }
+    @if (Model.OriginalMessage != null)
+    {
+        <div class="form-group">
+            @if(Model.IsReply.GetValueOrDefault())
+            {
+                <label>@MessagePages.ReplyTo</label>
+            }
+            else
+            {
+                <label>@MessagePages.ForwardTo</label>
+
+            }
+            <span class="form-control">@Html.ActionLink(Model.OriginalMessage.Subject, "details", new { id = Model.OriginalMessage.MessageId })</span>
+
+            </div>
+            }
+    <div class="form-group">
+        <label>@MessagePages.Subject</label>
+        <span class="form-control">
+            @Model.Subject
+        </span>
+    </div>
+    <div class="form-group" >
+        <label>@MessagePages.Message</label>
+        <span class="form-control"  style="height:auto">
+            @Html.Raw(Model.Contents)
+        </span>
+    </div>
+</section>
+
+@using (Html.BeginForm("removesent", "message", FormMethod.Post, new { id = "frmDelete" }))
+{
+    @Html.Hidden("DeleteIds", Model.MessageId)
+    @Html.AntiForgeryToken()
+}
+<div id="modalConfirmDelete" style="display:none" title="@MessagePages.DeleteMsg">
+    <p>@MessagePages.ConfirmDelete </p>
+
+</div>
+@section scripts
+{
+
+    <script src="~/Scripts/MessageScripts.js"></script>
+}

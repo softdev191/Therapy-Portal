@@ -1,0 +1,41 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClientServiceList
+@{
+    ViewBag.Title = SharedPages.PotMakeups;
+    ViewBag.CurArea = MenuArea.Calendar;
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(CalendarPages.MyCalendar, "index", "appointment") &gt; @SharedPages.PotMakeups</h2>
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="LongNameText"><a href="#">@Dictionary.Client</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Service</a></th>
+            <th class="NumberText"><a href="#">@SharedPages.PotMakeups</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var r in Model)
+            {
+                <tr>
+                    <td>@Html.ActionLink(r.Client.LastFirstMI , "details", "client", new { id = r.Client.UniqueId }, null)</td>
+                    <td>@r.Service.Name</td>
+                  
+                <td class="NumberText">
+                    @Html.ActionLink(r.MakeupCount.GetValueOrDefault(0).ToString(), "createmakeup", "appointment", new { id = r.Id }, null)
+            </td>
+
+        </tr>
+            }
+        }
+    </tbody>
+</table>

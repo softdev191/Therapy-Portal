@@ -1,0 +1,18 @@
+﻿@model decimal?
+
+@{
+    string displayValue;
+    if (Model == null)
+    {
+        displayValue = null;
+    }
+    else
+    {
+        var formatString = (ViewData.ModelMetadata).DisplayFormatString;
+        displayValue = formatString == null ? Model.ToString() : string.Format(formatString, Model);
+    }
+
+    @Html.TextBoxFor(c => c, new { type = "text", Value = displayValue, @class = "form-control NumberText", maxlength = "10" })
+
+}
+

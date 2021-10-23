@@ -1,0 +1,95 @@
+﻿@using www.therapycorner.com.account;
+@using TherapyCorner.Portal.ResourceText;
+
+@model MeetingInfo
+@{
+    ViewBag.Title = CalendarPages.EditUnavail;
+    ViewBag.CurArea = MenuArea.Calendar;
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(CalendarPages.MyCalendar, "index") &gt; @CalendarPages.EditUnavail</h2>
+@using (Html.BeginForm("editunavailable", "appointment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MeetingId)
+
+
+    <div class="form-group">
+        <label>@Dictionary.Name</label>
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+    </div>
+        <div class="halfspace">
+            <div class="form-group">
+                <label>@Dictionary.StartTime</label>
+                @Html.TextBoxFor(m => m.Start, "{0:MM/dd/yyyy h:mm tt}", new { @class = "form-control DateTimeText", maxlength = "21" })
+                @Html.ValidationMessageFor(m => m.Start, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="halfspace">
+            <div class="form-group">
+                <label>@Dictionary.EndTime</label>
+                @Html.TextBoxFor(m => m.End, "{0:MM/dd/yyyy h:mm tt}", new { @class = "form-control DateTimeText", maxlength = "21" })
+                @Html.ValidationMessageFor(m => m.End, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+            <p style="text-align:right">
+                <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+                @if (Model.End > DateTime.Now)
+                {
+                    <button type="button" onclick="RemoveMe()">@Dictionary.Delete</button>
+                }
+
+            </p>
+}
+<div id="modalDelete" style="display:none" title="@CalendarPages.RemoveUnavail">
+    <p>@CalendarPages.RemoveUnavailInstr</p>
+    @using (Html.BeginForm("RemoveUnavailable", "Appointment", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id", Model.MeetingId);
+
+    }
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script>
+        $(document).ready(function () {
+            $(".DateTimeText").datetimepicker(
+                {
+                    stepMinute:5,
+                    controlType: 'select',
+                    oneLine: true,
+                    timeFormat: 'h:mm tt'
+
+                });
+
+            diagRemove = $("#modalDelete").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+            });
+
+        });
+
+        function RemoveMe()
+        {
+            diagRemove.dialog("open");
+        }
+
+
+
+        function ConfirmDel() {
+            submitit();
+            diagRemove.dialog("close");
+            $("#frmDel").submit();
+        }
+    </script>
+}

@@ -1,0 +1,373 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model PeriodicReport
+@{
+    ViewBag.Title = ReportPages.ReportDetails;
+    var token = UserAuthorization.CurrentUser;
+    bool editing = (Model.Status== FilingStatusEnum.Pending || Model.Status== FilingStatusEnum.Rejected) && Model.Providers.Exists(c=>c.AlternateId==token.User.UniqueId);
+    bool reviewing = (Model.Status== FilingStatusEnum.Submitted || Model.Status == FilingStatusEnum.PendingRejection) && !Model.ApprovedAt.HasValue && token.IsSupervisor;
+
+    ViewBag.ReadOnly = !editing && !reviewing;
+    ViewBag.ToggleApprove = Model.Status == FilingStatusEnum.Submitted && token.IsSupervisor;
+    int index = 0;
+    www.soundpower.biz.common.GenericEntityList ShareOptions = ViewBag.ShareOptions;
+    if (Model.Answers!=null && Model.Answers.Count>0)
+    {
+        Model.Answers.Sort((a, b) => a.Question.Order.GetValueOrDefault(0).CompareTo(b.Question.Order.GetValueOrDefault(0)));
+    }
+    string returnField = ViewBag.ReturnField;
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index","client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.Name), "details", "client", new { id = Model.Client.UniqueId }, null) &gt;@ReportPages.ReportDetails</h2>
+<p>
+    @if (Model.ApprovedAt.HasValue )
+{
+    <button onclick="PrintMe(@Model.ReportId)">@Dictionary.ToPDF</button><button type="button" onclick="ShareMe()">@Dictionary.Share</button>
+
+   
+
+}
+    @if ((token.IsSupervisor || token.IsAdmin) && Model.Status == FilingStatusEnum.Pending)
+    {
+        <button type="button" onclick="CancelMe()">@Dictionary.Cancel</button>
+    }
+    </p>
+@if ((token.IsSupervisor || token.IsAdmin) && Model.Status == FilingStatusEnum.Pending)
+{
+    <div id="modalCancel" style="display:none" title="@Dictionary.Cancel">
+        <p>@ReportPages.CancelConfirm </p>
+        @using (Html.BeginForm("cancel", "report", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmCancel" }))
+        {
+           
+                @Html.Hidden("Id", Model.ReportId)
+                @Html.AntiForgeryToken()
+             
+        }
+
+    </div>
+}
+
+@if (Model.ApprovedAt.HasValue)
+{
+  
+
+    <div id="modalShare" style="display:none" title="@Dictionary.Share">
+        <p>@ReportPages.ShareInstr </p>
+        @using (Html.BeginForm("share", "report", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmShare" }))
+        {
+            <div>
+                @Html.Hidden("Id", Model.ReportId)
+                @Html.AntiForgeryToken()
+                @if (ShareOptions != null && ShareOptions.Count > 0)
+                {
+                    foreach (var o in ShareOptions)
+                    {
+                        <input type="checkbox" name="Destination" value="@o.UniqueId" /> @o.Name <br />
+                    }
+                }
+            </div>
+        }
+
+    </div>
+
+}
+@using (Html.BeginForm("save", "report", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+<div class="halfspace">
+    <div class="form-group"><label>@Dictionary.Discipline</label><br/>&nbsp;&nbsp;@Model.Discipline.Name</div>
+    <div class="form-group"><label>@Dictionary.Type</label><br />&nbsp;&nbsp;@www.therapycorner.com.company.ResStrings.ReportPeriod.ResourceManager.GetString(Model.Type.ToString())</div>
+   <div class="form-group"><label>@Dictionary.CreatedAt</label><br />&nbsp;&nbsp;@Model.CreatedAt.ToShortDateString()</div>
+    <div class="form-group"><label>@Dictionary.Status</label><br />&nbsp;&nbsp;@Model.Status.ToString()</div>
+</div>
+<div class="halfspace">
+    <div class="form-group"><label>@Dictionary.Client</label><br />&nbsp;&nbsp;@Model.Client.Name</div>
+    <div class="form-group"><label>@Dictionary.Providers</label>
+    <ul>
+        @foreach (var c in Model.Providers)
+        {
+            @Html.Hidden(string.Format("{0}.Index", "Providers"), index)
+            @Html.Hidden(string.Format("Providers[{0}].UniqueId",index), c.UniqueId)
+            @Html.Hidden(string.Format("Providers[{0}].Name", index), c.Name)
+            @Html.Hidden(string.Format("Providers[{0}].Context", index), c.Context)
+            @Html.Hidden(string.Format("Providers[{0}].AlternateId", index), c.AlternateId)
+    <li>@c.Name</li>
+            index++;
+        }
+        </ul></div>
+</div>
+@Html.Hidden("RejectReason");
+@Html.Hidden("ReturnField");
+ @Html.HiddenFor(m => Model.ReportId)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Client.Name)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Type)
+    @Html.HiddenFor(m => m.CreatedAt)
+    @Html.HiddenFor(m => m.AppointmentsStarting)
+    @Html.HiddenFor(m => m.Discipline.UniqueId)
+    @Html.HiddenFor(m => m.Discipline.Name)
+    @Html.HiddenFor(m => m.Discipline.Context)
+   @Html.HiddenFor(m => m.Discipline.AlternateId)
+     @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.SubmittedAt)
+    @Html.HiddenFor(m => m.Version)
+    if (Model.Appointments != null && Model.Appointments.Count > 0)
+    {
+        index = 0;
+        foreach (var c in Model.Appointments)
+        {
+            @Html.Hidden(string.Format("{0}.Index", "Appointments"), index)
+            @Html.Hidden(string.Format("Appointments[{0}].AppointmentId", index), c.AppointmentId)
+            @Html.Hidden(string.Format("Appointments[{0}].Client.UniqueId", index), c.Client.UniqueId)
+            @Html.Hidden(string.Format("Appointments[{0}].Client.Context", index), c.Client.Context)
+            @Html.Hidden(string.Format("Appointments[{0}].End", index), c.End)
+            @Html.Hidden(string.Format("Appointments[{0}].Start", index), c.Start)
+            @Html.Hidden(string.Format("Appointments[{0}].Service.UniqueId", index), c.Service.UniqueId)
+            @Html.Hidden(string.Format("Appointments[{0}].Service.Context", index), c.Service.Context)
+            @Html.Hidden(string.Format("Appointments[{0}].Service.Name", index), c.Service.Name)
+            @Html.Hidden(string.Format("Appointments[{0}].Status", index), c.Status)
+            @Html.Hidden(string.Format("Appointments[{0}].Provider.UniqueId", index), c.Provider.UniqueId)
+            @Html.Hidden(string.Format("Appointments[{0}].Provider.Context", index), c.Provider.Context)
+            @Html.Hidden(string.Format("Appointments[{0}].Provider.Name", index), c.Provider.Name)
+            index++;
+        }
+    }
+    if (Model.Attachments != null && Model.Attachments.Count > 0)
+    {
+        index = 0;
+        foreach (var c in Model.Attachments)
+        {
+            @Html.Hidden(string.Format("{0}.Index", "Attachments"), index)
+            @Html.Hidden(string.Format("Attachments[{0}].Id", index), c.Id)
+            @Html.Hidden(string.Format("Attachments[{0}].Extension", index), c.Extension)
+            @Html.Hidden(string.Format("Attachments[{0}].Name", index), c.Name)
+            @Html.Hidden(string.Format("Attachments[{0}].Type", index), c.Type)
+ 
+            index++;
+        }
+    }
+    <h3>@ReportPages.Notes</h3>
+    <div class="NotesQuestions">
+        @{ 
+            ViewBag.Prefix = "Answers";
+            index = 0;
+        }
+        @foreach (var q in Model.Answers)
+        {
+            ViewBag.Index = index;
+            @Html.Partial("_QuestionAnswer", q)
+            index++;
+        }
+    </div>
+
+            if ( Model.GoalUpdates != null && Model.GoalUpdates.Count > 0)
+            {
+<h3>@NotePages.GoalUpdates</h3>
+<div class="NotesQuestions">
+    @{
+        ViewBag.Prefix = "GoalUpdates";
+        index = 0;
+    }
+    @foreach (var q in Model.GoalUpdates)
+    {
+        if(q.Goal.Client==null)
+        {
+            q.Goal.Client = Model.Client;
+        }
+        ViewBag.Index = index;
+        @Html.Partial("_GoalUpdate", q)
+        index++;
+    }
+    </div>
+
+            }
+        }
+@if (Model.Status != FilingStatusEnum.Pending)
+{
+<h3>
+    @NotePages.GoalsToAdd
+@if (reviewing)
+{
+
+
+        <button onclick="window.location='@Url.Action("creategoal", new { id = Model.ReportId })'">@NotePages.AddGoal</button>
+}
+</h3>
+
+                <table style="border:none">
+                    <tbody>
+                        @if (Model.NewGoals != null && Model.NewGoals.Count > 0)
+                        {
+                            foreach (var f in Model.NewGoals)
+                            {
+                                <tr>
+                                    @if (reviewing)
+                                    {
+                                        <td style="border:none" class="tdSingleButton"><div><a href='javascript:RemoveGoal(@f.GoalId,"@f.Statement.Replace("\"", "'")",@Model.ReportId)'><img src="~/images/delete.png" /></a></div></td>
+                                    }
+                                    <td style="border:none"><p>@f.Statement</p>
+                                        <p style="text-align:right"> @f.Success / @f.Attempts  @f.Units</p>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                if (reviewing)
+                {
+                    <div id="modalRemoveGoal" style="display:none" title="@ReportPages.RemoveGoal">
+                        <p>@ReportPages.RemoveGoalInstr </p>
+                        <p id="rGoal"></p>
+                    </div>
+                }
+}
+ @if(reviewing)
+        {
+
+<div id="modalApprove" style="display:none" title="@Dictionary.Approve">
+    <p>@ReportPages.ApproveInstructions </p>
+
+
+</div>
+        }
+ <h3>@Dictionary.Appointments</h3>
+<div class="scrollTableContainer" style="width:715px">
+    <div class="scrollTableArea" style="height:300px">
+        <table class="scrollable sortable">
+            <thead>
+                <tr>
+                    <th><div class="DateTimeText"><a href="#">@Dictionary.StartTime</a></div></th>
+                    <th><div class="NameText"><a href="#">@Dictionary.Service</a></div></th>
+                    <th><div class="IdText"><a href="#">@Dictionary.Status</a></div></th>
+                    <th><div class="NameText"><a href="#">@Dictionary.Provider</a></div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Appointments != null && Model.Appointments.Count > 0)
+                {
+                    Model.Appointments.Sort((a, b) => a.Start.CompareTo(b.Start));
+
+                    foreach (var s in Model.Appointments)
+                    {
+                        <tr>
+                            <td><div class="DateTimeText">@s.Start.ToString("g")</div></td>
+                            <td><div class="NameText">@s.Service.Name</div></td>
+                            <td><div class="IdText">@www.therapycorner.com.company.ResStrings.AppointmentStatus.ResourceManager.GetString(s.Status.ToString())</div></td>
+                            <td><div class="NameText">@s.Provider.Name</div></td>
+
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+  
+
+<h3>@Dictionary.Attachments</h3>
+<table style="border:none">
+    <tbody>
+        @if (Model.Attachments !=null && Model.Attachments.Count>0)
+        {
+            foreach(var f in Model.Attachments)
+            {
+                <tr>
+                    @if(editing || reviewing)
+                    {
+                        <td style="border:none" class="tdSingleButton"><div><a href="javascript:RemoveFile('@f.Id','@string.Format("{0}.{1}",f.Name,f.Extension).Replace("'","")',@Model.ReportId)"><img src="~/images/delete.png" /></a></div></td>
+                    }
+                    <td style="border:none" class="tdSingleButton"><div><a href="@Url.Action("attachment",new { id = Model.ReportId, f=f.Id })" target="_blank"><img src="~/images/magnify.png" /></a></div></td>
+                    <td style="border:none">@string.Format("{0}.{1}",f.Name,f.Extension)</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@if (editing || reviewing)
+{
+   
+        using (Html.BeginForm("attach", "report", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFile", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+       <div style="margin:10px;">
+         <input type="file" name="file" class="form-control" style="display:inline-block;height:50px" />&nbsp;<button onclick="submitit()" type="submit">@Dictionary.AddFile </button>
+           </div>
+           <input type="hidden" name="id" value="@Model.ReportId"/>
+        }
+
+        <div id="modalRemove" style="display:none" title="@ReportPages.RemoveAttachment">
+            <p>@ReportPages.RemoveAttachmentInstr </p>
+            <p id="rAttach"></p>
+        </div>
+
+        if (editing)
+        {
+    <p style="text-align:right">
+        <button onclick="SaveMe()">@Dictionary.Save</button>
+    <button type="button" onclick="SubmitMe()">@Dictionary.Submit</button>
+
+    </p>
+        }
+
+}
+@if(reviewing)
+{
+    <p style="text-align:right"><button onclick="SaveMe()">@Dictionary.Save</button><button onclick="RejectMe()">@Dictionary.Reject</button>
+    
+   @if (Model.Status != FilingStatusEnum.PendingRejection)
+   {
+    <button id="btnApprove" type="button" onclick="ApproveMe()">@Dictionary.Approve</button>
+   }
+    </p>
+
+        <div id="modalReject" style="display:none" title="@Dictionary.Reject">
+            <p>@ReportPages.RejectInstr </p>
+          
+            @Html.TextArea("Reason", new { style = "width:95%" })
+            
+        </div>
+    }
+<div id="modalReminder" style="display:none" title="@SharedPages.SaveReminder">
+    <p>@SharedPages.SaveReminderText</p>
+</div>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+<link type="text/css" rel="stylesheet"  href="~/Content/WorkFormStyle.css"/>
+    <script type="text/javascript" src="~/Scripts/ReportScripts.js">
+      
+    </script>
+  
+<script type="text/javascript" src="~/Scripts/SaveReminderScript.js">
+
+</script>
+   
+
+@if (editing || reviewing)
+    {
+    <script>
+        $(document).ready(function () {
+            InitiateReminder("@DateTime.UtcNow.AddMinutes(20).ToString("r")",SaveMe);
+        }
+            );
+    </script>
+    if (!string.IsNullOrWhiteSpace(returnField))
+    {
+        <script>
+
+            $(document).ready(function () { $("#@returnField").focus(); });
+        </script>
+    }
+}
+
+}
+
+
+
+
+

@@ -1,0 +1,19 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@{
+    ViewBag.Title = SharedPages.FileNotFound;
+    var token = UserAuthorization.CurrentUser;
+    if (token == null)
+    {
+        Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    }
+}
+
+
+<h2 class="error">@SharedPages.CouldntFindPage</h2>
+<p>@SharedPages.Http404Instr</p> 
+
+

@@ -1,0 +1,97 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+@using TherapyCorner.Portal.Controllers
+
+@model www.therapycorner.com.company.MessageContracts.ClaimSearchRequest
+@{
+    ViewBag.Title = PaymentsPages.Filter;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+ 
+
+    List<SelectListItem> govts = new List<SelectListItem>();
+    govts.Add(new SelectListItem() { Value = "", Text = Status.All, Selected = !Model.GovernmentProgram.HasValue });
+    ReferencedGovernmentProgramList programs = ViewBag.Govt;
+    foreach(var g in programs)
+    {
+        govts.Add(new SelectListItem() { Value = g.ProgramId.ToString(), Text = g.Name, Selected = Model.GovernmentProgram.GetValueOrDefault(-1) == g.ProgramId });
+
+    }
+
+    List<SelectListItem> insurance = new List<SelectListItem>();
+    insurance.Add(new SelectListItem() { Value = "", Text = Status.All, Selected = !Model.Insurance.HasValue });
+    ReferencedInsuranceCompanyList companies = ViewBag.Insurance;
+    foreach (var g in companies)
+    {
+        insurance.Add(new SelectListItem() { Value = g.CompanyId.ToString(), Text = g.Name, Selected = Model.Insurance.GetValueOrDefault(-1) == g.CompanyId });
+
+    }
+    string client = ViewBag.ClientName;
+
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(PaymentsPages.Payments, "index") &gt; @SharedPages.ChangeFilter</h2>
+
+@using (Html.BeginForm("index", "payment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+<section class="halfspace">
+   <div class="form-group">
+        <label>@Dictionary.Client</label>
+        @Html.TextBox("ClientName", client, new { @class = "form-control", maxlength = "50" })
+
+    </div>
+    <div class="form-group">
+        <label>@ClaimsPages.MinDays</label>
+        @Html.TextBoxFor(m => m.FromDays, new { @class = "form-control NumberText", maxlength = "3" })
+    </div>
+    <div class="form-group">
+        <label>@ClaimsPages.MaxDays</label>
+        @Html.TextBoxFor(m => m.ToDays, new { @class = "form-control NumberText", maxlength = "3" })
+    </div>
+</section>
+<section class="halfspace">
+
+    <div class="form-group">
+        <label>@Dictionary.GovtPrograms</label>
+        @Html.DropDownList("GovernmentProgram", govts, new { @class = "form-control" })
+
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Insurance</label>
+        @Html.DropDownList("Insurance", insurance, new { @class = "form-control" })
+
+
+    </div>
+</section>
+
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Filter</button><button type="button" onclick="window.history.back()">@Dictionary.Cancel</button></p>
+
+    <div id="SelClientContainer">
+
+    </div>
+}
+
+@section scripts
+{
+
+    @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/ClientSelectionScripts.js"></script>
+    <script src="~/Scripts/trumbowyg.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            InitializeClient("ClientName", "SelClient");
+           
+        });
+
+
+    </script>
+
+  
+}

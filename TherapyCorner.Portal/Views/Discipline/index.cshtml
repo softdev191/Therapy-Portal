@@ -1,0 +1,107 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model DisciplineInfoList
+
+@{
+    ViewBag.Title = Dictionary.Disciplines;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index","company") &gt; @Dictionary.Disciplines</h2>
+
+    @using (Html.BeginForm("create", "discipline", FormMethod.Post, new { role = "form", id = "frmAdd" }))
+    {
+        @*@Html.AntiForgeryToken()*@
+        <section class="halfspace">
+            <label>@DisciplinePages.NewDisciplineName</label>
+            <input class="form-control" type="text" id="name" name="name" maxlength="30" required="required" data-msg="@www.therapycorner.com.account.ResStrings.ValidationText.Required" />
+        </section>
+        <section class="halfspace" >
+            <button type="submit" onclick="submitit()">@Dictionary.Add</button>
+        </section>
+    }
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th style="min-width:200px"><a href="#">@Dictionary.Name</a></th>
+                <th class="NumberText HideMobile"><a href="#">@Dictionary.Services</a></th>
+                <th class="NumberText HideMobile"><a href="#">@SharedPages.ProviderCount</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+                                    <a href="@Url.Action("edit",new { id = p.DisciplineId })">
+                                        <img src="~/images/edit.png" />
+                                    </a>
+                                
+                            </div>
+                        </td>
+                        <td>@p.Name</td>
+                        <td class="NumberText HideMobile">@Html.ActionLink(p.ServiceCount.GetValueOrDefault(0).ToString(), "index", "service")</td>
+                        <td class="NumberText HideMobile">@Html.ActionLink(p.ProviderCount.GetValueOrDefault(0).ToString(), "index", "staff", new { discipline = p.DisciplineId },null)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+<div id="modalDelete" style="display:none" title="@DisciplinePages.RemoveDiscipline">
+    <p>@DisciplinePages.RemoveDisciplineInstr <span id="delConfirm"></span> </p>
+    @using (Html.BeginForm("Remove", "discipline", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id")
+
+    }
+</div>
+
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+    var diagRemove;
+
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+
+    $("#frmAdd").validate({errorClass:"inputinvalid"});
+
+});
+
+    function RemoveProgram(id,name)
+{
+        $("#Id").val(id);
+        $("#delConfirm").text(name);
+        diagRemove.dialog("open");
+    }
+
+
+
+    function ConfirmDel() {
+        submitit();
+        diagRemove.dialog("close");
+        $("#frmDel").submit();
+    }
+
+    
+    </script>
+
+}

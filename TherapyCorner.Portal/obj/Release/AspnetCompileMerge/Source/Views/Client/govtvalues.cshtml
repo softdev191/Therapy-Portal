@@ -1,0 +1,130 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+
+@model FieldValueList
+@{
+    ViewBag.Title = ClientPages.EditGovt;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    int clientId = ViewBag.ClientId;
+    string clientName = ViewBag.ClientName;
+    string programId = ViewBag.ProgramId;
+    ViewBag.FieldPrefix = "GovtValues";
+    www.soundpower.biz.common.GenericEntityList caseWorkers = ViewBag.CaseWorkers;
+    List<string> caseWorkerList = new List<string>();
+    if (caseWorkers != null && caseWorkers.Count > 0)
+    {
+        foreach (var c in caseWorkers)
+        {
+            caseWorkerList.Add(string.Format("caseWorkers.push({{label : \"{0} ({1})\", value : \"{0} ({1})\", id : {2} }});\n", c.Name, c.AlternateId, c.UniqueId));
+        }
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, clientName), "details", new { id = clientId }) &gt; @ClientPages.EditGovt</h2>
+@using (Html.BeginForm("govtvalues", "client", FormMethod.Post, new { id = "frmAdd" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("id",clientId)
+    @Html.Hidden("nme",clientName)
+    @Html.Hidden("programId", programId)
+    if (Model != null && Model.Count > 0)
+    {
+        <section class="halfspace">
+            @foreach (var v in Model)
+            {
+                if (v.FieldId % 2 == 0)
+                {
+                    continue;
+                }
+                ViewBag.FieldNumber = v.FieldId;
+                ViewBag.FieldValue = v.Value;
+                <div class="form-group">
+                    @Html.Partial("_CustomFieldEditor", v.Type)
+   
+            </div>
+            }
+        </section>
+            <section class="halfspace">
+                @foreach (var v in Model)
+                {
+                    if (v.FieldId % 2 != 0)
+                    {
+                        continue;
+                    }
+                    ViewBag.FieldNumber = v.FieldId;
+                    ViewBag.FieldValue = v.Value;
+                    <div class="form-group">
+                        @Html.Partial("_CustomFieldEditor", v.Type)
+
+                    </div>
+                }
+            </section>
+    }
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = clientId })'">@Dictionary.Cancel</button>
+    <button type="button" onclick="RemoveMe()">@Dictionary.Remove </button></p>
+
+}
+
+<div id="modalDelete" style="display:none" title="@FreqDurPages.RemoveRate">
+    <p>@ClientPages.RemoveProgram </p>
+    @using (Html.BeginForm("RemoveProgram", "Client", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id", clientId );
+
+    }
+</div>
+
+<div id="modalAddCaseWorker" style="display:none" title="@ClientPages.AddCaseWorker">
+    <p>@ClientPages.AddCWInstr</p>
+    <form id="frmAddCaseWorker">
+   <div class="form-group">
+       <label>@Dictionary.Name</label>
+       <input class="form-control" type="text" id="CaseWorkerName" name="CaseWorkerName" required data-msg="@www.therapycorner.com.account.ResStrings.ValidationText.Required" />
+
+   </div>
+        <div class="form-group">
+            <label>@Dictionary.Email</label>
+            <input class="form-control" type="email" id="CaseWorkerEmail" name="CaseWorkerEmail" required data-msg="@www.therapycorner.com.account.ResStrings.ValidationText.Required" />
+
+        </div>
+    </form>
+    
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/CaseWorkerScripts.js"></script>
+    <script>
+        function LoadCaseWorkers()
+        {
+           @Html.Raw(string.Join("", caseWorkerList))
+        }
+
+        var diagRemove;
+
+        $(document).ready(function () {
+            diagRemove = $("#modalDelete").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+            });
+        });
+        function RemoveMe() {
+            diagRemove.dialog("open");
+        }
+
+
+
+        function ConfirmDel() {
+            submitit();
+            diagRemove.dialog("close");
+            $("#frmDel").submit();
+        }
+    </script>
+}

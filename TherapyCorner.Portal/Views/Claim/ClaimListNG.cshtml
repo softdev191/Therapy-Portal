@@ -1,0 +1,87 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@model ClaimInfoList
+
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="tdSingleButton"><input type="checkbox" onclick="javascript:SelectAll()" id="sac" /> </th>
+            <th class="tdSingleButton"></th>
+            <th class="IdText"><a href="#">Claim Id</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Status</a></th>
+            <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+            <th class="NameText "><a href="#">@Dictionary.Client</a></th>
+            <th class="LongNameText"><a href="#">@Dictionary.Provider</a></th>
+            <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+            <th class="NumberText"><a href="#">@ClaimsPages.Paid</a></th>
+            <th class="NameText"><a href="#">@ClaimsPages.Pending</a></th>
+            <th class="LongNameText"><a href="#">@Dictionary.Comments</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var p in Model)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox" name="ids" value="@p.ClaimId" />
+
+                    </td>
+                    <td>
+                        <div class="tdSingleButton">
+
+                            <a href="@Url.Action("details", "claim", new { id = p.ClaimId })"><img src="~/images/magnify.png" /></a>
+
+                        </div>
+                    </td>
+                    <td>@p.ClaimId</td>
+                    <td>@ClaimsPages.ResourceManager.GetString(p.Status.ToString())</td>
+                    <td>
+                        @p.ClaimDate.ToShortDateString()
+                    </td>
+                    <td>
+                        @Html.ActionLink(p.Client.Name, "details", "client", new { id = p.Client.UniqueId }, null)
+                    </td>
+                    <td>
+                        @p.Provider.Name
+
+
+                    </td>
+                    <td>
+                        @p.AmountDue.ToString("c")
+                    </td>
+                    <td>
+                        @p.AmountPaid.ToString("c")
+                    </td>
+                    <td>
+                        @switch (p.Status)
+                        {
+                            case ClaimStatusEnum.PendInsPay:
+                            case ClaimStatusEnum.PendInsSubmission:
+                            case ClaimStatusEnum.PendingWaiver:
+                            case ClaimStatusEnum.PendInsSubmissionIssue:
+                                @Html.ActionLink(p.PendingWith.Name, "update", "insurancepolicy", new { id = p.PendingWith.UniqueId }, null)
+
+
+
+                                break;
+
+                            case ClaimStatusEnum.PendGovtPay:
+                            case ClaimStatusEnum.PendGovtSubmission:
+                            case ClaimStatusEnum.PendGovtIssue:
+                                @p.PendingWith.Name
+                                break;
+                        }
+
+                    </td>
+                    <td>
+                        @p.LastComment
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

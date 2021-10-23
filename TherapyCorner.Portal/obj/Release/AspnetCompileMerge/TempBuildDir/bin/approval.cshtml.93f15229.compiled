@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Payroll/approval.cshtml" hash="76fac76b" filehash="1cfe1a132c15" flags="110000" assembly="App_Web_gkry4fbo" type="ASP._Page_Views_Payroll_approval_cshtml">
+    <filedeps>
+        <filedep name="/Views/Payroll/approval.cshtml" />
+    </filedeps>
+</preserve>

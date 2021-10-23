@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Error/ForgeryError.cshtml" hash="76fac76b" filehash="fffffe3bd91bb50e" flags="110000" assembly="App_Web_ncydyhcw" type="ASP._Page_Views_Error_ForgeryError_cshtml">
+    <filedeps>
+        <filedep name="/Views/Error/ForgeryError.cshtml" />
+    </filedeps>
+</preserve>

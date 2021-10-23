@@ -1,0 +1,101 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model www.therapycorner.com.company.MessageContracts.ClientSearchRequest
+@{
+    ViewBag.Title = ClientPages.ClientSearchFilter;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = ClientSearchRequest.StatusEnum.All.ToString(), Text = Status.All, Selected = Model.Status == ClientSearchRequest.StatusEnum.All });
+    valuesModel.Add(new SelectListItem() { Value = ClientSearchRequest.StatusEnum.PendingOnly.ToString(), Text = Status.PendingOnly, Selected = Model.Status == ClientSearchRequest.StatusEnum.PendingOnly });
+    valuesModel.Add(new SelectListItem() { Value = ClientSearchRequest.StatusEnum.ActiveOnly.ToString(), Text = Status.ActiveOnly, Selected = Model.Status == ClientSearchRequest.StatusEnum.ActiveOnly });
+    valuesModel.Add(new SelectListItem() { Value = ClientSearchRequest.StatusEnum.NotInactiveOnly.ToString(), Text = Status.NotInactiveOnly, Selected = Model.Status == ClientSearchRequest.StatusEnum.NotInactiveOnly });
+    valuesModel.Add(new SelectListItem() { Value = ClientSearchRequest.StatusEnum.InactiveOnly.ToString(), Text = Status.InactiveOnly, Selected = Model.Status == ClientSearchRequest.StatusEnum.InactiveOnly });
+
+    ServiceInfoList services = ViewBag.Services;
+    ReferencedGovernmentProgramList govts = ViewBag.Govt;
+    ReferencedInsuranceCompanyList insurances = ViewBag.Insurance;
+    string checkText = "";
+    List<SelectListItem> staffModel = ViewBag.Staff;
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @SharedPages.ChangeFilter</h2>
+
+@using (Html.BeginForm("index", "Client", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    <section class="halfspace">
+        <div class="form-group">
+            <label>@www.therapycorner.com.account.ResStrings.Dictionary.LastName</label>
+            @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = "50" })
+        </div>
+        <div class="form-group">
+            <label>@www.therapycorner.com.company.ResStrings.Dictionary.DrName</label>
+            @Html.TextBoxFor(m => m.Physician, new { @class = "form-control", maxlength = "50" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Status</label>
+            @Html.DropDownList("Status", valuesModel, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Provider</label>
+            @Html.DropDownList("Provider", staffModel, new { @class = "form-control" })
+        </div>
+    </section>
+    <section class="halfspace">
+
+
+        <div class="form-group">
+            <label>@Dictionary.GovtPrograms</label>
+            <div style="overflow-y:auto;height:150px;margin-left:10px">
+                @if (govts != null && govts.Count > 0)
+                {
+                    foreach (var d in govts)
+                    {
+                        checkText = Model.GovernmentPrograms == null || !Model.GovernmentPrograms.Contains(d.ProgramId) ? "" : "checked= \"checked\"";
+                        <input type="checkbox" @checkText name="GovernmentPrograms" value="@d.ProgramId" /> @d.Name<br />
+                    }
+                }
+            </div>
+        </div>
+    </section>
+    <section class="halfspace">
+
+
+        <div class="form-group">
+            <label>@Dictionary.Services</label>
+            <div style="overflow-y:auto;height:250px;margin-left:10px">
+                @if (services != null && services.Count > 0)
+                {
+                    foreach (var d in services)
+                    {
+                        checkText = Model.Services == null || !Model.Services.Contains(d.ServiceId) ? "" : "checked= \"checked\"";
+                        <input type="checkbox" @checkText name="Services" value="@d.ServiceId" /> @d.Name<br />
+                    }
+                }
+            </div>
+        </div>
+    </section>
+    <section class="halfspace">
+
+
+        <div class="form-group">
+            <label>@Dictionary.Insurance</label>
+            <div style="overflow-y:auto;height:250px;margin-left:10px">
+                @if (insurances != null && insurances.Count > 0)
+                {
+                    foreach (var d in insurances)
+                    {
+                        checkText = Model.InsuranceCompanies == null || !Model.InsuranceCompanies.Contains(d.CompanyId.ToString()) ? "" : "checked= \"checked\"";
+                        <input type="checkbox" @checkText name="InsuranceCompanies" value="@d.CompanyId" /> @d.Name<br />
+                    }
+                }
+            </div>
+        </div>
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.history.back()">@Dictionary.Cancel</button></p>
+
+}

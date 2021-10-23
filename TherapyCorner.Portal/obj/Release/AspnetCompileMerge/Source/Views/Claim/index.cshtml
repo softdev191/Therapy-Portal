@@ -1,0 +1,167 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.ClaimSearchRequest
+
+
+@{
+    ViewBag.Title = ClaimsPages.Claims;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+    string client = ViewBag.Client;
+    string insurance = ViewBag.Insurances;
+    string govt = ViewBag.GovtPrograms;
+
+    ClaimInfoList results = ViewBag.Results;
+    string statusName = "";
+    switch (Model.Statuses)
+    {
+        case TherapyCorner.Portal.Controllers.ClaimController.slPendingClaims:
+            statusName = ClaimsPages.AllActive;
+            break;
+        case TherapyCorner.Portal.Controllers.ClaimController.slClaimsReqAttn:
+            statusName = SharedPages.ClaimsReqAttention;
+            break;
+        case "0":
+            statusName = ClaimsPages.PendInsSubmission;
+            break;
+        case "1":
+            statusName = ClaimsPages.PendInsPay;
+            break;
+        case "2":
+            statusName = ClaimsPages.PendGovtSubmission;
+            break;
+        case "3":
+            statusName = ClaimsPages.PendGovtPay;
+            break;
+        case "4":
+            statusName = ClaimsPages.PendPay;
+            break;
+        case "5":
+            statusName = ClaimsPages.Paid;
+            break;
+        case "6":
+            statusName = ClaimsPages.Closed;
+            break;
+        case "7":
+            statusName = ClaimsPages.PendingWaiver;
+            break;
+        case "8":
+            statusName = ClaimsPages.Generating;
+            break;
+        case "9":
+            statusName = ClaimsPages.Vetting;
+            break;
+        case "10":
+            statusName = ClaimsPages.PendInsSubmissionIssue;
+            break;
+        case "11":
+            statusName = ClaimsPages.PendGovtIssue;
+            break;
+    }
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @ClaimsPages.Claims</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="submitit(); frmFilter.submit();">@SharedPages.ChangeFilter</button>
+    <button onclick="HCFA();">@ClaimsPages.DownloadHCFA</button>
+    <button onclick="GovtProcessing();">@ClaimsPages.DownloadGovt</button>
+    <button onclick="ResolveClaims();">@ClaimsPages.Resolve</button>
+
+</section>
+<section style="padding-bottom:10px">
+    @if (Model.Client.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Client')" class="close" aria-label="close">&times;</a>@client</div>
+    }
+    @if (Model.Insurance.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Insurance')" class="close" aria-label="close">&times;</a>@insurance</div>
+    }
+    @if (Model.GovernmentProgram.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('GovernmentProgram')" class="close" aria-label="close">&times;</a>@govt</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Statuses))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Statuses')" class="close" aria-label="close">&times;</a>@statusName</div>
+    }
+    @if (Model.FromDays.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('FromDays')" class="close" aria-label="close">&times;</a>@string.Format(">= {0} days", Model.FromDays.Value.ToString())</div>
+    }
+    @if (Model.ToDays.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('ToDays')" class="close" aria-label="close">&times;</a>@string.Format("<= {0} days", Model.ToDays.Value.ToString())</div>
+    }
+    @if (Model.ClaimId.HasValue)
+    {
+        <div class="well well-sm">@string.Format("#{0}", Model.ClaimId.Value.ToString())</div>
+    }
+</section>
+<section>
+    @{
+        switch (Model.Grouping.GetValueOrDefault(0))
+        {
+            case 1:
+                @Html.Partial("ClaimListByPending", results)
+                break;
+            case 2:
+                @Html.Partial("ClaimListByClient", results)
+                break;
+            default:
+                @Html.Partial("ClaimListNG", results)
+                break;
+        }
+    }
+
+</section>
+@using (Html.BeginForm("filter", "claim", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    @Html.HiddenFor(m => m.ToDays)
+    @Html.HiddenFor(m => m.FromDays)
+    @Html.HiddenFor(m => m.Insurance)
+    @Html.HiddenFor(m => m.GovernmentProgram)
+    @Html.HiddenFor(m => m.Client)
+    @Html.HiddenFor(m => m.Statuses)
+
+
+}
+
+<div id="modalSO" style="display:none" title="@ClaimsPages.Submit">
+    <p>@ClaimsPages.ConfirmSubmit </p>
+    @using (Html.BeginForm("advance", "claim", FormMethod.Post, new { role = "form", id = "frmSO" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", "")
+
+    }
+</div>
+
+<form target="_blank" id="frmFile" method="post">
+    <input type="hidden" name="id" id="FileIds" />
+</form>
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/claimsearch")
+    <script>
+
+
+        function ClearField(field) {
+            $("#" + field).remove();
+                                submitit();
+            $("#frmFilter")[0].action = '@Url.Action("index")';
+            $("#frmFilter").submit();
+                            }
+
+
+    </script>
+
+}

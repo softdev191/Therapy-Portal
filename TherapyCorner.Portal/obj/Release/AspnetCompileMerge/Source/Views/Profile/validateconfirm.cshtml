@@ -1,0 +1,64 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+
+
+@model ValidationCode
+@{
+    ViewBag.Title = ProfilePages.IdentityConfirmation;
+    Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    string eml = ViewBag.Email;
+    string ph = ViewBag.Mobile;
+}
+
+<h2>@ProfilePages.IdentityConfirmation</h2>
+
+<section>
+
+    @using (Html.BeginForm("validateconfirm", "Profile", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.UserId)
+        @Html.HiddenFor(m => m.ValidationId)
+        @Html.HiddenFor(m => m.ByEmail)
+        @Html.HiddenFor(m => m.ReturnURL)
+        <div class="form-group">
+            @Html.LabelFor(m => m.Code)
+            @Html.TextBoxFor(m => m.Code, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
+
+        </div>
+
+        <div class="form-group">
+            @Html.CheckBoxFor(m=>m.HomeDevice ) @ProfilePages.HomeDevice
+
+
+        </div>
+        <div class="form-group">
+            <button style="margin-left:200px" type="submit">@Dictionary.Continue</button>
+        </div>
+    }
+</section>
+<section>
+    @using (Html.BeginForm("validate", "Profile", FormMethod.Post, new { @class = "form-horizontal", role = "form",id="frmResend" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id",Model.UserId)
+        @Html.HiddenFor(m => m.ByEmail)
+        @Html.HiddenFor(m => m.ReturnURL)
+        @Html.Hidden("Email",eml)
+        @Html.Hidden("Mobile", ph)
+
+
+
+        <p style="text-align:center">
+            <a href="javascript:frmResend.submit()">@ProfilePages.ResendCode</a>
+        </p>
+    }
+</section>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

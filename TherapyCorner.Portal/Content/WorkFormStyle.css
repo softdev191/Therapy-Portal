@@ -1,0 +1,46 @@
+﻿div.GoalUpdate
+{
+    width:95%;
+    border-bottom:solid 1px black;
+    padding-bottom:5px;
+}
+
+div.FormSection
+{
+    height:250px;
+    overflow-y:auto;
+    border:solid 1px black;
+    padding:4px;
+}
+
+div.NotesQuestions
+{
+    height:450px;
+    overflow-y:auto;
+    border:solid 1px black;
+    padding:4px;
+}
+
+.GoalArea
+{
+    border-bottom: groove thin black;
+    padding:4px;
+}
+
+.GoalHighlight
+{
+    background-color: rgba(240, 240, 240, 1);
+}
+
+textarea.form-control
+{
+    
+    max-width:100%;
+    height:90px !important;
+}
+
+.NotesQuestions > div.form-group
+{
+    width:98%;
+    min-width:98%;
+}

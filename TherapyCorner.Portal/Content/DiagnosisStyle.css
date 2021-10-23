@@ -1,0 +1,18 @@
+﻿.DiagnosisList
+{
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.NewDiagnosis
+{
+    width:250px;
+    display:inline-block;
+    margin-right:5px;
+}
+
+img.DiagBtn
+{
+    max-height:25px;
+    margin-right:5px;
+}

@@ -1,0 +1,44 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+
+@{
+    ViewBag.Title = ClaimsPages.ReconcileGovt;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(PaymentsPages.Payments, "index","payment") &gt; @ClaimsPages.ReconcileGovt</h2>
+@using (Html.BeginForm("reconcilegovtresults", "claim", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+  
+    <section style="padding-bottom:10px">
+
+
+        
+
+        
+        <div class="form-group">
+            <label>@ClaimsPages.FileToProcess</label>
+            <input type="file" name="file" class="form-control" />
+
+        </div>
+
+    </section>
+
+
+    <p style="text-align:right">
+
+            <button onclick="submitit()" type="submit">@Dictionary.Submit</button>
+ 
+        <button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+    </p>
+
+}
+
+

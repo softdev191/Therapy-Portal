@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/EmptyReportServicePage.aspx" hash="527bc2b4c" filehash="ffffe6cdd7981d12" flags="110000" assembly="App_Web_kgcoaodg" type="ASP.emptyreportservicepage_aspx">
+    <filedeps>
+        <filedep name="/EmptyReportServicePage.aspx" />
+    </filedeps>
+</preserve>

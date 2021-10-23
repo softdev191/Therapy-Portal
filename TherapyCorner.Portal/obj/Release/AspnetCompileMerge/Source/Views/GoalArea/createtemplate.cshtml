@@ -1,0 +1,61 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model GoalInfo
+
+@{
+    ViewBag.Title = GoalAreaPages.CreateTemplate;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    string disciplineId = ViewBag.DisciplineId;
+    string disciplineName = ViewBag.DisciplineName;
+
+
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.Disciplines, "index", "discipline") &gt; @Html.ActionLink(disciplineName, "edit", "discipline", new { id = disciplineId },null) &gt; @Html.ActionLink(Model.Area.Name, "edit", "goalarea", new { id = Model.Area.UniqueId },null) &gt; @GoalAreaPages.CreateTemplate </h2>
+
+    @using (Html.BeginForm("Createtemplate", "goalarea", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Area.UniqueId)
+        @Html.HiddenFor(m => m.Area.Context)
+        @Html.HiddenFor(m => m.Area.Name)
+       @Html.HiddenFor(m => m.GoalId)
+        <input type="hidden" name="disciplineId" value="@disciplineId" />
+        <input type="hidden" name="disciplineName" value="@disciplineName" />
+
+        <div class="halfspace ">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Statement)
+                @Html.TextAreaFor(m => m.Statement, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Statement, "", new { @class = "text-danger" })
+            </div>
+          
+        </div>
+        <div class="halfspace">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Success)
+                @Html.TextBoxFor(m => m.Success, new { @class = "form-control NumberText", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.Success, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Attempts)
+                @Html.TextBoxFor(m => m.Attempts, new { @class = "form-control NumberText", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.Attempts, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Units)
+                @Html.TextBoxFor(m => m.Units, new { @class = "form-control", maxlength = "20" })
+                @Html.ValidationMessageFor(m => m.Units, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("edit","goalarea",new { id = Model.Area.UniqueId })'">@Dictionary.Cancel</button></p>
+    }
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

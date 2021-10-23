@@ -1,0 +1,88 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MessageInfoList
+
+@{
+    ViewBag.Title = MessagePages.SentMessages;
+    ViewBag.CurArea = MenuArea.Messages;
+}
+<link rel="stylesheet" type="text/css" href="~/Content/MessageStyles.css" />
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Messages,"index") &gt; @MessagePages.SentMessages</h2>
+
+<section style="padding-bottom:10px;">
+    <button onclick="window.location='@Url.Action("create")'">@MessagePages.NewMessage</button>
+    <button onclick="DeleteMessages()" disabled="disabled" id="btnDelete">@Dictionary.Delete</button>
+
+</section>
+
+<div class="scrollTableContainer MessageList">
+    <div class="scrollTableArea" style="height:450px">
+        <table class="scrollable sortable SentMsgs">
+            <thead>
+                <tr>
+                    <th><div class="tdSingleButton"></div></th>
+                    <th class="HideMobile"><div class="NameText"><a href="#">@MessagePages.To</a></div></th>
+                    <th><div class="LongNameText"><a href="#">@MessagePages.Subject</a></div></th>
+                    <th class="HideSmall"><div class="NameText"><a href="#">@Dictionary.Client</a></div></th>
+                    <th><div class="DateTimeText"><a href="#">@Dictionary.Date</a></div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var c in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="tdSingleButton">
+                                    <input type="checkbox" value="@c.MessageId" onclick="ToggleDelete()" class="DeleteSelect" />
+                                </div>
+                            </td>
+                             <td class="HideMobile" nowrap>
+                                <div class="NameText">
+                                    
+                                    @string.Join("; ",(from r in c.Recipients select r.Name))
+                            </div>
+                        </td>
+                        <td nowrap>
+                            <div class="LongNameText">
+                                @Html.ActionLink(c.Subject, "sentdetails", new { id = c.MessageId })
+                            </div>
+                        </td>
+                        <td class="HideSmall" nowrap>
+                            <div class="NameText">
+                                @if (c.Client != null)
+                                {
+                                    @c.Client.LastFirstMI
+                                }
+                            </div>
+                        </td>
+                        <td nowrap>
+                            <div class="DateTimeText">
+                                @c.SentAt.ToString("r")
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@using (Html.BeginForm("removesent", "message", FormMethod.Post, new { id = "frmDelete" }))
+{
+    @Html.Hidden("DeleteIds", "")
+    @Html.AntiForgeryToken()
+}
+<div id="modalConfirmDeletes" style="display:none" title="@MessagePages.DeleteMsg">
+    <p>@MessagePages.ConfirmDeletes </p>
+
+</div>
+@section scripts
+{
+
+    <script src="~/Scripts/MessageScripts.js"></script>
+}

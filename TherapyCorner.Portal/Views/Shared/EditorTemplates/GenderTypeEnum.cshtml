@@ -1,0 +1,15 @@
+﻿@using www.therapycorner.com.account;
+@using www.therapycorner.com.account.ResStrings;
+
+@model www.therapycorner.com.account.GenderTypeEnum?
+
+@{
+    var values = new List<SelectListItem>();
+    values.Add(new SelectListItem() { Value = GenderTypeEnum.Female.ToString(), Text = Gender.Female, Selected = (Model.GetValueOrDefault(GenderTypeEnum.Other) == GenderTypeEnum.Female)} );
+    values.Add(new SelectListItem() { Value = GenderTypeEnum.Male.ToString(), Text = Gender.Male, Selected = (Model.GetValueOrDefault(GenderTypeEnum.Other) == GenderTypeEnum.Male)});
+    values.Add(new SelectListItem() { Value = GenderTypeEnum.Other.ToString(), Text = Gender.Other, Selected = (Model.GetValueOrDefault(GenderTypeEnum.Female) == GenderTypeEnum.Other) });
+
+}
+
+@Html.DropDownList("",values, new { @class = "form-control" })
+

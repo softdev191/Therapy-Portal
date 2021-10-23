@@ -1,0 +1,99 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MessageInfoList
+
+@{
+    ViewBag.Title = SharedPages.Messages;
+    ViewBag.CurArea = MenuArea.Messages;
+}
+<link rel="stylesheet" type="text/css" href="~/Content/MessageStyles.css" />
+
+<h2 class="breadcrumb">@SharedPages.Messages</h2>
+
+<section style="padding-bottom:10px;">
+    <button onclick="window.location='@Url.Action("create")'">@MessagePages.NewMessage</button>
+    <button onclick="window.location='@Url.Action("sent")'">@MessagePages.SentMessages</button>
+    <button onclick="DeleteMessages()" disabled="disabled" id="btnDelete">@Dictionary.Delete</button>
+
+</section>
+
+<div class="scrollTableContainer MessageList">
+    <div class="scrollTableArea" style="height:450px">
+        <table class="scrollable sortable">
+            <thead>
+                <tr>
+                    <th><div class="tdSingleButton"></div></th>
+                    <th class="HideMobile"><div class="tdSingleButton"><a href="#">@MessagePages.New</a></div></th>
+                    <th class="HideMobile"><div class="NameText"><a href="#">@MessagePages.From</a></div></th>
+                    <th><div class="LongNameText"><a href="#">@MessagePages.Subject</a></div></th>
+                    <th class="HideSmall"><div class="NameText"><a href="#">@Dictionary.Client</a></div></th>
+                    <th><div class="DateTimeText"><a href="#">@Dictionary.Date</a></div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    string nr = "";
+                    foreach (var c in Model)
+                    {
+                        nr = c.HasRead.GetValueOrDefault() ? "" : "NotRead";
+                        <tr class="@nr">
+                            <td>
+                                <div class="tdSingleButton">
+                                    <input type="checkbox" value="@c.MessageId" onclick="ToggleDelete()" class="DeleteSelect" />
+                                </div>
+                            </td>
+                            <td class="HideMobile">
+                                <div class="tdSingleButton ">
+                                    @if (!c.HasRead.GetValueOrDefault())
+                                    {
+                                        <span>*</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="HideMobile" nowrap>
+                                <div class="NameText">
+                                    @c.SentBy.Name
+                            </div>
+                        </td>
+                        <td nowrap>
+                            <div class="LongNameText">
+                                @Html.ActionLink(c.Subject, "details", new { id = c.MessageId })
+                            </div>
+                        </td>
+                        <td class="HideSmall" nowrap>
+                            <div class="NameText">
+                                @if (c.Client != null)
+                                {
+                                    @c.Client.LastFirstMI
+                                }
+                            </div>
+                        </td>
+                        <td nowrap>
+                            <div class="DateTimeText">
+                                @c.SentAt.ToString("ddd, dd MMM yyy HH:mm:ss 'MT'")
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+@using (Html.BeginForm("remove", "message", FormMethod.Post, new { id = "frmDelete" }))
+{
+    @Html.Hidden("DeleteIds", "")
+    @Html.AntiForgeryToken()
+}
+<div id="modalConfirmDeletes" style="display:none" title="@MessagePages.DeleteMsg">
+    <p>@MessagePages.ConfirmDeletes </p>
+
+</div>
+@section scripts
+{
+
+    <script src="~/Scripts/MessageScripts.js"></script>
+}

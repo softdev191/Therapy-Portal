@@ -1,0 +1,128 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model CreateMessageModel 
+
+@{
+    ViewBag.Title = MessagePages.NewMessage;
+    ViewBag.CurArea = MenuArea.Messages;
+    StaffInfoList staff = ViewBag.Staff;
+    string recipientIds = Model.RecipientIds;
+    List<int> recips = new List<int>();
+    if (!string.IsNullOrWhiteSpace(recipientIds))
+    {
+        recips.AddRange(from i in recipientIds.Split(',') select int.Parse(i));
+    }
+    Model.MessageBody = Model.Contents;
+}
+<link rel="stylesheet" type="text/css" href="~/Content/trumbowyg.min.css" />
+@using (Html.BeginForm("create", "message", FormMethod.Post))
+{
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Messages, "index")  &gt; @MessagePages.NewMessage</h2>
+
+<section style="padding-bottom:10px;">
+    <button disabled="disabled" onclick="SetContents();submitit()" id="btnSend">@MessagePages.Send</button>
+    <button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+
+</section>
+<section>
+    <div class="form-group">
+        <label>@Dictionary.Client</label>
+        <input type="text" id="ClientSelector" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label>@MessagePages.To <a href="javascript:SetRecipients()"><img src="~/images/edit.png"/></a></label>
+        <span class="form-control" id="RecipNames" style="height:auto">
+            @if(recips.Count>0)
+            {
+                @(string.Join(",", (from s in staff
+                                  where recips.Contains(s.StaffId)
+                                  select s.DisplayName)))
+            }
+        </span>
+    </div>
+   
+    <div class="form-group">
+        <label>@MessagePages.Subject</label>
+        @Html.TextBoxFor(m=>m.Subject,new { @class="form-control"})
+        @Html.ValidationMessageFor(m => m.Subject, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <label>@MessagePages.Message</label>
+        @Html.ValidationMessageFor(m => m.Contents, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m=>m.MessageBody)
+        <div id="EditContents">@Html.Raw(Model.MessageBody)</div>
+    </div>
+</section>
+@Html.HiddenFor(m=>m.RecipientIds)
+
+    if(Model.OriginalMessage!=null)
+    {
+        @Html.HiddenFor(m=>m.IsReply)
+        @Html.HiddenFor(m=>m.OriginalMessage.MessageId)
+        @Html.HiddenFor(m => m.OriginalMessage.SentAt)
+        @Html.HiddenFor(m => m.OriginalMessage.Subject)
+
+    }
+<div id="ClientContainer">
+    
+    </div>
+
+    @Html.AntiForgeryToken()
+}
+<div id="modalSelStaff" style="display:none" title="@MessagePages.Recipients">
+    <p><a href="javascript:SelectAllRecips()" style="margin-right:50px;">@MessagePages.SelectAll</a><a href="javascript:SelectNoRecips()">@MessagePages.SelectNone</a></p>
+    <div style="height:250px;overflow:auto">
+    
+                @if(staff!=null && staff.Count>0)
+                            {
+                                string chckd = "";
+                                foreach(var s in staff)
+                                {
+                                    chckd = recips.Contains(s.StaffId) ? "checked" : "";
+                        
+                            <input type="checkbox" @chckd value="@s.StaffId" />
+                            <span id="@string.Format("StaffName{0}",s.StaffId)"> @s.DisplayName</span><br/>
+                       
+                    }
+                }
+
+    </div> 
+</div>
+@section scripts
+{
+   
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/createmessage")
+<script src="~/Scripts/trumbowyg.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            InitializeClient("ClientSelector", "Client");
+            $("#EditContents").trumbowyg({
+                btns: [
+                    ['formatting'],
+                    'btnGrp-semantic',
+                    ['superscript', 'subscript'],
+                    ['link'],
+                    ['insertImage'],
+                    'btnGrp-justify',
+                    'btnGrp-lists',
+                    ['horizontalRule'],
+                    ['removeformat'],
+                    ['fullscreen']
+                ]
+            });
+        });
+
+
+    </script>
+
+    @if(recips.Count>0)
+    {
+        <script>
+            $(document).ready(function () { $("#btnSend").prop("disabled", false); });
+        </script>
+    }
+}

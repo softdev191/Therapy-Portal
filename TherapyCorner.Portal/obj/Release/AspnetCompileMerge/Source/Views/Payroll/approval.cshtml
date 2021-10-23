@@ -1,0 +1,138 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model List<TherapyCorner.Portal.Models.PayrollGroup>
+
+
+@{
+    ViewBag.Title = PayrollPages.PayrollApprovals;
+    Layout = "~/Views/Shared/_LayoutFinance.cshtml";
+    ViewBag.CurArea = MenuArea.Finances;
+    DateTime? toDT = ViewBag.ToDT;
+}
+<style>
+    .headerbar {
+        font-weight: bold;
+        background-color: lightgrey;
+        border: outset thin black;
+        padding: 3px;
+        cursor: pointer;
+    }
+
+    .childarea {
+        padding: 5px;
+        display: none;
+    }
+
+    .tamount {
+        float: right;
+    }
+
+
+</style>
+
+<h2 class="breadcrumb">@PayrollPages.PayrollApprovals</h2>
+@using (Html.BeginForm("approval", "payroll", FormMethod.Get, new {  role = "form" , id="frmFilter"}))
+{
+    <div style="text-align:center">
+        <label>@Dictionary.To</label>
+        @Html.TextBox("ToDT", toDT.HasValue ? toDT.Value.ToShortDateString() : "", new { @class = "form-control DateText", style="display:inline-block", maxlength = 10 })
+    </div>
+}
+@using (Html.BeginForm("approve", "payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <p><button onclick="submitit()">@Dictionary.Approve</button></p>
+    <h6 style="text-align:center">@PayrollPages.ViewDetails</h6>
+    <p><input type="checkbox" onclick="javascript:SelectAll()" id="sac" />&nbsp;@Dictionary.All</p>
+    <div style="margin:10px;border:1px solid black">
+        @if (Model.Count > 0)
+        {
+            int x = 0;
+            foreach (var p in Model)
+            {
+                x++;
+                <div class="headerbar" onclick="ToggleArea(@x)">
+                    <span class="tamount">@p.Amount.ToString("c")</span>
+                    <input type="checkbox" onclick="javascript:SelectStaff(@x)"  @(p.CanPay ? "" : "disabled") id="@string.Format("sc{0}", x)"/> @p.StaffMember.Name 
+                </div>
+                <div class="childarea sortable" id="@string.Format("Area{0}", x)">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="tdSingleButton"></th>
+                                <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                                <th class="LongNameText"><a href="#">@Dictionary.Description</a></th>
+                                <th class="NumberText"><a href="#">@PayrollPages.Count</a></th>
+                                <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var g in p.Children)
+                            {
+                            <tr>
+                                <td>
+                                    <input class="@string.Format("checkstaff{0}", x)" type="checkbox" name="ids" value="@g.Ids" @(g.CanPay ? "" : "disabled") />
+                                </td>
+                                <td>@g.FromDT.ToShortDateString()</td>
+                                <td>@g.Title</td>
+                                <td class="NumberText">@g.Count.ToString("N2")</td>
+                                <td class="NumberText">@g.Amount.ToString("c")</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+    </div>
+
+
+}
+    @section scripts
+{
+       <script>
+           var checkme = true;
+           function SelectAll()
+           {
+               var c = $("#sac");
+               $('input:checkbox').not(c).not("[disabled]").prop('checked', checkme);
+               checkme = !checkme;
+           }
+
+           function SelectStaff(id)
+           {
+               var c = $("#sc" +id);
+               var scheck = c[0].checked;
+               $('.checkstaff'+id).not(c).not("[disabled]").prop('checked', scheck);
+              
+           }
+
+           function ToggleArea(id) {
+               $("#Area" + id).toggle();
+           }
+
+           var  origTo;
+
+           $(document).ready(function () {
+               origTo = $("#ToDT").val();
+               $("#ToDT")[0].onblur = LostFocus;
+               $("#ToDT").datepicker().on("change", function () { ChangeFilter(); });
+           });
+
+           function ChangeFilter() {
+               submitit();
+               $("#frmFilter").submit();
+           }
+           function LostFocus() {
+               if ($("#ToDT").val() != origTo) {
+                   ChangeFilter();
+               }
+           }
+        </script>
+
+
+    }
+

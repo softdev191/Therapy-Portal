@@ -1,0 +1,64 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model PaymentAuthorization
+@{
+    /**/
+
+    ViewBag.Title = string.Format("{0}: {1}", "Add Payment Authorization", Model.Client.Name);
+    ViewBag.CurArea = MenuArea.Clients;
+
+    www.therapycorner.com.account.Session token = UserAuthorization.CurrentUser;
+    List<SelectListItem> reportsModel = new List<SelectListItem>();
+    www.therapycorner.com.account.ProgramCategoryList categories = StaticData.GovernmentCategories;
+    foreach(var c in categories)
+    {
+        if (c.ProgramId.ToString() != Model.Client.AlternateId)
+        {
+            continue;
+        }
+        reportsModel.Add(new SelectListItem() { Value = c.CategoryId.ToString(), Text = c.Name, Selected = c.CategoryId.ToString()==Model.ServiceCategory.UniqueId });
+
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.Name), "details", new { id = Model.Client.UniqueId }) &gt; Add Payment Authorization</h2>
+
+@using (Html.BeginForm("addauth", "client", FormMethod.Post, new { id = "frmAdd" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Client.Name)
+    @Html.HiddenFor(m => m.Client.AlternateId)
+    @Html.HiddenFor(m => m.ServiceCategory.Context)
+    @Html.HiddenFor(m => m.AuthId)
+
+    <div class="form-group">
+        <label>@Dictionary.StartedOn</label>
+        @Html.TextBoxFor(m => m.Start, new { @class = "form-control DateText", maxlength = "10" })
+        @Html.ValidationMessageFor(m => m.Start, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.EndedOn</label>
+        @Html.TextBoxFor(m => m.End, new { @class = "form-control DateText", maxlength = "10" })
+        @Html.ValidationMessageFor(m => m.End, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <label>Units</label>
+        @Html.TextBoxFor(m => m.Units, new { @class = "form-control NumberText", maxlength = "5" })
+        @Html.ValidationMessageFor(m => m.Units, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <label>Category</label>
+        @Html.DropDownList("ServiceCategory.UniqueId", reportsModel, new { @class = "form-control" })
+
+    </div>
+
+    <p style="text-align:right">
+        <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = Model.Client.UniqueId })'">@Dictionary.Cancel</button>
+    </p>
+
+}

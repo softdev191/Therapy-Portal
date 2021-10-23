@@ -1,0 +1,75 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+@using www.soundpower.biz.common;
+
+@model FieldType
+
+@{
+    ViewBag.Title = StaffFieldPages.Edit;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    List<SelectListItem> values = new List<SelectListItem>();
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Date.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Date, Selected = Model.Type == ValueTypeEnum.Date });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Decimal.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Decimal, Selected = Model.Type == ValueTypeEnum.Decimal });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Integer.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Integer, Selected = Model.Type == ValueTypeEnum.Integer });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.String.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.String, Selected = Model.Type == ValueTypeEnum.String });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Boolean.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Boolean, Selected = Model.Type == ValueTypeEnum.Boolean });
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt;@Html.ActionLink(SharedPages.StaffFields, "index") &gt; @StaffFieldPages.Edit</h2>
+
+@using (Html.BeginForm("edit", "stafffield", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.FieldId)
+
+    <section class="halfspace form-horizontal">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Label)
+            @Html.TextBoxFor(m => m.Label, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Label, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@TherapyCorner.Portal.ResourceText.Dictionary.Type</label>
+            @Html.DropDownList("Type", values, new { @class = "form-control", onchange = "TypeChanged()" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Required)
+            @Html.CheckBoxFor(m => m.Required, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.IsActive)
+            @Html.EditorFor(m => m.IsActive, new { @class = "form-control" })
+        </div>
+    </section>
+    <section class="halfspace form-horizontal">
+
+        <div class="form-group" id="grpMin">
+            @Html.LabelFor(m => m.Min)
+            @Html.TextBoxFor(m => m.Min, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Min, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group" id="grpMax">
+            @Html.LabelFor(m => m.Max)
+            @Html.TextBoxFor(m => m.Max, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Max, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group" id="grpValidation">
+            @Html.LabelFor(m => m.Validation)
+            @Html.TextBoxFor(m => m.Validation, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Validation, "", new { @class = "text-danger" })
+        </div>
+
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@TherapyCorner.Portal.ResourceText.Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@TherapyCorner.Portal.ResourceText.Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/FieldTypeEditingScripts.js"></script>
+}

@@ -1,0 +1,97 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ReferencedInsuranceCompanyList
+
+@{
+    ViewBag.Title = Dictionary.Insurance;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+}
+<link rel="stylesheet" type="text/css" href="~/Content/insurance.css" />
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(Dictionary.Insurance, "insurance", "company") &gt; @Dictionary.Add</h2>
+<div>
+    @using (Html.BeginForm("AddInsurance", "Company", FormMethod.Post, new { role = "form", id = "frmAdd" }))
+    {
+        <input type="text" id="lstNew" name="lstNew" class="form-control" style="display:inline-block" /> <span>&nbsp;</span>
+        <button type="submit" disabled id="btnAdd" style="height:35px">@Dictionary.Add</button>
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id")
+    }
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        var lstNew;
+        var selCompany = null;
+        $(document).ready(function () {
+
+            var addr = window.location.origin + "/company/insuranceoptions";
+
+            lstNew = $("#lstNew");
+            lstNew.autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: addr,
+                        dataType: "json",
+                        data: {
+                            name: request.term
+                        },
+                        success: function (data) {
+                            CompleteSearch(data, response);
+                        }
+                    });
+                },
+                minLength: 3,
+                change: function (event, ui) {
+                    InsuranceSelected(event, ui);
+                },
+                select: function (event, ui) {
+                    InsuranceSelected(event, ui);
+                }
+            });
+
+        });
+
+        function CompleteSearch(returndata, response) {
+            if (returndata.IsFailure) {
+                var msgs = ProcessResponseBase(returndata);
+                msgs.DisplayResponseResults();
+                return;
+            }
+            var options = returndata.EntityList;
+            var data = [];
+            if (options != null && options.length > 0) {
+                $.each(options, function (index, item) {
+                    item.label = item.Name;
+                    item.value = item.label;
+                    data.push(item);
+                });
+            }
+            response(data);
+        }
+
+        function InsuranceSelected(event, ui) {
+            var selValue = ui.item;
+
+            if (selValue==null)
+            {
+                $("#btnAdd").prop("disabled", true);
+
+            }
+            else
+            {
+                $("#btnAdd").prop("disabled", false);
+                $("#Id").val(selValue.UniqueId);
+            }
+        }
+
+
+
+
+
+    </script>
+
+}

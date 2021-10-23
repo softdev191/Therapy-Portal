@@ -1,0 +1,101 @@
+﻿@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+@{
+    Session curUser = TherapyCorner.Portal.UserAuthorization.CurrentUser;
+    www.soundpower.biz.common.GenericEntity curCompany = curUser.Companies.Find(c => c.UniqueId == curUser.CurrentCompany);
+    MenuArea? area = ViewBag.CurArea;
+    string maClass = "";
+    string maLink = "";
+    int msgCount = UserAuthorization.MessageCount;
+}
+       @{
+           maLink = Url.Action("index", "home");
+       } 
+@if (area == MenuArea.Home)
+{
+    maClass = "curarea";
+}
+@if (!string.IsNullOrWhiteSpace(curUser.CurrentCompany))
+{
+<div class="navbar">
+    <div></div>
+    <div class="@maClass">
+        <a href="@maLink"><span class="glyphicon glyphicon-home"></span> <span class="navlabel">@SharedPages.Home</span></a>
+    </div>
+    @{
+        maLink = Url.Action("index", "message");
+    }
+    @if (area == MenuArea.Messages)
+    {
+        maClass = "curarea";
+    }
+    else
+    {
+        maClass = "";
+    }
+    <div class="@maClass">
+        <a href="@maLink">
+            <span class="glyphicon glyphicon-envelope"></span>
+            <span class="navlabel">@SharedPages.Messages</span>
+            @if (msgCount > 0)
+            {
+                <span class="messagecount">@msgCount</span>
+            }
+        </a>
+    </div>
+    @{
+        maClass = area == MenuArea.Clients ? "curarea" : "";
+        maLink = Url.Action("index", "client");
+    }
+    <div class="@maClass">
+        <a href="@maLink"><i class="fa fa-users"></i> <span class="navlabel">@SharedPages.Clients</span></a>
+    </div>
+
+    @if (curUser.IsSupervisor || curUser.IsProvider)
+    {
+
+        maClass = area == MenuArea.Calendar ? "class=\"curarea\"" : "";
+
+        maLink = Url.Action("index", "appointment");
+
+        <div @maClass>
+            <a href="@maLink"><span class="glyphicon glyphicon-calendar"></span> <span class="navlabel">@SharedPages.Calendar </span></a>
+        </div>
+    }
+    @if (curUser.IsAdmin || curUser.IsWorker || curUser.IsSupervisor)
+    {
+
+        maClass = area == MenuArea.Staff ? "class=\"curarea\"" : "";
+        maLink = Url.Action("index", "staff");
+
+        <div @maClass>
+            <a href="@maLink"><span class="glyphicon glyphicon-user"></span> <span class="navlabel">@SharedPages.Staff</span></a>
+        </div>
+    }       
+    @if (curUser.IsAdmin)
+    {
+        maClass = area == MenuArea.Admin ? "class=\"curarea\"" : "";
+        maLink = Url.Action("index", "company");
+        <div @maClass>
+            <a href="@maLink"><span class="glyphicon glyphicon-cog"></span> <span class="navlabel">@SharedPages.Admin</span></a>
+        </div>
+    }
+    @{
+        maClass = area == MenuArea.Finances ? "curarea" : "";
+        maLink = Url.Action("finances", "home");
+    }
+    <div class="@maClass">
+        <a href="@maLink"><span class="glyphicon glyphicon-usd"></span> <span class="navlabel">@SharedPages.Finances</span></a>
+    </div>
+    @if (curUser.IsAdmin || curUser.IsBiller)
+    {
+        maClass = area == MenuArea.Billing ? "curarea" : "";
+        maLink = Url.Action("billing", "home");
+
+    <div class="@maClass">
+        <a href="@maLink"><span class="glyphicon glyphicon-book"></span> <span class="navlabel">@Dictionary.Billing  </span></a>
+    </div>
+    }
+</div>
+
+}

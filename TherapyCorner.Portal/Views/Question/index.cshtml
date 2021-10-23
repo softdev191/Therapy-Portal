@@ -1,0 +1,57 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+
+@model www.therapycorner.com.company.QuestionTypeList 
+
+@{
+    ViewBag.Title = Dictionary.Questions ;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index") &gt; @Dictionary.Questions</h2>
+
+
+<section style="padding-bottom:10px">
+    <button onclick="window.location='@Url.Action("create")'">@QuestionPages.Add</button>
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th style="min-width:150px"><a href="#">@Dictionary.Question</a></th>
+                <th class="IdText HideMobile"><a href="#">@Dictionary.Type</a></th>
+                <th class="NumberText HideMedium"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Minimum</a></th>
+                <th class="NumberText HideMedium"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Maximum</a></th>
+               <th class="BoolText "><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.IsActive</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                <a href="@Url.Action("edit",new { id = p.QuestionId })">
+                                    <img src="~/images/edit.png" />
+                                </a>
+
+                            </div>
+                        </td>
+                        <td>@p.Label</td>
+                        <td class="HideMobile IdText">@www.therapycorner.com.account.ResStrings.DataTypes.ResourceManager.GetString(p.Type.ToString())</td>
+                     <td class="HideMedium NumberText">@(p.Min.HasValue ? p.Min.Value.ToString() : "")</td>
+                        <td class="HideMedium NumberText">@(p.Max.HasValue ? p.Max.Value.ToString() : "")</td>
+                        <td class="BoolText">@(p.IsActive.GetValueOrDefault() ? Dictionary.Yes : Dictionary.No)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

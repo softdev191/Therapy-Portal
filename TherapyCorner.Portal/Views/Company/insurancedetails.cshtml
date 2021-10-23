@@ -1,0 +1,156 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ReferencedInsuranceCompany
+
+@{
+    ViewBag.Title = Dictionary.Insurance;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+    www.therapycorner.com.account.InsuranceCompany company = ViewBag.Company;
+    var ch = company.ClearingHouses.Find(h => h.ClearingHouseId == UserAuthorization.CurrentUser.ClearingHouse.GetValueOrDefault(1));
+}
+<link rel="stylesheet" type="text/css" href="~/Content/insurance.css" />
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(Dictionary.Insurance, "insurance", "company") &gt; @company.Name</h2>
+<p>
+    <button onclick="SaveChanges()" type="button">@Dictionary.Save</button>&nbsp;&nbsp;<button onclick="RemoveProgram()" type="button">@Dictionary.Remove</button>
+
+</p>
+<section class="halfspace">
+    @if (company.Address != null)
+    {
+    <address>
+        @company.Address.Line1<br/>
+        @company.Address.City, @company.Address.State  @company.Address.PostalCode
+    </address>
+    }
+</section>
+<section class="halfspace">
+    @using (Html.BeginForm("insurancedetails", "Company", FormMethod.Post, new { role = "form", id = "frmAdd" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Version)
+        @Html.HiddenFor(m => m.CompanyId)
+        @Html.HiddenFor(m => m.IsActive)
+        @Html.Hidden("Name", company.Name)
+        @Html.Hidden("PayerId", ch.Code)
+
+        <div class="form-group">
+            @Html.EditorFor(m => m.ExcludeRenderer) <span> Exclude Renderer On Claims</span>
+        </div>
+        if (!string.IsNullOrWhiteSpace(ch.EligibilityId))
+        {
+            <div class="form-group">
+                @Html.EditorFor(m => m.AllowEligibility) <span>Allow Eligibility Checks</span>
+            </div>
+        }
+        else
+        {
+            Model.AllowEligibility = false;
+            @Html.HiddenFor(m => m.AllowEligibility)
+            <div class="form-group">
+                Eligibility Checks Are Not Allowed
+            </div>
+        }
+        <div class="form-group">
+            @(ch.ERAReturned.GetValueOrDefault(false) ? "" : "ERA Data Not Automatically Processed")
+        </div>
+        if (!string.IsNullOrWhiteSpace(ch.StatusCheckId))
+        {
+            <div class="form-group">
+
+                <label>Days to delay status checks</label>
+                @Html.TextBoxFor(m => m.CheckDelay, new { @class = "form-control NumberText", maxlength = 2 })
+                @Html.ValidationMessageFor(m => m.CheckDelay, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+
+                <label>Days between status checks</label>
+                @Html.TextBoxFor(m => m.CheckFreq, new { @class = "form-control NumberText", maxlength = 2 })
+                @Html.ValidationMessageFor(m => m.CheckFreq, "", new { @class = "text-danger" })
+            </div>
+        }
+        else
+        {
+            Model.CheckDelay = 0;
+            Model.CheckFreq = 0;
+            @Html.HiddenFor(m => m.CheckFreq)
+            @Html.HiddenFor(m => m.CheckDelay)
+            <div class="form-group">
+                Status Checks Are Not Allowed
+            </div>
+        }
+
+
+    }
+</section>
+<section>
+    <h3>Enrollment Set-up Steps</h3>
+    <p>@ch.Instructions</p>
+    <p>Make sure you complete any EDI enrollment forms found at <a href="https://cms.officeally.com/Pages/ResourceCenter/PayerEDIEnrollmentForms.aspx" target="_blank">https://cms.officeally.com/Pages/ResourceCenter/PayerEDIEnrollmentForms.aspx</a> for this company before adding this company for claims processing.</p>
+    @if (ch.ERAReturned.GetValueOrDefault(false))
+    {
+        <p>Make sure you complete any ERA enrollment forms found at <a href="https://cms.officeally.com/Pages/ResourceCenter/PayerERAEnrollmentForms.aspx" target="_blank">https://cms.officeally.com/Pages/ResourceCenter/PayerERAEnrollmentForms.aspx</a> for this company.</p>
+    }
+
+
+    <h3>Fees </h3>
+    @if (ch.SubmissionPrice.GetValueOrDefault(0) > 0)
+    {
+        <p>This is a non-participating payer with Office Ally. If more than 50% of your claims for the month are with non-participating payers, you may be billed an extra surcharge.</p>
+    }
+
+</section>
+<div id="modalDelete" style="display:none" title="@CompanyPages.RemoveInsurance">
+    <p>@CompanyPages.RemoveInsuranceInstr  </p>
+    @using (Html.BeginForm("RemoveInsurance", "company", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("ProgramId",Model.CompanyId)
+
+    }
+</div>
+
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        var diagRemove;
+
+        $(document).ready(function () {
+            diagRemove = $("#modalDelete").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+            });
+
+
+        });
+
+        function SaveChanges() {
+            submitit();
+            $("#frmAdd").submit();
+        }
+
+
+        function RemoveProgram() {
+            diagRemove.dialog("open");
+        }
+
+
+
+        function ConfirmDel() {
+            submitit();
+            diagRemove.dialog("close");
+            $("#frmDel").submit();
+        }
+
+
+
+    </script>
+
+}
+

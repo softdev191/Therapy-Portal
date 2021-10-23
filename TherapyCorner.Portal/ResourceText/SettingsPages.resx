@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Accounting" xml:space="preserve">
+    <value>Accounting</value>
+  </data>
+  <data name="APIAccessInfo" xml:space="preserve">
+    <value>You may find more information about accessing the API at {0}.</value>
+  </data>
+  <data name="APIDisabled" xml:space="preserve">
+    <value>The API interface for this account has been disabled.</value>
+  </data>
+  <data name="APIEnabled" xml:space="preserve">
+    <value>The API interface for this account has been enabled.</value>
+  </data>
+  <data name="APIInstructions" xml:space="preserve">
+    <value>You can use the API to pull information out of Therapy Corner into another system of yours or to simply pull into another application to make your own dashboards and reports.</value>
+  </data>
+  <data name="APIReset" xml:space="preserve">
+    <value>The passcode on the API interface for this account has been changed.</value>
+  </data>
+  <data name="APISettingInfo" xml:space="preserve">
+    <value>Place the following values into the header of any request you make to the API.</value>
+  </data>
+  <data name="ChangeAccount" xml:space="preserve">
+    <value>Change Account</value>
+  </data>
+  <data name="ClearAPI" xml:space="preserve">
+    <value>Disable API</value>
+  </data>
+  <data name="ClearingHouseUpdated" xml:space="preserve">
+    <value>The insurance clearing house has been updated for this account.</value>
+  </data>
+  <data name="CompanyID" xml:space="preserve">
+    <value>Company ID</value>
+  </data>
+  <data name="ConfirmClearAPI" xml:space="preserve">
+    <value>Are you sure you want to disable the API interface on this account?</value>
+  </data>
+  <data name="ConfirmResetAPI" xml:space="preserve">
+    <value>Are you sure you want to change the API interface password on this account? When you do, you will need to change the code used on all applications interacting with the API to the new one that will be displayed.</value>
+  </data>
+  <data name="ConfirmSetAPI" xml:space="preserve">
+    <value>Are you sure you want to enable the API interface on this account?</value>
+  </data>
+  <data name="Integrations" xml:space="preserve">
+    <value>Integrations</value>
+  </data>
+  <data name="IntegrationsUpdated" xml:space="preserve">
+    <value>You integration options have been successfully updated.</value>
+  </data>
+  <data name="NoAccountingIntegration" xml:space="preserve">
+    <value>No accounting integration choice has been made yet. Please click on a button below to begin integrating payroll, expenses, and payments with the accounting system of your choice.</value>
+  </data>
+  <data name="NotLinkedToQB" xml:space="preserve">
+    <value>Cannot perform the requested action because this account is not linked to QuickBooks.</value>
+  </data>
+  <data name="QBCompanyHelp" xml:space="preserve">
+    <value>This is the ID for your account that can be found by looking at the "Your Account" screen in QuickBooks under the settings menu.</value>
+  </data>
+  <data name="QBLinkError" xml:space="preserve">
+    <value>QuickBooks returned the following error while trying to establish the connection with Therapy Corner: {0}</value>
+  </data>
+  <data name="QBLinkSuccess" xml:space="preserve">
+    <value>You have successfully linked this account to QuickBooks.</value>
+  </data>
+  <data name="QBRenewHelp" xml:space="preserve">
+    <value>You must renew the link between Therapy Corner and QuickBooks annually.</value>
+  </data>
+  <data name="QBSyncd" xml:space="preserve">
+    <value>The system performed a sync where possible with QuickBooks.</value>
+  </data>
+  <data name="QuickBooks" xml:space="preserve">
+    <value>QuickBooks</value>
+  </data>
+  <data name="RefreshLink" xml:space="preserve">
+    <value>Refresh Link</value>
+  </data>
+  <data name="RemoveLink" xml:space="preserve">
+    <value>Remove Link</value>
+  </data>
+  <data name="ResetAPI" xml:space="preserve">
+    <value>Reset API Code</value>
+  </data>
+  <data name="SetAPI" xml:space="preserve">
+    <value>Enable API</value>
+  </data>
+</root>

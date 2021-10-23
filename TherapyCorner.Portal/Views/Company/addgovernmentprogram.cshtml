@@ -1,0 +1,52 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.ReferencedGovernmentProgram
+
+@{
+    ViewBag.Title = Dictionary.GovtPrograms;
+    Layout = "~/Views/Shared/_Layoutbilling.cshtml";
+
+    ReferencedGovernmentProgramList programs = ViewBag.Programs;
+
+    var options = new List<SelectListItem>();
+    foreach (var p in programs)
+    {
+        options.Add(new SelectListItem() { Value = p.ProgramId.ToString(), Text = p.Name, Selected = p.ProgramId == Model.ProgramId });
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(Dictionary.GovtPrograms, "governmentprogram", "company") &gt;@Dictionary.Add</h2>
+
+@using (Html.BeginForm("addgovernmentprogram", "company", FormMethod.Post, new { id = "frmAdd" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.IsActive)
+    @Html.HiddenFor(m => m.Version)
+
+    <div class="form-group">
+        <label>@Dictionary.Program</label>
+        @Html.DropDownList("ProgramId", options, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>@www.therapycorner.com.company.ResStrings.Dictionary.AgencyProvider</label>
+        @Html.TextBoxFor(m => m.Code, new { @class = "form-control", maxlength = 20 })
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Login</label>
+        @Html.TextBoxFor(m => m.Login, new { @class = "form-control", autocomplete = "off" })
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Password</label>
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control", autocomplete = "off" })
+    </div>
+    <p style="text-align:center">
+        <button onclick="submitit()" type="submit" @(options.Count == 0 ? "disabled='disabled'" : "")>@Dictionary.Add</button>&nbsp;&nbsp;<button onclick="submitit();window.location='@Url.Action("governmentprogram")'" type="button">@Dictionary.Cancel</button>
+
+    </p>
+}
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,417 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClaimInfo
+@{
+    ViewBag.Title = ClaimsPages.Details;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+    int? activeTab = ViewBag.ActiveTab;
+
+    string clss = "";
+
+}
+<style>
+    .voidedpay {
+        text-decoration: line-through;
+    }
+</style>
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(ClaimsPages.Claims, "index") &gt; @ClaimsPages.Details</h2>
+<section style="padding-bottom:10px">
+
+    <button onclick="window.location='@Url.Action("topdf",new { id = Model.ClaimId })'">@ClaimsPages.ToPDF</button>
+    @if (Model.Status == ClaimStatusEnum.Vetting)
+    {
+        <button onclick="submitit(); window.location='@Url.Action("vet",new { id = Model.ClaimId })'">@ClaimsPages.Vet</button>
+    }
+
+    @if (Model.Status != ClaimStatusEnum.Paid && Model.Status != ClaimStatusEnum.Generating && Model.Status != ClaimStatusEnum.Vetting)
+    {
+        <button onclick="javascript:StartOver()">@ClaimsPages.StartOver</button>
+    }
+    @if (Model.Status != ClaimStatusEnum.Closed && Model.Status != ClaimStatusEnum.Paid)
+    {
+        <button onclick="javascript:CloseClaim()">@ClaimsPages.Close</button>
+
+    }
+    @if (Model.Status == ClaimStatusEnum.PendInsPay || Model.Status == ClaimStatusEnum.PendInsSubmission || Model.Status == ClaimStatusEnum.PendInsSubmissionIssue)
+    {
+        <button onclick='window.open("@Url.Action("hcfa",new { id = Model.ClaimId })","_blank")'>@ClaimsPages.DownloadHCFA</button>
+
+    }
+    @if (Model.Status == ClaimStatusEnum.PendGovtIssue || Model.Status == ClaimStatusEnum.PendGovtPay || Model.Status == ClaimStatusEnum.PendGovtSubmission)
+    {
+        <button onclick='window.open("@Url.Action("dddhcfa",new { id = Model.ClaimId })","_blank")'>@ClaimsPages.DownloadHCFA</button>
+
+    }
+    @if (Model.Status == ClaimStatusEnum.PendGovtIssue || Model.Status == ClaimStatusEnum.PendInsSubmissionIssue)
+    {
+        <button onclick='window.location="@Url.Action("resolve",new { ids = Model.ClaimId })"'>@ClaimsPages.Resolve</button>
+
+    }
+</section>
+
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Date</label><br />
+        @Model.ClaimDate.ToShortDateString()
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Provider</label><br />@Model.Provider.Name
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Client</label><br />
+        @Html.ActionLink(Model.Client.Name, "details", "client", new { id = Model.Client.UniqueId }, null)
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Location</label><br />@www.therapycorner.com.company.ResStrings.Location.ResourceManager.GetString(Model.Location.ToString())
+    </div>
+    @if (Model.Approver != null)
+    {
+        <div class="form-group">
+            <label>Approved By</label><br />
+            @Model.Approver.Name
+        </div>
+    }
+
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Status</label><br />@ClaimsPages.ResourceManager.GetString(Model.Status.ToString())
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.SubStatus))
+    {
+        <div class="form-group">
+            <label>Sub-Status</label><br />
+            @Model.SubStatus
+        </div>
+    }
+    @if (Model.PendingWith != null)
+    {
+        <div class="form-group">
+            <label>Pending With</label><br />
+            @Model.PendingWith.Name
+        </div>
+    }
+    <div class="form-group">
+        <label>@Dictionary.Amount</label><br />@Model.AmountDue.ToString("c")
+
+
+    </div>
+    <div class="form-group">
+        <label>Amount Paid</label><br />@Model.AmountPaid.ToString("c")
+
+
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.ActivityId) && (Model.Status == ClaimStatusEnum.PendInsPay || Model.Status == ClaimStatusEnum.PendInsSubmissionIssue || Model.Status == ClaimStatusEnum.PendGovtPay))
+    {
+
+        <div class="form-group">
+            <label>Activity ID</label><br />@Model.ActivityId
+        </div>
+        <div class="form-group">
+            <label>Transaction ID</label><br />@Model.TransactionId
+        </div>
+
+    }
+</section>
+
+<section>
+    <div id="tabs">
+        <ul>
+
+            <li><a href="#tabs-1">@ClaimsPages.Payments</a></li>
+
+            <li><a href="#tabs-2">@Dictionary.Comments</a></li>
+            <li><a href="#tabs-3">@Dictionary.Appointments</a></li>
+        </ul>
+
+        <div id="tabs-1" style="height:550px" class="ControlledTab">
+
+            <div id="modalVoid" style="display:none" title="@ClaimsPages.VoidPayment">
+                <p>@ClaimsPages.VoidInstr </p>
+                <p id="VoidName"></p>
+                <form method="post" id="frmVoid" role="form" action="@Url.Action("void",new {id=Model.ClaimId})">
+
+                    @Html.AntiForgeryToken()
+                    @Html.TextArea("Comment", new { @class = "form-control", id = "VoidReason" })
+                    <span id="VoidRequired" class="alert-danger">@Dictionary.Required</span>
+                    @Html.Hidden("SubId", "")
+                </form>
+            </div>
+
+            <table class="sortable">
+                <thead>
+                    <tr>
+
+                        <th class="DateTimeText"><a href="#">@Dictionary.Date</a></th>
+                        <th class="IdText "><a href="#">@Dictionary.Type</a></th>
+                        <th class="LongNameText"><a href="#">@ClaimsPages.Payer</a></th>
+                        <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                        <th class="BoolText "><a href="#">@ClaimsPages.Denied</a></th>
+                        <th class="DateTimeText">@ClaimsPages.VoidedAt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Payments != null && Model.Payments.Count > 0)
+                    {
+                        foreach (var p in Model.Payments)
+                        {
+                            clss = p.VoidedAt.HasValue ? "voidedpay" : "";
+                            <tr class="@clss">
+
+                                <td>
+                                    @p.PayDate.Value.ToShortDateString()
+                                </td>
+                                <td>
+                                    @p.Source.Context
+                                </td>
+                                <td>
+                                    @p.Source.Name
+
+                                </td>
+                                <td>
+                                    @p.Amount.GetValueOrDefault(0).ToString("c")
+                                </td>
+                                <td>
+                                    @(p.Denial ? Dictionary.Yes : Dictionary.No )
+                                </td>
+                                <td>
+                                    @if (p.VoidedAt.HasValue)
+                                    {
+                                        <div class="LocalDT">@p.VoidedAt.Value.ToString("r")</div>
+                                    }
+                                    else
+                                    {
+                                        <a href="javascript:VoidPayment(@p.PaymentId, '@p.PayDate.Value.ToShortDateString()', '@p.Source.Name')">@ClaimsPages.VoidPayment</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div id="tabs-2" style="height:550px" class="ControlledTab">
+            <div id="modalComment" style="display:none" title="@ClientPages.MakeComment">
+                <p>@ClientPages.CommentInstr </p>
+                <form method="post" id="frmComment" role="form" action="@Url.Action("comment",new {id=Model.ClaimId})">
+
+                    @Html.AntiForgeryToken()
+                    @Html.TextArea("Comment", new { @class = "form-control" })
+                </form>
+            </div>
+            <div style="margin-bottom:10px">
+                <button onclick="AddComment() ">@Dictionary.Add</button>
+            </div>
+            <div class="scrollTableContainer CommentTable">
+                <div class="scrollTableArea" style="height:430px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th class="HideMobile"><div class="DateTimeText"><a href="#">@Dictionary.Date</a></div></th>
+                                <th class="HideMedium"><div class="NameText"><a href="#">@Dictionary.Commentor</a></div></th>
+                                <th><div class="LongNameText">@Dictionary.Comments</div></th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Comments != null && Model.Comments.Count > 0)
+                            {
+                                Model.Comments.Sort((a, b) => b.CommentDate.CompareTo(a.CommentDate));
+                                foreach (var s in Model.Comments)
+                                {
+                                    <tr>
+
+                                        <td class="HideMobile"><div class="DateTimeText LocalDT">@s.CommentDate.ToString("r")</div></td>
+                                        <td class="HideMedium"><div class="NameText">@s.Commentor.Name</div></td>
+                                        <td><div class="LongNameText">@s.CommentText</div></td>
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="tabs-3" style="height:550px" class="ControlledTab">
+
+
+            <table class="sortable">
+                <thead>
+                    <tr>
+
+                        <th class="tdSingleButton"></th>
+                        <th class="DateTimeText"><a href="#">@Dictionary.Date</a></th>
+                        <th class="LongNameText"><a href="#">@Dictionary.Service</a></th>
+                        <th class="NumberText"><a href="#">Units</a></th>
+                        <th class="NumberText"><a href="#">Gov't Program Units</a></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Appointments != null && Model.Appointments.Count > 0)
+                    {
+                        foreach (var p in Model.Appointments)
+                        {
+                            <tr>
+
+                                <td class="tdSingleButton">
+                                    <a href="@Url.Action("details","appointment",new { id = p.AppointmentId })"><img width="25" src="~/images/magnify.png" /></a>
+                                </td>
+                                <td>
+                                    @p.Start.ToString("g")
+                                </td>
+                                <td>
+                                    @Html.ActionLink(p.Service.Name, "update", "clientservice", new { id = p.Service.UniqueId }, null)
+                                </td>
+                                <td class="NumberText">
+                                    @p.Units.ToString("N2")
+                                </td>
+                                <td class="NumberText">
+                                    @p.GovtUnits.GetValueOrDefault(0).ToString("N2")
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<div id="modalDelete" style="display:none" title="@ClaimsPages.Close">
+    <p>@ClaimsPages.VerifyClose </p>
+    @using (Html.BeginForm("close", "claim", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.ClaimId)
+
+    }
+</div>
+
+<div id="modalSO" style="display:none" title="@ClaimsPages.StartOver">
+    <p>@ClaimsPages.VerifyReset </p>
+    @using (Html.BeginForm("startover", "claim", FormMethod.Post, new { role = "form", id = "frmSO" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.ClaimId)
+
+    }
+</div>
+
+@section scripts
+{
+    @Styles.Render("~/Content/tabs")
+    <script>
+                    var diagRemove,diagSO,diagComment, diagVoid;
+
+                    $(document).ready(function () {
+                        diagRemove = $("#modalDelete").dialog({
+                            autoOpen: false,
+                            width: 365,
+                            modal: true,
+                            buttons: { "Yes": function () { ConfirmClose(); }, "No": function () { diagRemove.dialog("close"); } }
+                        });
+
+                        diagComment = $("#modalComment").dialog({
+                            autoOpen: false,
+                            width: 365,
+                            modal: true,
+                            buttons: { "@Dictionary.Create": function () { SaveComment(); }, "@Dictionary.Cancel": function () { diagComment.dialog("close"); } }
+                        });
+
+                        diagVoid = $("#modalVoid").dialog({
+                            autoOpen: false,
+                            width: 365,
+                            modal: true,
+                            buttons: { "@Dictionary.Yes": function () { CommitVoid(); }, "@Dictionary.No": function () { diagVoid.dialog("close"); } }
+                        });
+
+                        diagSO = $("#modalSO").dialog({
+                            autoOpen: false,
+                            width: 365,
+                            modal: true,
+                            buttons: { "Yes": function () { ConfrimSO(); }, "No": function () { diagSO.dialog("close"); } }
+                        });
+
+                    });
+
+                    function AddComment()
+                    {
+                        $("#Comment").val("");
+                        diagComment.dialog("open");
+
+                    }
+
+                    function SaveComment()
+                    {
+                        diagComment.dialog("close");
+                        submitit();
+                        $("#frmComment").submit();
+                    }
+
+                    function CloseClaim()
+                    {
+
+                        diagRemove.dialog("open");
+                    }
+
+                    function StartOver() {
+
+                        diagSO.dialog("open");
+                    }
+
+                    function ConfirmClose() {
+                        submitit();
+                        diagRemove.dialog("close");
+                        $("#frmDel").submit();
+                    }
+
+                    function ConfrimSO() {
+                        submitit();
+                        diagSO.dialog("close");
+                        $("#frmSO").submit();
+                    }
+
+                    function VoidPayment(id,dt,name)
+                    {
+                        $("#VoidReason").val("");
+                        $("#VoidRequired").hide();
+                        $("#SubId").val(id);
+                        $("#VoidName").text(dt + " " + name);
+                        diagVoid.dialog("open");
+
+                    }
+
+                    function CommitVoid()
+                    {
+                        if( $("#VoidReason").val()=="")
+                        {
+                            $("#VoidRequired").show();
+                            return;
+                        }
+                        submitit();
+                        diagVoid.dialog("close");
+                        $("#frmVoid").submit();
+                    }
+                    function ConfirmClose() {
+                        submitit();
+                        diagRemove.dialog("close");
+                        $("#frmDel").submit();
+                    }
+
+    </script>
+
+    @if (activeTab.HasValue)
+    {
+        <script>
+                        $(document).ready(function() { $("#tabs").tabs({active: @activeTab.Value })})
+        </script>
+    }
+}

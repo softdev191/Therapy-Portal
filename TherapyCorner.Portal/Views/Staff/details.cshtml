@@ -1,0 +1,385 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model StaffInfo
+
+@{
+    ViewBag.Title = string.Format("{0} ({1})", StaffPages.StaffDetails,Model.DisplayName);
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    www.therapycorner.com.account.UserInfo usr = ViewBag.User;
+    www.therapycorner.com.account.FieldTypeList customFields = ViewBag.Fields;
+    if (customFields!=null)
+    {
+        customFields.RemoveAll(f => !f.IsActive.Value);
+    }
+    int? activeTab = ViewBag.ActiveTab;
+    var tkn = UserAuthorization.CurrentUser;
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt; @StaffPages.StaffDetails</h2>
+<h3 style="margin-bottom:30px;">
+    @Model.DisplayName
+@if (Model.Status == StaffInfo.StatusEnum.Pending && tkn.IsAdmin )
+{
+    <button style="float:right" onclick="submitit();window.location='@Url.Action("resendInvite",new { id = Model.StaffId } )'">@StaffPages.ResendInvite</button>
+}
+@if (Model.Status != StaffInfo.StatusEnum.Inactive)
+{
+    <button style="float:right" onclick="submitit();window.location='@Url.Action("schedule",new { id = Model.StaffId } )'">@SharedPages.Calendar</button>
+}
+</h3>
+
+<section>
+    <div id="tabs">
+        <ul>
+
+            <li><a href="#tabs-1">@Dictionary.Profile</a></li>
+            @if (tkn.IsAdmin)
+            {
+            <li><a href="#tabs-2">@Dictionary.Credentials</a></li>
+            <li><a href="#tabs-4">@Dictionary.PayrollRates</a></li>
+            }
+            <li><a href="#tabs-3">@Dictionary.Services</a></li>
+
+        </ul>
+        <div id="tabs-1" style="height:600px"  class="ControlledTab">
+            @if (tkn.IsAdmin)
+            {
+            <div style="margin-bottom:10px">
+                <button onclick="window.location='@Url.Action("update", new { id = Model.StaffId })' ">@Dictionary.Edit</button>
+            </div>
+            }
+            <div class="ProfileInfo">
+                <div class="ThirdSpace">
+                    @if (tkn.IsAdmin || tkn.IsWorker)
+                    {
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.DoB</label>
+                        <span class="form-control">@(usr == null || usr.DoB == DateTime.MinValue ? "" : usr.DoB.ToShortDateString())</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.TaxId</label>
+                        <span class="form-control">@(usr == null ? "" : usr.TaxId)</span>
+                    </div>
+                    }
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.Gender</label>
+                        <span class="form-control">@(usr == null || !usr.Gender.HasValue ? "" : www.therapycorner.com.account.ResStrings.Gender.ResourceManager.GetString(usr.Gender.Value.ToString()))</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.Email</label>
+                        <span class="form-control">@(usr == null ? "" : usr.Email)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.MobilePhone</label>
+                        <span class="form-control">@(usr == null ? "" : usr.MobilePhone)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.WorkPhone</label>
+                        <span class="form-control">@(usr == null ? "" : usr.WorkPhone)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.Address</label>
+                        @if (usr != null && usr.Address != null)
+                        {
+                        <address class="form-control">
+                            @usr.Address.Line1<br />
+                            @if (!string.IsNullOrWhiteSpace(usr.Address.Line2))
+                            {
+                                @usr.Address.Line2 <br />
+                            }
+                            @usr.Address.City, @usr.Address.State  @usr.Address.PostalCode
+                        </address>
+                        }
+                    </div>
+                </div>
+                <div class="ThirdSpace">
+                    <div class="form-group">
+                        <label>@Html.LabelFor(m => m.Title)</label>
+                        <span class="form-control">@Model.Title</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.EmployementType</label>
+                        <span class="form-control">@(Model.IsEmployee.GetValueOrDefault(false) ? Dictionary.Employee : Dictionary.Contractor)</span>
+                    </div>
+                        <div class="form-group">
+                        <label>@Dictionary.Supervisor</label>
+                        <span class="form-control">@(Model.Supervisor == null ? "" : Model.Supervisor.Name)</span>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.StartDate)
+                        <span class="form-control">@Model.StartDate.ToShortDateString()</span>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.TerminationDate)
+                        <span class="form-control">@(Model.TerminationDate == null ? "" : Model.TerminationDate.Value.ToShortDateString())</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.Role</label>
+                        <div style="margin-left:10px">
+                            @if (Model.IsAdmin)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Administrator<br />
+                            }
+                            @if (Model.IsSupervisor)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Supervisor<br />
+                            }
+                            @if (Model.IsProvider)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Provider<br />
+                            }
+                            @if (Model.IsWorker)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.OfficeWorker<br />
+                            }
+                            @if (Model.IsBiller)
+                            {
+                                @Dictionary.Biller<br />
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.Disciplines </label>
+                        <div style="margin-left:10px">
+                            @if (Model.Disciplines != null && Model.Disciplines.Count > 0)
+                            {
+                                foreach (var d in Model.Disciplines)
+                                {
+                                    @d.Name <br/>
+                                }
+                            }
+                        
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>@Html.LabelFor(m => m.Bio)</label>
+                        <span class="form-control">@Model.Bio</span>
+                    </div>
+                   </div>
+@if (tkn.IsAdmin || tkn.IsWorker)
+{
+                <div class="ThirdSpace">
+                    @if (customFields != null && customFields.Count > 0)
+                    {
+                        www.therapycorner.com.account.FieldValue v = null;
+
+                        foreach (var f in customFields)
+                        {
+                            if (Model.FieldValues != null && Model.FieldValues.Count > 0)
+                            {
+                                v = Model.FieldValues.Find(i => i.FieldId == f.FieldId);
+                            }
+                            if (v != null && f.Type == www.soundpower.biz.common.ValueTypeEnum.Boolean)
+                            {
+                                v.Value = v.Value == true.ToString() ? Dictionary.Yes : Dictionary.No;
+                            }
+                            <div class="form-group">
+                                <label>@f.Label</label>
+                                <span class="form-control">@(v == null ? "" : v.Value)</span>
+                            </div>
+                        }
+                    }
+                </div>
+}
+               </div>
+        </div>
+        @if (tkn.IsAdmin)
+        {
+        <div id="tabs-2" style="height:600px"  class="ControlledTab">
+
+            <div class="scrollTableContainer CredTable">
+                <div class="scrollTableArea" style="height:470px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th><div class="td2Button"></div></th>
+                                <th><div class="NameText"><a href="#">@Dictionary.Type</a></div></th>
+                                <th class='HideSmall'><div class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.CredentialId</a></div></th>
+                                <th class='HideMedium'><div class="DateText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.AcceptedDate</a></div></th>
+                                <th class='HideMobile'><div class="DateText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.ExpiringDate</a></div></th>
+                                <th class='HideMedium'><div class="IdText"></div></th>
+                                <th><div class="DateText"></div></th>
+           
+
+                            </tr>
+                        </thead>
+                        <tbody id="tbCredentials"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="tabs-4" style="height:600px" class="ControlledTab">
+
+            <div class="scrollTableContainer" style="width:368px" >
+                <div class="scrollTableArea" style="height:470px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th><div class="tdSingleButton"></div></th>
+                                <th><div class="NameText"><a href="#">@Dictionary.PayRateTask</a></div></th>
+                                <th><div class="NumberText"><a href="#">@Dictionary.Amount</a></div></th>
+                        
+
+
+                            </tr>
+                        </thead>
+                        <tbody >
+                            @foreach(var r in Model.PayRates)
+                            {
+                                <tr>
+                                    <td><div class="tdSingleButton"><a href="@Url.Action("editpayrate",new { id = r.PayRateId, staff = Model.StaffId } )"><img src="~/images/edit.png" /></a></div></td>
+                                    <td><div class="NameText">@r.Label</div></td>
+                                    <td><div class="NumberText">@r.Amount.GetValueOrDefault(0).ToString("c")</div></td>
+                                  </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        }
+        <div id="tabs-3" style="height:600px"  class="ControlledTab">
+            @if (tkn.IsAdmin && (Model.IsSupervisor || Model.IsProvider))
+            {
+            <div>
+                <button onclick="AddService()">@Dictionary.Add</button>
+            </div>
+            }
+            <div class="scrollTableContainer ServiceList">
+                <div class="scrollTableArea" style="height:420px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th><div class="tdSingleButton"></div></th>
+                                <th><div class="LongNameText"><a href="#">@Dictionary.Service</a></div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Services != null && Model.Services.Count > 0)
+                            {
+                                foreach (var c in Model.Services)
+                                {
+                                    <tr>
+                                        <td><div class="tdSingleButton">
+                                            @if (tkn.IsAdmin)
+                                            {
+                                            <a href="javascript:RemoveService(@c.UniqueId,'@c.Name')"><img src="~/images/delete.png" /></a>
+                                            }</div></td>
+                                        <td>
+                                            <div class="LongNameText">
+                                                @c.Name
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Modal -->
+<div id="modalDelete" style="display:none" title="@StaffPages.RemoveService">
+    <p>@StaffPages.RemoveServiceInstr <span id="delConfirm"></span> </p>
+    @using (Html.BeginForm("RemoveService", "Staff", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("ServiceId")
+     <input type="hidden" name="id" value="@Model.StaffId" id="delId"/>
+    }
+</div>
+
+<div id="modalAdd" style="display:none" title="@StaffPages.AddService">
+    <p>@StaffPages.AddServiceInstr</p>
+    @using (Html.BeginForm("AddService", "Staff", FormMethod.Post, new { role = "form", id = "frmAdd" }))
+    {
+        @Html.AntiForgeryToken()
+        <select class="form-control"  id="NewServiceId" name="ServiceId"  />
+        <input type="hidden" name="id" value="@Model.StaffId" id="addId" />
+
+    }
+</div>
+
+<div id="modalCannotAdd" style="display:none" title="@StaffPages.AddService">
+    <p>@StaffPages.AddServiceNone</p>
+  
+</div>
+<div id="modalVerifyCred" style="display:none" title="@CredentialPages.Verify">
+    <p>@CredentialPages.VerifyInstr  </p>
+    <ul>
+        <li><label>@Dictionary.Type:</label><span id="verifyCredType"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.ValidTo:</label><span id="verifyCredValid"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.CredentialId:</label><span id="verifyCredId"></span></li>
+
+    </ul>
+</div>
+<div id="modalCredMsg" style="display:none" title="@CredentialPages.Msg">
+    <p>@CredentialPages.MsgInstr  </p>
+    <ul>
+        <li><label>@Dictionary.Type:</label><span id="msgCredType"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.ValidTo:</label><span id="msgCredValid"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.CredentialId:</label><span id="msgCredId"></span></li>
+
+    </ul>
+    <div >
+        <textarea class="form-control" id="CredentialMsg"></textarea>
+    </div>
+</div>
+
+<div id="modalIgnoreCred" style="display:none" title="@CredentialPages.Ignore">
+    <p>@CredentialPages.IgnoreInstr  </p>
+    <ul>
+        <li><label>@Dictionary.Name:</label><span id="ignoreCredName"></span></li>
+        <li><label>@Dictionary.Type:</label><span id="ignoreCredType"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.ValidTo:</label><span id="ignoreCredValid"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.CredentialId:</label><span id="ignoreCredId"></span></li>
+
+    </ul>
+</div>
+
+<div id="modalWatchCred" style="display:none" title="@CredentialPages.Watch">
+    <p>@CredentialPages.WatchInstr  </p>
+    <ul>
+        <li><label>@Dictionary.Name:</label><span id="watchCredName"></span></li>
+        <li><label>@Dictionary.Type:</label><span id="watchCredType"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.ValidTo:</label><span id="watchCredValid"></span></li>
+        <li><label>@www.therapycorner.com.account.ResStrings.Dictionary.CredentialId:</label><span id="watchCredId"></span></li>
+
+    </ul>
+</div>
+@section scripts
+{
+    @Styles.Render("~/Content/tabs")
+    @Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/staffdetails")
+@Styles.Render("~/Content/staffdetails")
+@if (Model.User != null && usr!=null && usr.DoB!=DateTime.MinValue && tkn.IsAdmin)
+{
+<script>
+    $(document).ready(function () {
+        InitializeCredentials("@Url.Action("credentials", new { id = Model.User.UniqueId })", "@Url.Action("image","credential")", "@Url.Content("~/images/magnify.png")", "@Url.Action("ignore","credential")", "@Url.Action("watch","credential")", "@CredentialPages.Ignore", "@CredentialPages.Watch", false, "@Url.Action("verify","credential")", "@Url.Action("quickmessage","credential")", "@Url.Content("~/images/check.png")", "@Url.Content("~/images/msg.png")", "@Url.Action("edit","credential")", "@Url.Content("~/images/edit.png")",@(tkn.IsAdmin ? "true" : "false"));
+      
+                          });
+    </script>
+    }
+<script>
+     $(document).ready(function () {
+        if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+            $('.ControlledTab').css("height","auto");
+        }
+                          });
+</script>
+   
+@if (activeTab.HasValue)
+    {
+    <script>
+            $(document).ready(function() { $("#tabs").tabs({active: @activeTab.Value })})
+    </script>
+}
+}

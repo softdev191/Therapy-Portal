@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Staff/schedule.cshtml" hash="76fac76b" filehash="372f661e8acc" flags="110000" assembly="App_Web_n055db2i" type="ASP._Page_Views_Staff_schedule_cshtml">
+    <filedeps>
+        <filedep name="/Views/Staff/schedule.cshtml" />
+    </filedeps>
+</preserve>

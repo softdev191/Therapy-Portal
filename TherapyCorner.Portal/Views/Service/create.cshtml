@@ -1,0 +1,191 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ServiceInfo
+
+@{
+    ViewBag.Title = ServicePages.AddRate;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = ServiceModelEnum._1on1.ToString(), Text =www.therapycorner.com.company.ResStrings.ServiceModel._1on1, Selected = Model.Model== ServiceModelEnum._1on1 });
+    valuesModel.Add(new SelectListItem() { Value = ServiceModelEnum.Group.ToString(), Text = www.therapycorner.com.company.ResStrings.ServiceModel.Group, Selected = Model.Model == ServiceModelEnum.Group });
+
+    DisciplineInfoList disciplines = ViewBag.Disciplines;
+    List<SelectListItem> valuesDisc = new List<SelectListItem>();
+    foreach(var d in disciplines)
+    {
+        valuesDisc.Add(new SelectListItem() { Value = d.DisciplineId.ToString(), Text = d.Name, Selected = Model.Discipline.UniqueId == d.DisciplineId.ToString() });
+
+    }
+
+    FreqDurInfoList durations = ViewBag.Durations;
+    PayRateList rates = ViewBag.Rates;
+    StaffInfoList providers = ViewBag.Providers;
+    www.soundpower.biz.common.GenericEntityList cpts = ViewBag.CPTs;
+
+    List<SelectListItem> reportsModel = new List<SelectListItem>();
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.None.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.None, Selected = Model.ReportingType == PeriodicReportTypeEnum.None  });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.Quarterly.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.Quarterly, Selected = Model.ReportingType == PeriodicReportTypeEnum.Quarterly });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.SemiAnnual.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.SemiAnnual, Selected = Model.ReportingType == PeriodicReportTypeEnum.SemiAnnual });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.Annual.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.Annual, Selected = Model.ReportingType == PeriodicReportTypeEnum.Annual });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.ThreeMonths.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.ThreeMonths, Selected = Model.ReportingType == PeriodicReportTypeEnum.ThreeMonths });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.SixMonths.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.SixMonths, Selected = Model.ReportingType == PeriodicReportTypeEnum.SixMonths });
+    reportsModel.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.TwelveMonths.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.TwelveMonths, Selected = Model.ReportingType == PeriodicReportTypeEnum.TwelveMonths });
+
+
+    ReferencedGovernmentProgramList programs = ViewBag.Programs;
+    www.therapycorner.com.account.ProgramCategoryList categories = StaticData.GovernmentCategories;
+    Model.NoteQuestions = new QuestionTypeList();
+    string checkText = "";
+    ViewBag.QuestionPrefix = "NoteQuestions";
+
+}
+<link rel="stylesheet" type="text/css" href="~/Content/ServiceEditing.css" />
+
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.Services, "index") &gt; @ServicePages.AddRate</h2>
+
+    @using (Html.BeginForm("Create", "Service", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ServiceId)
+        @Html.HiddenFor(m => m.IsActive)
+        @Html.HiddenFor(m => m.Discipline.Context)
+       <input type="hidden" name="Version" value="NEW" />
+
+
+        <section class="halfspace">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Name)
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label>@www.therapycorner.com.company.ResStrings.Dictionary.Discipline</label>
+                @Html.DropDownList("Discipline.UniqueId", valuesDisc, new { @class = "form-control", onchange="DisciplineChanged()" })
+            </div>
+            <div class="form-group">
+                <label>@www.therapycorner.com.company.ResStrings.Dictionary.ServiceModel</label>
+                @Html.DropDownList("Model", valuesModel, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Minutes)
+                @Html.TextBoxFor(m => m.Minutes, new { @class = "form-control NumberText", maxlength = "3" })
+                @Html.ValidationMessageFor(m => m.Minutes, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label>@www.therapycorner.com.company.ResStrings.Dictionary.IsEval</label><br/>
+                @Html.CheckBoxFor(m=>m.IsEval)
+            </div>
+            <div class="form-group">
+                <label>@www.therapycorner.com.company.ResStrings.Dictionary.ReportingType</label>
+                @Html.DropDownList("ReportingType", reportsModel, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                <label>@Dictionary.Locations</label>
+                <div class="ServiceLocations">
+                    @Html.CheckBoxFor(m=>m.AllowClient) @www.therapycorner.com.company.ResStrings.Dictionary.AllowClient                
+                    @Html.ValidationMessageFor(m => m.AllowClient, "", new { @class = "text-danger" })<br/>
+                    @Html.CheckBoxFor(m => m.AllowProvider) @www.therapycorner.com.company.ResStrings.Dictionary.AllowProvider
+                    @Html.ValidationMessageFor(m => m.AllowProvider, "", new { @class = "text-danger" })<br />
+                    @Html.CheckBoxFor(m => m.AllowClinic) @www.therapycorner.com.company.ResStrings.Dictionary.AllowClinic
+                    @Html.ValidationMessageFor(m => m.AllowClinic, "", new { @class = "text-danger" })<br />
+                </div>
+            </div>
+        </section>
+        <section class="halfspace">
+            <label>@ServicePages.AllowedFreqs</label>
+            @Html.ValidationMessageFor(m => m.Frequencies, "", new { @class = "text-danger" })
+            <div class="SelectionList" id="DurationList">
+              
+            </div>
+        </section>
+        <section class="halfspace">
+            <label>@ServicePages.AllowedRates</label>
+            @Html.ValidationMessageFor(m => m.Rates, "", new { @class = "text-danger" })
+           <div class="SelectionList" id="RateList">
+               
+            </div>
+        </section>
+        <section class="halfspace">
+            <label>@Dictionary.Providers</label>
+            <div class="SelectionList" id="ProviderList">
+
+            </div>
+        </section>
+        <section class="halfspace">
+            <label>@ServicePages.AllowedCPTs  <input type="text" id="CPTFilter" onchange="FilterCPTs()" oninput="FilterCPTs()" style="font-weight:normal" placeholder="Enter CPT filter here"/></label>
+            <div class="SelectionList">
+                @if (cpts != null && cpts.Count > 0)
+                {
+                    foreach (var d in cpts)
+                    {
+                        checkText = Model.CPTs == null || !Model.CPTs.Exists(f => f.UniqueId == d.UniqueId) ? "" : "checked= \"checked\"";
+                        <div class="CPTOption">
+                            <input type="checkbox" @checkText name="CPTIds" value="@d.UniqueId" />   @d.UniqueId<span> - </span>@d.Name
+                        </div>
+                    }
+                }
+            </div>
+        </section>
+        if (programs != null && programs.Count > 0)
+        {
+            int i = 0;
+            <section class="halfspace">
+                <label>Government Programs</label>
+                <table>
+                    @foreach (var p in programs)
+                    {
+                        string baseName = string.Format("ProgramCategories[{0}].", i);
+
+                        var options = categories.FindAll(c => c.ProgramId == p.ProgramId);
+                        var lst = new List<SelectListItem>();
+                        lst.AddRange(from o in options orderby o.Name select new SelectListItem() { Value = o.CategoryId.ToString(), Text = o.Name });
+                        <tr>
+                            <td>
+                                @p.Name
+                            <input type="hidden" name="ProgramCategories.Index" value="@i" />
+                            <input type="hidden" name="@string.Format("{0}Category.Context",baseName)" value="Category" />
+                            <input type="hidden" name="@string.Format("{0}Program.Context",baseName)" value="GovtProgram" />
+                            <input type="hidden" name="@string.Format("{0}Program.UniqueId",baseName)" value="@p.ProgramId" />
+
+                        </td>
+                        <td>@Html.DropDownList(string.Format("{0}Category.UniqueId", baseName), lst, new { @class = "form-control" })</td>
+                    </tr>
+                        {
+                            i++;
+                        }
+                    }
+                </table>
+                </section>
+        }
+
+        <section class="halfspace">
+            <label>@ServicePages.NoteQuestions</label>
+            @Html.Partial("_QuestionTypeList", Model.NoteQuestions)
+
+
+        </section>
+
+                <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+                }
+
+                @section scripts
+{
+                    @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/ServiceEditingScripts.js" ></script>
+<script src="~/Scripts/QuestionListScripts.js"></script>
+
+                    <script>
+                        $(document).ready(function () {
+                            $("#Minutes").spinner({
+                                min: 15,
+                                max: 300,
+                                step: 15
+                            });
+                            DisciplineChanged();
+                        });
+
+             
+                    </script>
+                }

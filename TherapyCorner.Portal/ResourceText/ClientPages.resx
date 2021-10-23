@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddCaseWorker" xml:space="preserve">
+    <value>Add Case Worker</value>
+  </data>
+  <data name="AddCWInstr" xml:space="preserve">
+    <value>Please provide the name and the email address for the new case worker.</value>
+  </data>
+  <data name="AddGuardian" xml:space="preserve">
+    <value>Add Guardian</value>
+  </data>
+  <data name="AddPolicy" xml:space="preserve">
+    <value>Add Policy</value>
+  </data>
+  <data name="AddProgram" xml:space="preserve">
+    <value>Add Program</value>
+  </data>
+  <data name="AddService" xml:space="preserve">
+    <value>Add Service</value>
+  </data>
+  <data name="ClientRate" xml:space="preserve">
+    <value>Client Rate</value>
+  </data>
+  <data name="ClientSearchFilter" xml:space="preserve">
+    <value>Client Search Filter</value>
+  </data>
+  <data name="Commented" xml:space="preserve">
+    <value>The comment was successfully added to the client record.</value>
+  </data>
+  <data name="CommentInstr" xml:space="preserve">
+    <value>Place your comment here</value>
+  </data>
+  <data name="CommentRecorded" xml:space="preserve">
+    <value>Your comment has been recorded.</value>
+  </data>
+  <data name="CommentTextRequired" xml:space="preserve">
+    <value>Remember to supply your comment text!</value>
+  </data>
+  <data name="CPTAssignments" xml:space="preserve">
+    <value>CPT Assignments</value>
+  </data>
+  <data name="CPTCodeAssignment" xml:space="preserve">
+    <value>CPT Code Assignment</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>The new client was successfully created.</value>
+  </data>
+  <data name="DeleteGuardianInstructions" xml:space="preserve">
+    <value>Are you sure you want to remove this guardian?</value>
+  </data>
+  <data name="DeletePolicyInstr" xml:space="preserve">
+    <value>Are you sure you want to delete this insurance policy from this client?</value>
+  </data>
+  <data name="DeleteSvcInstr" xml:space="preserve">
+    <value>Are you sure you want to remove this service from this client?</value>
+  </data>
+  <data name="DeleteWaiver" xml:space="preserve">
+    <value>Remove Waiver</value>
+  </data>
+  <data name="DelWaiverInstr" xml:space="preserve">
+    <value>Are you sure you want to remove the following waiver?</value>
+  </data>
+  <data name="DiscSvcInstr" xml:space="preserve">
+    <value>Are you sure you want to end this service to this client today and cancel any future appointements tied to this service?</value>
+  </data>
+  <data name="EditClient" xml:space="preserve">
+    <value>Edit Client Profile</value>
+  </data>
+  <data name="EditGovt" xml:space="preserve">
+    <value>Edit Government Assistance</value>
+  </data>
+  <data name="EditGuardian" xml:space="preserve">
+    <value>Edit Guardian</value>
+  </data>
+  <data name="FreqDur" xml:space="preserve">
+    <value>Frequency &amp; Duration</value>
+  </data>
+  <data name="GovtValuesUpdated" xml:space="preserve">
+    <value>The government assistance values have been updated successfully.</value>
+  </data>
+  <data name="GuardianCreated" xml:space="preserve">
+    <value>The guardian was successfully updated</value>
+  </data>
+  <data name="GuardianMatch" xml:space="preserve">
+    <value>Contact information the same as client</value>
+  </data>
+  <data name="GuardianRemoved" xml:space="preserve">
+    <value>The guardian was successfully removed</value>
+  </data>
+  <data name="GuardianUpdated" xml:space="preserve">
+    <value>The guardian was successfully updated</value>
+  </data>
+  <data name="HasWaivers" xml:space="preserve">
+    <value>Has Waivers</value>
+  </data>
+  <data name="MakeComment" xml:space="preserve">
+    <value>Make Comment</value>
+  </data>
+  <data name="NewClient" xml:space="preserve">
+    <value>New Client</value>
+  </data>
+  <data name="NoneNeeded" xml:space="preserve">
+    <value>None Needed</value>
+  </data>
+  <data name="PhysicianName" xml:space="preserve">
+    <value>Physician Name</value>
+  </data>
+  <data name="PolicyCreated" xml:space="preserve">
+    <value>The insurance policy was added to the client.</value>
+  </data>
+  <data name="PolicyRemoved" xml:space="preserve">
+    <value>The insurance policy was removed.</value>
+  </data>
+  <data name="PolicyUpdated" xml:space="preserve">
+    <value>The insurance policy was updated.</value>
+  </data>
+  <data name="PrimaryGuardian" xml:space="preserve">
+    <value>Primary Guardian</value>
+  </data>
+  <data name="PrivatePay" xml:space="preserve">
+    <value>Private Pay</value>
+  </data>
+  <data name="ServiceAdded" xml:space="preserve">
+    <value>The service was successfully added</value>
+  </data>
+  <data name="ServiceDeleted" xml:space="preserve">
+    <value>The service was successfully deleted</value>
+  </data>
+  <data name="ServiceEnded" xml:space="preserve">
+    <value>The service was successfully discontinued</value>
+  </data>
+  <data name="ServiceUpdated" xml:space="preserve">
+    <value>The service was successfully updated</value>
+  </data>
+  <data name="Updated" xml:space="preserve">
+    <value>The client's profile information was successfully updated</value>
+  </data>
+  <data name="UpdatePolicy" xml:space="preserve">
+    <value>Update Insurance Policy</value>
+  </data>
+  <data name="UpdateService" xml:space="preserve">
+    <value>Update Service</value>
+  </data>
+  <data name="ViewRx" xml:space="preserve">
+    <value>View Prescription</value>
+  </data>
+  <data name="WaiverAdded" xml:space="preserve">
+    <value>The government assistance waiver has been added</value>
+  </data>
+  <data name="WaiverRemoved" xml:space="preserve">
+    <value>The government assistance waiver has been removed</value>
+  </data>
+  <data name="Waivers" xml:space="preserve">
+    <value>Government Assistance Waivers</value>
+  </data>
+  <data name="RemoveProgram" xml:space="preserve">
+    <value>Are you sure you want to remove this client from the government assistance program?</value>
+  </data>
+  <data name="ScheduleAppt" xml:space="preserve">
+    <value>Schedule Appointment(s)</value>
+  </data>
+  <data name="ServicesExpiring" xml:space="preserve">
+    <value>Client has services where the last scheduled appointment is within the next 2 weeks.</value>
+  </data>
+  <data name="AddGoal" xml:space="preserve">
+    <value>Add Goal</value>
+  </data>
+  <data name="GoalCondition" xml:space="preserve">
+    <value>{0}/{1} {2}</value>
+  </data>
+  <data name="GoalCreated" xml:space="preserve">
+    <value>The goal was successfully created for the client!</value>
+  </data>
+  <data name="LastScheduled" xml:space="preserve">
+    <value>Last Scheduled Session</value>
+  </data>
+  <data name="SessionsScheduled" xml:space="preserve">
+    <value>Scheduled</value>
+  </data>
+  <data name="Contributors" xml:space="preserve">
+    <value>Contributor(s)</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Session Notes &amp; Reviews</value>
+  </data>
+  <data name="ServiceDisc" xml:space="preserve">
+    <value>Service/Discipline</value>
+  </data>
+  <data name="CreateReport" xml:space="preserve">
+    <value>Create Report</value>
+  </data>
+  <data name="ReportCreated" xml:space="preserve">
+    <value>The report was successfully created and is ready for editing.</value>
+  </data>
+  <data name="GoalHistory" xml:space="preserve">
+    <value>Goal History</value>
+  </data>
+  <data name="NoHistoryForGoal" xml:space="preserve">
+    <value>There is no history for the selected goal</value>
+  </data>
+  <data name="QuickLookup" xml:space="preserve">
+    <value>Quick Client Lookup</value>
+  </data>
+  <data name="DocumentAttached" xml:space="preserve">
+    <value>Document was successfully attached to the client.</value>
+  </data>
+  <data name="DocumentRemoved" xml:space="preserve">
+    <value>The document was successfully removed from the client.</value>
+  </data>
+  <data name="Documents" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="RemoveDocConfirm" xml:space="preserve">
+    <value>Are you sure you want to remove the following file from this client's record?</value>
+  </data>
+  <data name="ServicesBeforeAuth" xml:space="preserve">
+    <value>This client has services starting before the start of their authorization.</value>
+  </data>
+  <data name="StartsBeforeAuth" xml:space="preserve">
+    <value>This service starts before it is authorized.</value>
+  </data>
+  <data name="WaiverConfirmed" xml:space="preserve">
+    <value>The government assistance waiver has been confirmed.</value>
+  </data>
+  <data name="FileTooLarge" xml:space="preserve">
+    <value>The file submitted was larger than 10MB.</value>
+  </data>
+</root>

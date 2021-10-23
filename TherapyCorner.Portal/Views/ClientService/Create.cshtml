@@ -1,0 +1,226 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClientService
+@{
+    ViewBag.Title = ClientPages.AddService;
+    ViewBag.CurArea = MenuArea.Clients;
+
+    ServiceInfoList services = ViewBag.Services;
+
+    var svcOpts = new List<SelectListItem>();
+    foreach (var s in services)
+    {
+
+        svcOpts.Add(new SelectListItem() { Value = s.ServiceId.ToString(), Text = s.Name, Selected = Model.Service.UniqueId == s.ServiceId.ToString() });
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.LastFirst), "details", "client", new { id = Model.Client.UniqueId }, null) &gt; @ClientPages.AddService</h2>
+@using (Html.BeginForm("create", "clientservice", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Client.FirstName)
+    @Html.HiddenFor(m => m.Client.LastName)
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.Service.Context)
+    @Html.HiddenFor(m => m.Rate.Context)
+    @Html.HiddenFor(m => m.Duration.Context)
+    @Html.HiddenFor(m => m.Provider.Context)
+
+    <section class="halfspace">
+        <div class="form-group">
+            <label>@Dictionary.Service</label>
+            @Html.DropDownList("Service.UniqueId", svcOpts, new { @class = "form-control", onchange = "SetService()" })
+        </div>
+        <div class="form-group">
+            <label>@ClientPages.ClientRate</label>
+            @Html.DropDownList("Rate.UniqueId", new List<SelectListItem>(), new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@ClientPages.FreqDur</label>
+            @Html.DropDownList("Duration.UniqueId", new List<SelectListItem>(), new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.ServiceProvider</label>
+            @Html.DropDownList("Provider.UniqueId", new List<SelectListItem>(), new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Locations</label>
+            @Html.DropDownList("Location", new List<SelectListItem>(), new { @class = "form-control" })
+        </div>
+
+    </section>
+    <section class="halfspace">
+
+        <div class="form-group">
+            <label>@Dictionary.StartedOn</label>
+            @Html.TextBoxFor(m => m.Start, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.Start, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <label>@Dictionary.ApprovedFrom</label>
+            @Html.TextBoxFor(m => m.ApprovedFrom, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.ApprovedFrom, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.ApprovedTo</label>
+            @Html.TextBoxFor(m => m.ApprovedTo, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.ApprovedTo, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <label>@Dictionary.Prescription</label>
+            <input type="file" name="file" class="form-control" />
+            @Html.EditorFor(m => m.NoRx) @ClientPages.NoneNeeded
+        </div>
+    </section>
+    <section>
+        <h3>@ClientPages.CPTAssignments</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">@Dictionary.CPTCode</th>
+                    <th>@Dictionary.Amount</th>
+                    <th>Modifier 1</th>
+                    <th>Modifier 2</th>
+                    <th>Modifier 3</th>
+                </tr>
+            </thead>
+            <tbody id="CPTValues">
+                @if (Model.CPTs != null && Model.CPTs.Count > 0)
+                {
+                    int x = 0;
+                    foreach (var c in Model.CPTs)
+                    {
+                        ViewBag.CPTCounter = x;
+                        @Html.Partial("_CPTListing", c)
+                        x++;
+                    }
+                }
+            </tbody>
+        </table>
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("details","client",new { id = Model.Client.UniqueId })'">@Dictionary.Cancel</button></p>
+}
+<style>
+    .CPTMod {
+        width: 65px
+    }
+</style>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script>
+        var reloading = false;
+        $(document).ready(function () {
+            SetService();
+        });
+
+
+        function SetService() {
+            var id = $("#Service_UniqueId").val();
+            var addr = window.location.origin + "/service/details/" + id;
+            //Fetch available services
+            TurnFreezePaneOn();
+            $.ajax({
+                url: addr,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (returndata) {
+                    FinishSetService(returndata);
+                }
+            });
+        }
+
+        function FinishSetService(returndata) {
+            TurnFreezePaneOff();
+            if (returndata.IsFailure) {
+                var msgs = ProcessResponseBase(returndata);
+                msgs.DisplayResponseResults();
+                return;
+            }
+
+            var providers = [];
+            var rates = [];
+            var durations = [];
+            var locations = [];
+            var cpts = [];
+
+            if (returndata.Service.AllowClient) {
+                locations.push("<option value='ClientHome'>Client Home</option>");
+            }
+            if (returndata.Service.AllowProvider) {
+                locations.push("<option value='ProviderHome'>Provider Home</option>");
+            }
+            if (returndata.Service.AllowClinic) {
+                locations.push("<option value='Clinic'>Clinic</option>");
+            }
+
+            if (returndata.Service.Frequencies) {
+                $.each(returndata.Service.Frequencies, function (index, item) {
+                    durations.push('<option value="' + item.UniqueId + '">' + item.Name + "</option>");
+                });
+            }
+            if (returndata.Service.Rates) {
+                $.each(returndata.Service.Rates, function (index, item) {
+                    rates.push('<option value="' + item.UniqueId + '">' + item.Name + "</option>");
+                });
+            }
+            if (returndata.Service.Providers) {
+                $.each(returndata.Service.Providers, function (index, item) {
+                    providers.push('<option value="' + item.UniqueId + '">' + item.Name + "</option>");
+                });
+            }
+            $("#Rate_UniqueId").html(rates.join(""));
+            $("#Duration_UniqueId").html(durations.join(""));
+            $("#Provider_UniqueId").html(providers.join(""));
+            $("#Location").html(locations.join(""));
+
+            if (!reloading) {
+                if (returndata.Service.CPTs && returndata.Service.CPTs.length > 0) {
+                    var x = 0;
+
+                    $.each(returndata.Service.CPTs, function (index, cpt) {
+                        var info = [];
+
+                        info.push('<tr><td>' + cpt.UniqueId);
+                        info.push('<input type="hidden" name="CPTs.Index" value="' + x + '" />');
+                        info.push('<input type="hidden" name="CPTs[' + x + '].CPT.Name" value="' + cpt.Name + '"/>');
+                        info.push('<input type="hidden" name="CPTs[' + x + '].CPT.UniqueId" value="' + cpt.UniqueId + '" />');
+                        info.push('<input type="hidden" name="CPTs[' + x + '].CPT.Context" value="CPT" />');
+                        info.push('</td>');
+                        info.push('<td>' + cpt.Name + '</td>');
+                        info.push('<td><input type="number" class="form-control NumberText CPTMod" value="0.00" min="0"  name="CPTs[' + x + '].Amount" id="CPTs_' + x + '"/><span class="field-validation-valid text-danger" data-valmsg-replace="true" data-valmsg-for"CPTs[' + x + '].Amount"></span></td>');
+                        info.push('<td><input type="text" class="form-control CPTMod" maxlength="2"  name="CPTs[' + x + '].Mod1" id="CPTs_' + x + '_Mod1" value=""/><span class="field-validation-valid text-danger" data-valmsg-replace="true" data-valmsg-for"CPTs[' + x + '].Mod1"></span></td>');
+                        info.push('<td><input type="text" class="form-control CPTMod" maxlength="2"  name="CPTs[' + x + '].Mod2" id="CPTs_' + x + '_Mod2" value=""/><span class="field-validation-valid text-danger" data-valmsg-replace="true" data-valmsg-for"CPTs[' + x + '].Mod2"></span></td>');
+                        info.push('<td><input type="text" class="form-control CPTMod" maxlength="2"  name="CPTs[' + x + '].Mod3" id="CPTs_' + x + '_Mod3" value=""/><span class="field-validation-valid text-danger" data-valmsg-replace="true" data-valmsg-for"CPTs[' + x + '].Mod3"></span></td>');
+                        info.push('</tr>');
+
+                        cpts.push(info.join(""));
+                        x++;
+                    });
+
+                }
+                $("#CPTValues").html(cpts.join());
+            }
+        }
+    </script>
+
+
+    @if ((Model.Service.UniqueId != "?"))
+    {
+        <script>
+            reloading = true;
+        </script>
+    }
+}

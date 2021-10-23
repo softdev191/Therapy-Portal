@@ -1,0 +1,208 @@
+﻿.CommentTable .LongNameText
+{
+    width: 390px;
+}
+
+.CancelledReport
+{
+    display:none
+}
+.NoteTable
+{
+    width:713px;
+}
+    .GuardTable
+    {
+        width:978px;
+    }
+
+        .ServiceTable
+    {
+        width:1238px;
+    }
+        .GoalTable
+        {
+            width:778px;
+        }
+   
+        .PolicyTable
+    {
+        width:958px;
+    }
+
+        .CommentTable
+        {
+            width:788px;
+        }
+   #tabs
+   {
+       width:100%;
+   }
+   @media (max-width:1400px)
+   {
+       .ServiceTable
+       {
+           width:1063px;
+           margin-left: 20px !important;
+       }
+
+       .ServiceTable .HideLarge .NameText
+       {
+           width:105px
+       }
+
+       .ServiceTable .HideSmall .IdText 
+       {
+           width:60px;
+       }
+
+              .ServiceTable .HideLarge .DateText 
+       {
+           width:75px;
+       }
+   }
+   @media (max-width:1200px)
+   {
+                    .PolicyTable
+    {
+        width:753px;
+    }
+                                    .ServiceTable
+    {
+       width:808px;
+margin-left:-4px !important;
+    }
+                                                                                   .GuardTable
+    {
+        width:773px;
+    }
+                                                                                         
+   }
+   @media (max-width:1000px)
+   {
+       .CommentTable .LongNameText
+{
+    width: 450px;
+}
+
+       .CommentTable
+       {
+           width:643px
+       }
+
+              .GoalTable .LongNameText
+{
+    width: 300px;
+}
+
+          .GoalTable
+        {
+            width:643px;
+        }
+
+          .GoalTable .IdText
+          {
+              width:75px;
+          }
+               .PolicyTable
+    {
+        width:643px;
+    }
+                               .ServiceTable
+    {
+        width:588px;
+    }
+                                               .GuardTable
+    {
+        width:578px;
+    }
+                                                        .NoteTable
+    {
+        width:508px;
+    }
+   }
+@media (max-width: 767px) {
+
+       .GuardTable
+    {
+        width:373px;
+    }
+    
+
+                    .ServiceTable
+    {
+        width:363px;
+    }
+   
+        .PolicyTable
+    {
+        width:453px;
+    }
+      .CommentTable .LongNameText
+{
+    width: 320px;
+}
+            .CommentTable .DateTimeText
+{
+    width: 90px;
+}
+       .CommentTable
+       {
+           width:438px
+       }
+                                                              .NoteTable
+    {
+        width:393px;
+    }
+   .GoalTable .LongNameText
+{
+    width: 300px;
+}
+
+          .GoalTable
+        {
+            width:438px;
+        }
+}
+
+@media (max-width: 480px) {
+
+
+           .CommentTable
+       {
+           width:343px
+       }
+        .NoteTable
+       {
+           width:278px
+       }
+                 .GuardTable
+    {
+        width:350px;
+    }
+
+   
+        .PolicyTable
+    {
+        width:350px;
+    }
+
+        .NameText
+        {width:177px;}
+
+         .GoalTable .LongNameText
+{
+    width: 213px;
+}
+
+          .GoalTable
+        {
+            width:350px;
+        }
+
+          
+                    .ServiceTable
+    {
+        width:346px;
+    }
+}

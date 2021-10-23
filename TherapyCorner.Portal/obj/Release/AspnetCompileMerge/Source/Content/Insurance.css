@@ -1,0 +1,50 @@
+﻿ .CredTable{
+        width:668px;
+    }
+
+    .LongNameText {
+        width:500px;
+    }
+
+    .InsTable
+    {
+        height:60vh;
+    }
+
+
+@media (max-width: 600px) {
+    .CredTable {
+        width: 433px;
+    }
+  
+     .LongNameText {
+        width:375px;
+    }
+
+     .NumberText
+     {
+         width:75px;
+     }
+         .IdText
+    {
+        width:60px;
+    }
+}
+
+@media (max-width: 400px) {
+    .CredTable{
+        width:278px;
+    }
+    .LongNameText
+    {
+        width:220px;
+        overflow-x:hidden;
+    }
+
+        .InsTable
+    {
+        height:300px;
+    }
+
+
+}

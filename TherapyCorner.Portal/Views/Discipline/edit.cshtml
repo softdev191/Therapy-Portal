@@ -1,0 +1,178 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model DisciplineInfo
+
+@{
+    ViewBag.Title = DisciplinePages.EditDiscipline;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    ViewBag.QuestionPrefix = "ReportQuestions";
+
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.Disciplines, "index") &gt; @DisciplinePages.EditDiscipline</h2>
+    @using (Html.BeginForm("edit", "Discipline", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.DisciplineId)
+        @Html.HiddenFor(m => m.IsActive)
+        @Html.HiddenFor(m => m.BeenUsed)
+        @Html.HiddenFor(m => m.ServiceCount)
+        @Html.HiddenFor(m => m.ProviderCount)
+       @Html.HiddenFor(m => m.Version)
+        <div class="halfspace ">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Name)
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+           
+        </div>
+            <div class="halfspace">
+                <label>@DisciplinePages.ReportQuestions  </label>
+                @Html.Partial("_QuestionTypeList", Model.ReportQuestions)
+            </div>
+            <div class="halfspace">
+                <label>@DisciplinePages.GoalAreas  </label>
+                <table class="sortable">
+                    <thead>
+                        <tr>
+                            <th class="tdSingleButton"></th>
+                            <th style="min-width:150px"><a href="#">@Dictionary.Name</a></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.GoalAreas != null && Model.GoalAreas.Count > 0)
+                        {
+                            foreach (var p in Model.GoalAreas)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="tdSingleButton">
+                                            <a href="@Url.Action("edit","goalarea",new { id = p.UniqueId })">
+                                                <img src="~/images/edit.png" />
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                    <td>@p.Name</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                </div>
+
+                <p style="text-align:right">
+                    <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+                    <button type="button" onclick="AddArea()">@DisciplinePages.AddGoalArea </button>
+                    @if (!Model.BeenUsed.GetValueOrDefault(true))
+                {
+                        <button type="button" onclick="RemoveMe()">@Dictionary.Delete</button>
+
+                    }
+                    else if (!Model.IsActive.GetValueOrDefault(false))
+                    {
+                        <button type="button" onclick="ActivateMe()">@Dictionary.Activate</button>
+
+                    }
+                    else if (Model.IsActive.GetValueOrDefault(false) && Model.ServiceCount.GetValueOrDefault(1) == 0 && Model.ProviderCount.GetValueOrDefault(1) == 0)
+                    {
+                        <button type="button" onclick="DeactivateMe()">@Dictionary.Deactivate</button>
+
+                    }
+
+                </p>
+                }
+</section>
+<div id="modalDelete" style="display:none" title="@DisciplinePages.RemoveDiscipline">
+    <p>@DisciplinePages.RemoveDisciplineInstr </p>
+    @using (Html.BeginForm("Remove", "Discipline", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id", Model.DisciplineId);
+
+    }
+</div>
+<div id="modalAdd" style="display:none" title="@DisciplinePages.AddGoalArea">
+    @using (Html.BeginForm("create", "goalarea", FormMethod.Post, new { role = "form", id = "frmAdd" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("DisciplineId", Model.DisciplineId);
+        <label>@Dictionary.Name </label><br />
+        <input type="text" maxlength="50" data-val="true" data-val-required="@Dictionary.Required" name="GoalName" id="GoalName"/>
+        @Html.ValidationMessage("GoalName", new { @class = "text-danger" })
+
+    }
+</div>
+@using (Html.BeginForm("activate", "Discipline", FormMethod.Post, new { role = "form", id = "frmActivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.DisciplineId);
+
+}
+@using (Html.BeginForm("deactivate", "Discipline", FormMethod.Post, new { role = "form", id = "frmDeactivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.DisciplineId);
+
+}
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script src="~/Scripts/QuestionListScripts.js"></script>
+
+    <script>
+    var diagRemove,diagAdd;
+
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+    diagAdd = $("#modalAdd").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "@Dictionary.Create": function () { ConfirmAdd(); }, "@Dictionary.Cancel": function () { diagAdd.dialog("close"); } }
+    });
+
+});
+
+    function RemoveMe()
+{
+        diagRemove.dialog("open");
+    }
+
+    function AddArea()
+    {
+        $("#GoalName").val("");
+        diagAdd.dialog("open");
+    }
+
+    function ConfirmAdd() {
+
+        submitit();
+        diagAdd.dialog("close");
+        $("#frmAdd").submit();
+    }
+    function ConfirmDel() {
+        submitit();
+        diagRemove.dialog("close");
+        $("#frmDel").submit();
+    }
+    function ActivateMe() {
+        submitit();
+        $("#frmActivate").submit();
+    }
+    function DeactivateMe() {
+        submitit();
+        $("#frmDeactivate").submit();
+    }
+    </script>
+}

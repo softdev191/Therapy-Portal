@@ -1,0 +1,187 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model PaymentInfo
+@{
+    ViewBag.Title = ClaimsPages.PayGovt;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+    int cid = -1;
+    int? choiceId = ViewBag.ChoiceId;
+
+    if (Model.Claims == null)
+    {
+        Model.Claims = new ClaimPaymentList();
+    }
+    Model.Claims.Sort((a, b) => a.Client.Name.CompareTo(b.Client.Name));
+
+    var grps = from c in Model.Claims
+               group c by c.Client.UniqueId into g
+               select new { Id = g.Key, Claims = g.ToArray() };
+
+    List<SelectListItem> choices = ViewBag.Choices;
+}
+<style>
+    .hdr {
+        font-weight: bold;
+        height: 30px;
+        background-color: #005b79;
+        color: white;
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .cntr {
+        float: right;
+    }
+
+    .cntnt {
+        padding: 5px;
+        display: none;
+    }
+</style>
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(PaymentsPages.Payments, "index","payment") &gt; @ClaimsPages.PayGovt</h2>
+@using (Html.BeginForm("paygovt", "claim", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("ChoiceId", choiceId)
+    @Html.HiddenFor(m => m.Type)
+    @Html.HiddenFor(m => m.PaymentId)
+    <section style="padding-bottom:10px">
+
+
+        <div class="form-group">
+            <label>@Dictionary.Company</label>
+            @Html.DropDownList("Choice", choices, new { @class = "form-control", onchange = "ChoiceChanged()" })
+            @Html.HiddenFor(m => m.Description)
+
+        </div>
+
+        <div class="form-group">
+            <label>@Dictionary.Amount</label><br /><span id="AmountReceived">@Model.Amount.ToString("N2")</span>
+            @Html.HiddenFor(m => m.Amount)
+
+        </div>
+        <div class="form-group">
+            <label>@ClaimsPages.Notes</label>
+            @Html.TextBoxFor(m => m.Notes, new { @class = "form-control", maxlength = "100" })
+
+        </div>
+
+    </section>
+
+    <div style="margin:10px;border:1px solid black">
+
+
+
+
+        @if (Model.Claims != null && Model.Claims.Count > 0)
+        {
+            foreach (var client in grps)
+            {
+                <div class="hdr" onclick="ToggleClient(@client.Id)">
+                    @client.Claims[0].Client.Name
+                    <span class="cntr"><span id="@string.Format("ClientTotal_{0}",client.Id)">@client.Claims.Sum(c => c.Amount.GetValueOrDefault(0)).ToString("N2")</span>/<span>@client.Claims.Sum(c => c.AmountDue.GetValueOrDefault(0)).ToString("N2")</span></span>
+                </div>
+                <div id="@string.Format("ClientDetails_{0}",client.Id)" class="cntnt">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                                <th class="LongNameText"><a href="#">@Dictionary.Provider</a></th>
+                                <th class="NumberText"><a href="#">@ClaimsPages.AmountDue</a></th>
+                                <th class="tdSingleButton"><a href="#">@ClaimsPages.Denied</a></th>
+                               <th class="NumberText "><a href="#">@ClaimsPages.AmountPaid</a></th>
+                                <th class="LongNameText"><a href="#">@Dictionary.Comment</a></th>
+        </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var p in client.Claims)
+                            {
+                                cid++;
+                                <tr>
+
+                                    <td>
+                                        @Html.ActionLink(p.ClaimDate.Value.ToShortDateString(), "details", "claim", new { id = p.Claim.UniqueId }, null)
+                                        <input type="hidden" name="Claims.Index" value="@cid" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Claim.Context",cid)" value="@p.Claim.Context" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Claim.Name",cid)" value="@p.Claim.Name" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Claim.AlternateId",cid)" value="@p.Claim.AlternateId" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Claim.UniqueId",cid)" value="@p.Claim.UniqueId" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Source.Context",cid)" value="@p.Source.Context" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Source.UniqueId",cid)" value="@p.Source.UniqueId" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Source.Name",cid)" value="@p.Source.Name" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].ClaimDate",cid)" value="@p.ClaimDate" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].PaymentId",cid)" value="@p.PaymentId" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].AmountDue",cid)" value="@p.AmountDue" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Client.Context",cid)" value="@p.Client.Context" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Client.UniqueId",cid)" value="@p.Client.UniqueId" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].Client.Name",cid)" value="@p.Client.Name" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].DenialReason.Context",cid)" value="UnusedDenialReason" />
+                                        <input type="hidden" name="@string.Format("Claims[{0}].DenialReason.UniqueId",cid)" id="@string.Format("Claims_{0}_DenialReason_UniqueId",cid)" value="N/A" />
+                                    </td>
+                                    <td>
+                                        @p.Claim.Name
+                                    </td>
+                                    <td>
+                                        @p.AmountDue.GetValueOrDefault(0).ToString("c")
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" name="@string.Format("Claims[{0}].Denial",cid)" value="true" class="DenyCheck" id="@string.Format("Denied_{0}",cid)" onclick="Denied(@cid,@client.Id )" @(p.Denial ? "checked" : "") />
+                                    </td>
+                                    <td>
+                                        <input class="NumberText" id="@string.Format("Claims_{0}_Amount",cid)" name="@string.Format("Claims[{0}].Amount",cid)" value="@p.Amount" maxlength="10" onblur="AmountChanged(@cid,@client.Id)" @(p.Denial ? "disabled=\"disabled\"" : "") />
+                                        <input type="hidden" id="@string.Format("OriginalAmount_{0}",cid)" value="@p.Amount" />
+                                    </td>
+                                    <td>
+                                        <input class="NameText" onblur="CommentFocusLost(@cid)" id="@string.Format("Claims_{0}_Comment",cid)" name="@string.Format("Claims[{0}].Comment",cid)" value="@p.Comment" maxlength="250" />
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            }
+        }
+        else
+        {
+            <p>@ClaimsPages.NoPendingClaims</p>
+        }
+    </div>
+
+    <p style="text-align:right">
+        @if (Model.Claims != null && Model.Claims.Count > 0)
+        {
+            <button onclick="submitit()" type="submit">@Dictionary.Submit</button>
+        }
+        <button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+    </p>
+
+}
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/PaymentProcessingScripts.js"></script>
+    <script src="~/Scripts/trumbowyg.min.js"></script>
+
+    <script>
+
+
+        function ChoiceChanged()
+        {
+            submitit();
+            window.location= window.location.origin + "/claim/paygovt/" +  $("#Choice").val();
+        }
+
+    </script>
+}

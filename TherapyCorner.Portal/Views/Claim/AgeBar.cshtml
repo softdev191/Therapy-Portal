@@ -1,0 +1,10 @@
+﻿@model List<TherapyCorner.Portal.Controllers.ClaimController.ClaimsByAge>
+@{
+    var myChart = new Chart(width: 800, height: 300);
+    myChart.AddTitle("Outstanding Claim Value");
+    myChart.AddSeries(legend:"Age",axisLabel:"Test",xField:"Test2", name:Model[0].Name, chartType: "StackedBar", xValue: (from i in Model where Model.IndexOf(i)==1 select "Value").ToArray(), yValues: (from i in Model where Model.IndexOf(i) == 0 select i.Value).ToArray());
+    myChart.AddSeries(legend: "Age", name: Model[1].Name, chartType: "StackedBar", xValue: (from i in Model where Model.IndexOf(i) == 1 select "Value").ToArray(), yValues: (from i in Model where Model.IndexOf(i) == 1 select i.Value).ToArray());
+    myChart.AddSeries(legend: "Age", name: Model[2].Name, chartType: "StackedBar", xValue: (from i in Model where Model.IndexOf(i) == 2 select "Value").ToArray(), yValues: (from i in Model where Model.IndexOf(i) == 2 select i.Value).ToArray());
+    myChart.AddLegend("Age", "Age");
+    myChart.Write();
+}

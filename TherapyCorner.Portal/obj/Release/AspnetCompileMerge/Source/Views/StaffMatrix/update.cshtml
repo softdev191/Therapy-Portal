@@ -1,0 +1,101 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MatrixField
+
+@{
+    ViewBag.Title = SharedPages.MatrixFields;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+
+   
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index", "staff") &gt; @Html.ActionLink(SharedPages.MatrixFields, "index") &gt; @StaffMatrixPages.AddField</h2>
+
+    @using (Html.BeginForm("update", "StaffMatrix", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Source.Context)
+        @Html.HiddenFor(m => m.FieldId.UniqueId)
+        @Html.HiddenFor(m => m.FieldId.Context)
+        @Html.HiddenFor(m => m.Source.UniqueId)
+        if (Model.SubField != null)
+        {
+            @Html.HiddenFor(m => m.SubField.UniqueId)
+            @Html.HiddenFor(m => m.SubField.Context)
+        }
+        <div class="form-group">
+            <label>@StaffMatrixPages.Order</label>
+            @Html.TextBoxFor(m => m.OrderNumber, new { @class = "form-control NumberText", maxlength = "2" })
+            @Html.ValidationMessageFor(m => m.OrderNumber, "", new { @class = "text-danger" })
+        </div>
+          <div class="form-group">
+            <label>@StaffMatrixPages.Header</label>
+            @Html.TextBoxFor(m => m.Header, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Header, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@StaffMatrixPages.Source</label>
+           <span class = "form-control">@Model.Source.Name</span>
+
+
+        </div>
+        <div class="form-group">
+            <label>@StaffMatrixPages.Field</label>
+            <span class="form-control">@Model.FieldId.Name
+            @if(Model.SubField !=null)
+            {
+                <span>&nbsp;(@Model.SubField.Name)</span>
+            }
+            </span>
+        </div>
+
+
+        <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button><button type="button" onclick="RemoveMe()">@Dictionary.Delete</button></p>
+        
+    }
+
+    <div id="modalDelete" style="display:none" title="@Dictionary.Delete">
+        <p>@StaffMatrixPages.RemoveInstr </p>
+        @using (Html.BeginForm("Remove", "StaffMatrix", FormMethod.Post, new { role = "form", id = "frmDel" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Id", Model.OrderNumber);
+
+        }
+    </div>
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+    var diagRemove;
+
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+
+  
+});
+
+    function RemoveMe()
+{
+        diagRemove.dialog("open");
+    }
+
+
+
+    function ConfirmDel() {
+        submitit();
+        diagRemove.dialog("close");
+        $("#frmDel").submit();
+    }
+
+    </script>
+}

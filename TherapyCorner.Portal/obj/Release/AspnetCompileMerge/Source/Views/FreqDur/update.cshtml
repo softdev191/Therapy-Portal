@@ -1,0 +1,151 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model FreqDurInfo
+
+@{
+    ViewBag.Title = FreqDurPages.EditRate;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    List<SelectListItem> values = new List<SelectListItem>();
+    values.Add(new SelectListItem() { Value = "7", Text = FreqDurPages.Daily, Selected = Model.PerWeek == 7 });
+    values.Add(new SelectListItem() { Value = "6", Text = FreqDurPages.SixWeek, Selected = Model.PerWeek == 6 });
+    values.Add(new SelectListItem() { Value = "5", Text = FreqDurPages.FiveWeek, Selected = Model.PerWeek == 5 });
+    values.Add(new SelectListItem() { Value = "4", Text = FreqDurPages.FourWeek, Selected = Model.PerWeek == 4 });
+    values.Add(new SelectListItem() { Value = "3", Text = FreqDurPages.ThreeWeek, Selected = Model.PerWeek == 3 });
+    values.Add(new SelectListItem() { Value = "2", Text = FreqDurPages.TwoWeek, Selected = Model.PerWeek == 2 });
+    values.Add(new SelectListItem() { Value = "1", Text = FreqDurPages.Weekly, Selected = Model.PerWeek == 1 });
+    values.Add(new SelectListItem() { Value = "0.5", Text = FreqDurPages.Semiweekly, Selected = Model.PerWeek == .5 });
+    values.Add(new SelectListItem() { Value = "0.25", Text = FreqDurPages.Monthly, Selected = Model.PerWeek == .25 });
+
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.FreqDur, "index") &gt; @FreqDurPages.EditRate</h2>
+    @using (Html.BeginForm("update", "FreqDur", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.FreqDurId)
+        @Html.HiddenFor(m => m.IsActive)
+        @Html.HiddenFor(m => m.BeenUsed)
+        @Html.HiddenFor(m => m.ServiceCount)
+        @Html.HiddenFor(m => m.Version)
+        <div class="halfspace ">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Name)
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Duration)
+            @Html.TextBoxFor(m => m.Duration, new { @class = "form-control NumberText", maxlength = "3" })
+            @Html.ValidationMessageFor(m => m.Duration, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.PerWeek)
+            @Html.DropDownList("PerWeek", values, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Weeks)
+            @Html.TextBoxFor(m => m.Weeks, new { @class = "form-control NumberText", maxlength = "3" })
+            @Html.ValidationMessageFor(m => m.Weeks, "", new { @class = "text-danger" })
+        </div>
+            </div>
+            <div class="halfspace">
+                <h3>@www.therapycorner.com.company.ResStrings.Dictionary.Disciplines </h3>
+                @Html.Action("checklist", "Discipline", new { selected = Model.Disciplines })
+            </div>
+
+
+        <p style="text-align:right">
+            <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+
+            @if (!Model.BeenUsed.GetValueOrDefault(true))
+            {
+                <button type="button" onclick="RemoveMe()">@Dictionary.Delete</button>
+
+            }
+            else if (!Model.IsActive)
+            {
+                <button type="button" onclick="ActivateMe()">@Dictionary.Activate</button>
+
+            }
+            else if (Model.IsActive && Model.ServiceCount.GetValueOrDefault(1) == 0)
+            {
+                <button type="button" onclick="DeactivateMe()">@Dictionary.Deactivate</button>
+
+            }
+
+        </p>
+    }
+</section>
+<div id="modalDelete" style="display:none" title="@FreqDurPages.RemoveRate">
+    <p>@FreqDurPages.RemoveRateInstr </p>
+    @using (Html.BeginForm("Remove", "FreqDur", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("RateId", Model.FreqDurId);
+
+    }
+</div>
+
+@using (Html.BeginForm("activate", "FreqDur", FormMethod.Post, new { role = "form", id = "frmActivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.FreqDurId);
+
+}
+@using (Html.BeginForm("deactivate", "FreqDur", FormMethod.Post, new { role = "form", id = "frmDeactivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.FreqDurId);
+
+}
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script>
+    var diagRemove;
+
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+
+    $("#Duration").spinner({
+        min: 15,
+        max: 300,
+        step: 15
+    });
+    $("#Weeks").spinner({
+        min: 1,
+        max: 104,
+        step: 1
+    });
+});
+
+    function RemoveMe()
+{
+        diagRemove.dialog("open");
+    }
+
+
+
+    function ConfirmDel() {
+        submitit();
+        diagRemove.dialog("close");
+        $("#frmDel").submit();
+    }
+    function ActivateMe() {
+        submitit();
+        $("#frmActivate").submit();
+    }
+    function DeactivateMe() {
+        submitit();
+        $("#frmDeactivate").submit();
+    }
+</script>
+}

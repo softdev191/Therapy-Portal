@@ -1,0 +1,741 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ClientInfo
+@{
+    ViewBag.Title = string.Format("{0}: {1}, {2}", Dictionary.Details, Model.LastName, Model.FirstName);
+    ViewBag.CurArea = MenuArea.Clients;
+    PaymentAuthorizationList auths = ViewBag.Authorizations;
+    www.therapycorner.com.account.Session token = UserAuthorization.CurrentUser;
+
+    ReferencedGovernmentProgramList programs = ViewBag.GovtPrograms;
+    List<SelectListItem> goptions = new List<SelectListItem>();
+    if (programs != null && programs.Count > 0)
+    {
+        goptions.AddRange(from p in programs
+                          orderby p.Name
+                          select new SelectListItem() { Value = p.ProgramId.ToString(), Text = p.Name });
+    }
+    string classinfo = "";
+
+    int? activeTab = ViewBag.ActiveTab;
+    List<TherapyCorner.Portal.Models.NoteListing> notes = ViewBag.Notes;
+    List<SelectListItem> disciplines = ViewBag.Disciplines;
+    List<SelectListItem> reportTypes = new List<SelectListItem>();
+    reportTypes.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.AdHoc.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.AdHoc });
+    reportTypes.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.Discharge.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.Discharge });
+    reportTypes.Add(new SelectListItem() { Value = PeriodicReportTypeEnum.Discontinue.ToString(), Text = www.therapycorner.com.company.ResStrings.ReportPeriod.Discontinue });
+
+    bool canReport = token.IsSupervisor && disciplines.Count > 0;
+    if (!canReport)
+    {
+        if (Model.Services.Exists(s => s.End.GetValueOrDefault(DateTime.Today) > DateTime.Today.AddDays(-7) && s.Provider.AlternateId == token.User.UniqueId))
+        {
+            canReport = true;
+        }
+    }
+}
+<link type="text/css" rel="stylesheet" href="~/Content/ClientDetailsStyle.css" />
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Dictionary.Details</h2>
+<div>
+    <button style="float:right" onclick="window.location='@Url.Action("schedule",new { id = Model.ClientId })'">@CalendarPages.ServiceSchedule</button>
+    @if (token.IsAdmin || token.IsBiller)
+    {
+        <button style="float:right" onclick="window.location='@Url.Action("index","claim",new { client = Model.ClientId })'">@ClaimsPages.Claims</button>
+
+    }
+    <h3>@Model.FirstName @Model.MiddleName @Model.LastName @Model.Suffix</h3>
+    <p>
+        @www.therapycorner.com.account.ResStrings.Gender.ResourceManager.GetString(Model.Gender.GetValueOrDefault().ToString())<br />
+        @Model.DoB.GetValueOrDefault().ToShortDateString()
+    </p>
+</div>
+<section>
+    <div id="tabs">
+        <ul>
+
+            <li><a href="#tabs-1">@Dictionary.Profile</a></li>
+            @if (token.IsAdmin || token.IsProvider || token.IsSupervisor || token.IsWorker)
+            {
+                <li><a href="#tabs-2">@Dictionary.Guardians</a></li>
+            }
+            <li><a href="#tabs-3">@Dictionary.Services</a></li>
+            <li><a href="#tabs-8">@ClientPages.Notes</a></li>
+            @if (token.IsAdmin || token.IsProvider || token.IsSupervisor || token.IsWorker)
+            {
+                <li><a href="#tabs-7">@Dictionary.Goals</a></li>
+            }
+            <li><a href="#tabs-9">@ClientPages.Documents</a></li>
+            @if (token.IsAdmin || token.IsWorker || token.IsBiller)
+            {
+                <li><a href="#tabs-4">@Dictionary.Insurance</a></li>
+                <li><a href="#tabs-5">@Dictionary.Comments</a></li>
+                if (goptions.Count > 0)
+                {
+                    <li><a href="#tabs-6">@Dictionary.GovtAssist</a></li>
+                }
+            }
+        </ul>
+        <div id="tabs-1" style="height:550px" class="ControlledTab">
+            @if (token.IsAdmin || token.IsWorker)
+            {
+                <div style="margin-bottom:10px">
+                    <button onclick="window.location='@Url.Action("update", new { id = Model.ClientId })' ">@Dictionary.Edit</button>
+                </div>
+            }
+            <div style="height:465px;overflow-y:auto">
+
+
+                <div class="halfspace">
+                    <h3>@Dictionary.ContactInfo</h3>
+
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.Email</label>
+                        <span class="form-control">@Model.Email</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.account.ResStrings.Dictionary.Phone</label>
+                        <span class="form-control">@Model.Phone</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.Address</label>
+                        @if (Model.Address != null)
+                        {
+                            <address class="form-control">
+                                @Model.Address.Line1<br />
+                                @if (!string.IsNullOrWhiteSpace(Model.Address.Line2))
+                                {
+                                    @Model.Address.Line2 <br />
+                                }
+                                @Model.Address.City, @Model.Address.State  @Model.Address.PostalCode
+                            </address>
+                        }
+                    </div>
+                    @if (SiteUtilities.EnableTelehealth)
+                    {
+                    <div class="form-group">
+                        <label>Telehealth</label>
+                        <br/>
+                        <input type="hidden" id="TeleClientId" value="@Model.ClientId" />
+                        @Html.CheckBox("TeleHealth", (bool)ViewBag.IsTelehealth)
+
+                    </div>
+                    }
+                </div>
+                <div class="halfspace">
+                    <h3>@www.therapycorner.com.company.ResStrings.Dictionary.DrName</h3>
+                    <div class="form-group">
+                        <label>@Dictionary.Name</label>
+                        <span class="form-control">@Model.DrName</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@Dictionary.Email</label>
+                        <span class="form-control">@Model.DrEmail</span>
+                    </div>
+                    <div class="form-group">
+                        <label>@www.therapycorner.com.company.ResStrings.Dictionary.Phone</label>
+                        <span class="form-control">@Model.DrPhone</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosis</label>
+                        <span class="form-control">
+                            @if (Model.Diagnosis != null && Model.Diagnosis.Count > 0)
+                            {
+                                foreach (var d in Model.Diagnosis)
+                                {
+                                    @d.Name <span>(@d.UniqueId)<br /></span>
+                                }
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        @if (token.IsAdmin || token.IsProvider || token.IsSupervisor || token.IsWorker)
+        {
+            <div id="tabs-2" style="height:550px" class="ControlledTab">
+                @if (token.IsAdmin || token.IsWorker)
+                {
+                    <div style="margin-bottom:10px">
+                        <button onclick="window.location='@Url.Action("create", "guardian", new { id = Model.ClientId })' ">@ClientPages.AddGuardian</button>
+                    </div>
+                }
+                <div class="scrollTableContainer GuardTable">
+                    <div class="scrollTableArea" style="height:430px">
+                        <table class="scrollable sortable">
+                            <thead>
+                                <tr>
+                                    <th><div class="tdSingleButton"></div></th>
+                                    <th><div class="NameText"><a href="#">@Dictionary.Name</a></div></th>
+                                    <th class="HideMedium"><div class="BoolText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.IsPrimary</a></div></th>
+                                    <th><div class="IdText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Phone</a></div></th>
+                                    <th class="HideMedium"><div class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.MobilePhone</a></div></th>
+                                    <th class="HideSmall"><div class="NameText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Email</a></div></th>
+                                    <th class="HideLarge"><div class="NameText"><a href="#">@Dictionary.Address</a></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Guardians != null && Model.Guardians.Count > 0)
+                                {
+                                    foreach (var g in Model.Guardians)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="tdSingleButton">
+                                                    @if (token.IsAdmin || token.IsWorker)
+                                                    {
+                                                        <a href="@Url.Action("update", "guardian", new { id = g.GuardianId })"><img src="~/images/edit.png" /></a>
+
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td><div class="NameText">@g.FirstName @g.LastName</div></td>
+                                            <td class="HideMedium"><div class="BoolText">@(g.IsPrimary ? Dictionary.Yes : Dictionary.No)</div></td>
+                                            <td><div class="IdText">@g.Phone</div></td>
+                                            <td class="HideMedium"><div class="IdText">@g.Mobile</div></td>
+                                            <td class="HideSmall"><div class="NameText">@g.Email</div></td>
+                                            <td class="HideLarge">
+                                                <div class="NameText">
+                                                    @if (g.Address != null)
+                                                    {
+                                                        <address>
+                                                            @g.Address.Line1<br />
+                                                            @if (!string.IsNullOrWhiteSpace(g.Address.Line2))
+                                                            {
+                                                                @g.Address.Line2 <br />
+                                                            }
+                                                            @g.Address.City, @g.Address.State  @g.Address.PostalCode
+                                                        </address>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        <div id="tabs-3" style="height:550px" class="ControlledTab">
+            @if (token.IsAdmin || token.IsWorker)
+            {
+                <div style="margin-bottom:10px">
+                    <button onclick="window.location='@Url.Action("create", "clientservice", new { id = Model.ClientId })' ">@ClientPages.AddService</button>
+                </div>
+            }
+            <div class="scrollTableContainer ServiceTable">
+                <div class="scrollTableArea" style="height:430px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th><div class="tdSingleButton"></div></th>
+                                <th><div class="NameText"><a href="#">@Dictionary.Service</a></div></th>
+                                <th class="HideSmall"><div class="DateText"><a href="#">@Dictionary.StartedOn</a></div></th>
+                                <th class="HideLarge"><div class="DateText"><a href="#">@Dictionary.EndedOn</a></div></th>
+                                <th class="HideSmall"><div class="IdText"><a href="#">@ClientPages.SessionsScheduled </a></div></th>
+                                <th><div class="DateText"><a href="#">@ClientPages.LastScheduled</a></div></th>
+                                <th class="HideMedium"><div class="DateText"><a href="#">@Dictionary.ApprovedTo</a></div></th>
+                                <th class="HideLarge"><div class="NameText"><a href="#">@Dictionary.ServiceProvider</a></div></th>
+                                <th class="HideLarge"><div class="NumberText"><a href="#">@SharedPages.PotMakeups</a></div></th>
+                                <th class="HideMedium"><div class="NumberText"><a href="#">@ClientPages.CPTCodeAssignment</a></div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Services != null && Model.Services.Count > 0)
+                            {
+                                Model.Services.Sort((b, a) => a.End.GetValueOrDefault(DateTime.MaxValue).CompareTo(b.End.GetValueOrDefault(DateTime.MaxValue)));
+                                foreach (var s in Model.Services)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="tdSingleButton">
+                                                @if (token.IsAdmin || token.IsWorker || token.IsBiller)
+                                                {
+                                                    <a href="@Url.Action("update","clientservice",new { id = s.Id })"><img src="~/images/edit.png" /></a>
+
+                                                }
+                                            </div>
+                                        </td>
+                                        <td><div class="NameText">@s.Service.Name</div></td>
+                                        <td class="HideSmall"><div class="DateText">@s.Start.ToShortDateString()</div></td>
+                                        <td class="HideLarge"><div class="DateText">@(s.End.HasValue ? s.End.Value.ToShortDateString() : "")</div></td>
+                                        <td class="HideSmall"><div class="IdText">@(string.Format("{0} of {1}", s.ScheduledCount.GetValueOrDefault(0), s.AllowedCount.GetValueOrDefault(0)))</div></td>
+                                        <td><div class="DateText">@(s.LastAppointment.HasValue ? s.LastAppointment.Value.ToShortDateString() : "")</div></td>
+                                        <td class="HideMedium"><div class="DateText">@(s.ApprovedTo.HasValue ? s.ApprovedTo.Value.ToShortDateString() : "")</div></td>
+                                        <td class="HideLarge"><div class="NameText">@s.Provider.Name</div></td>
+                                        <td class="HideLarge"><div class="NumberText">@s.MakeupCount.GetValueOrDefault(0)</div></td>
+                                        <td class="HideMedium"><div class="NumberText">@s.CPTSum.GetValueOrDefault(0).ToString("F2")</div></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="tabs-8" style="height:550px" class="ControlledTab">
+            <p>
+                <span style="float:right"><input type="checkbox" id="chkShowCRs" onclick="ShowCancelledCRs()" />@SharedPages.ShowCancelled</span>
+                @if (canReport)
+                {
+                    using (Html.BeginForm("createreport", "client", FormMethod.Post, new { role = "form", id = "frmCreateReport" }))
+                    {
+
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("ClientId", Model.ClientId)
+                        @Html.DropDownList("Discipline", disciplines, new { @class = "form-control", style = "display:inline-block" })
+                        @Html.DropDownList("Type", reportTypes, new { @class = "form-control", style = "display:inline-block;width:175px;" })
+                        <button type="submit" onclick="submitit()">@ClientPages.CreateReport</button>
+
+                    }
+
+
+                }
+            </p>
+            <div class="scrollTableContainer NoteTable">
+                <div class="scrollTableArea" style="height:400px">
+                    <table class="scrollable sortable">
+                        <thead>
+                            <tr>
+                                <th><div class="tdSingleButton"></div></th>
+                                <th><div class="DateText"><a href="#">@Dictionary.Date</a></div></th>
+                                <th class="HideMobile"><div class="IdText"><a href="#">@Dictionary.Type</a></div></th>
+                                <th><div class="IdText"><a href="#">@ClientPages.ServiceDisc</a></div></th>
+                                <th class="HideSmall"><div class="IdText"><a href="#">@Dictionary.Status</a></div></th>
+                                <th class="HideMedium"><div class="NameText"><a href="#">@ClientPages.Contributors</a></div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (notes != null && notes.Count > 0)
+                            {
+                                notes.Sort((a, b) => b.NoteDate.CompareTo(a.NoteDate));
+
+                                foreach (var s in notes)
+                                {
+                                    classinfo = s.Status == FilingStatusEnum.Cancelled ? "CancelledReport" : "";
+                                    <tr class="@classinfo">
+                                        <td>
+                                            <div class="tdSingleButton">
+
+                                                <a href="@s.DetailsUrl"><img src="~/images/magnify.png" /></a>
+
+                                            </div>
+                                        </td>
+                                        <td><div class="DateText">@s.NoteDate.ToShortDateString()</div></td>
+                                        <td class="HideMobile"><div class="IdText">@s.Type</div></td>
+                                        <td><div class="IdText">@s.Source</div></td>
+                                        <td class="HideSmall"><div class="IdText">@s.Status.ToString()</div></td>
+                                        <td class="HideMedium"><div class="NameText">@s.Contributors</div></td>
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @if (token.IsAdmin || token.IsProvider || token.IsSupervisor || token.IsWorker)
+        {
+            <div id="tabs-7" style="height:550px" class="ControlledTab">
+                @if (token.IsSupervisor && Model.Status != ClientInfo.StatusEnum.Inactive)
+                {
+                    <div style="margin-bottom:10px">
+                        <button onclick="window.location='@Url.Action("creategoal", "client", new { id = Model.ClientId })' ">@ClientPages.AddGoal</button>
+                    </div>
+                }
+                <div class="scrollTableContainer GoalTable">
+                    <div class="scrollTableArea" style="height:430px">
+                        <table class="scrollable sortable">
+                            <thead>
+                                <tr>
+                                    <th><div class="tdSingleButton"></div></th>
+                                    <th><div class="LongNameText"><a href="#">@Dictionary.Goal</a></div></th>
+                                    <th class="HideSmall"><div class="NameText">@Dictionary.Condition</div></th>
+                                    <th><div class="IdText"><a href="#">@Dictionary.Status</a></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Goals != null && Model.Goals.Count > 0)
+                                {
+                                    Model.Goals.Sort((b, a) => a.Status.GetValueOrDefault().CompareTo(b.Status.GetValueOrDefault()));
+                                    foreach (var s in Model.Goals)
+                                    {
+                                        <tr>
+                                            <td><div class="tdSingleButton"><a href="@Url.Action("goaldetails", "client", new { id = s.GoalId, client = Model.ClientId })"><img src="~/images/magnify.png" /></a></div></td>
+                                            <td><div class="LongNameText">@s.Statement</div></td>
+                                            <td class="HideSmall"><div class="NameText">@string.Format(ClientPages.GoalCondition, s.Success, s.Attempts, s.Units)</div></td>
+                                            <td>
+                                                <div class="IdText">
+                                                    @s.Status.ToString()
+                                                    @if (s.Status != GoalStatusEnum.Active)
+                                                    {
+                                                        <span>(</span>@s.AsOf.GetValueOrDefault().ToShortDateString()<span>)</span>
+                                                    }
+                                                </div>
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        <div id="tabs-9" style="height:550px" class="ControlledTab">
+            @if (token.IsAdmin || token.IsWorker)
+            {
+                <form id="frmFile" method="post" enctype="multipart/form-data" class="form-horizontal" role="form" action="@Url.Action("attach",new {id=Model.ClientId })">
+
+                    @Html.AntiForgeryToken()
+                    <div style="margin:10px;">
+                        <input type="file" name="file" class="form-control" style="display:inline-block;height:50px" />&nbsp;<button onclick="submitit()" type="submit">@Dictionary.AddFile </button>
+                    </div>
+                </form>
+
+                <div id="modalRemoveFile" style="display:none" title="@ReportPages.RemoveAttachment">
+                    <p>@ClientPages.RemoveDocConfirm <span id="remFileName"></span> </p>
+
+                </div>
+                <form method="post" id="frmRemFile" class="form-horizontal" role="form" action="@Url.Action("RemAttach",new {id=Model.ClientId })">
+
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fileId" name="fileId" />
+                </form>
+            }
+
+            <div class="scrollTableArea" style="height:430px; width:90%">
+                <table class="border:0px" border="0">
+
+                    <tbody>
+                        @if (Model.Attachments != null && Model.Attachments.Count > 0)
+                        {
+                            foreach (var s in Model.Attachments)
+                            {
+                                <tr>
+                                    @if (token.IsAdmin || token.IsWorker)
+                                    {
+                                        <td style="border:none"><div class="tdSingleButton"><a href='javascript:RemoveAttachment("@s.Id","@s.Name")'><img src="~/images/delete.png" /></a></div></td>
+                                    }
+                                    <td style="border:none">@Html.ActionLink(string.Format("{0}.{1}", s.Name, s.Extension), "attachment", new { id = Model.ClientId, f = s.Id }, new { target = "_blank" })</td>
+
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        @if (token.IsAdmin || token.IsWorker || token.IsBiller)
+        {
+            <div id="tabs-4" style="height:550px" class="ControlledTab">
+
+                <div style="margin-bottom:10px">
+                    <button onclick="window.location='@Url.Action("create", "insurancepolicy", new { id = Model.ClientId })' ">@ClientPages.AddPolicy</button>
+                </div>
+                <div class="scrollTableContainer PolicyTable">
+                    <div class="scrollTableArea" style="height:430px">
+                        <table class="scrollable sortable">
+                            <thead>
+                                <tr>
+                                    <th><div class="tdSingleButton"></div></th>
+                                    <th><div class="NameText"><a href="#">@Dictionary.Company</a></div></th>
+                                    <th><div class="IdText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.InsuredId</a></div></th>
+                                    <th class="HideLarge"><div class="NameText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.InsuredName</a></div></th>
+                                    <th class="HideMedium"><div class="DateText"><a href="#">@Dictionary.StartedOn</a></div></th>
+                                    <th class="HideSmall"><div class="DateText"><a href="#">@Dictionary.EndedOn</a></div></th>
+                                    <th class="HideMobile"><div class="BoolText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.IsPrimary</a></div></th>
+                                    <th class="HideSmall"><div class="BoolText"><a href="#">@ClientPages.HasWaivers</a></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Policies != null && Model.Policies.Count > 0)
+                                {
+                                    Model.Policies.Sort((b, a) => a.End.GetValueOrDefault(DateTime.MaxValue).CompareTo(b.End.GetValueOrDefault(DateTime.MaxValue)));
+                                    foreach (var s in Model.Policies)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="tdSingleButton">
+                                                    <a href="@Url.Action("update","insurancepolicy",new { id = s.PolicyId })"><img src="~/images/edit.png" /></a>
+                                                </div>
+                                            </td>
+                                            <td><div class="NameText">@s.Company.Name</div></td>
+                                            <td><div class="IdText">@s.IdNo</div></td>
+                                            <td class="HideLarge"><div class="NameText">@s.FirstName @s.LastName</div></td>
+                                            <td class="HideMedium"><div class="DateText">@s.Start.ToShortDateString()</div></td>
+                                            <td class="HideSmall"><div class="DateText">@(s.End.HasValue ? s.End.Value.ToShortDateString() : "")</div></td>
+                                            <td class="HideMobile"><div class="BoolText">@(s.IsPrimary ? Dictionary.Yes : Dictionary.No)</div></td>
+                                            <td class="HideSmall"><div class="BoolText">@(s.WaiverCount.GetValueOrDefault(0) > 0 ? Dictionary.Yes : Dictionary.No)</div></td>
+
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-5" style="height:550px" class="ControlledTab">
+                <div id="modalComment" style="display:none" title="@ClientPages.MakeComment">
+                    <p>@ClientPages.CommentInstr </p>
+                    @using (Html.BeginForm("comment", "client", FormMethod.Post, new { role = "form", id = "frmComment" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("Id", Model.ClientId)
+                        @Html.TextArea("Comment", new { @class = "form-control" })
+                    }
+                </div>
+                <div style="margin-bottom:10px">
+                    <button onclick="AddComment() ">@Dictionary.Add</button>
+                </div>
+                <div class="scrollTableContainer CommentTable">
+                    <div class="scrollTableArea" style="height:430px">
+                        <table class="scrollable sortable">
+                            <thead>
+                                <tr>
+                                    <th class="HideMobile"><div class="DateTimeText"><a href="#">@Dictionary.Date</a></div></th>
+                                    <th class="HideMedium"><div class="NameText"><a href="#">@Dictionary.Commentor</a></div></th>
+                                    <th><div class="LongNameText">@Dictionary.Comments</div></th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Comments != null && Model.Comments.Count > 0)
+                                {
+                                    Model.Comments.Sort((a, b) => a.CommentDate.CompareTo(b.CommentDate));
+                                    foreach (var s in Model.Comments)
+                                    {
+                                        <tr>
+
+                                            <td class="HideMobile"><div class="DateTimeText">@s.CommentDate.ToString("r")</div></td>
+                                            <td class="HideMedium"><div class="NameText">@s.Commentor.Name</div></td>
+                                            <td><div class="LongNameText">@s.CommentText</div></td>
+
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            if (goptions.Count > 0)
+            {
+                <div id="tabs-6" style="height:550px" class="ControlledTab">
+                    @if (Model.GovtProgram == null)
+                    {
+                        using (Html.BeginForm("addprogram", "client", FormMethod.Post))
+                        {<div class="form-group">
+                                @Html.DropDownList("ProgramId", goptions, new { @class = "form-control" })
+                                @Html.Hidden("Id", Model.ClientId)
+                                @Html.AntiForgeryToken()
+                            </div>
+                            <p><button onclick="submitit()">@ClientPages.AddProgram</button></p>
+                        }
+
+                    }
+                    else
+                    {
+                        <div style="margin-bottom:10px">
+                            <button onclick="window.location='@Url.Action("govtvalues", "client", new { id = Model.ClientId })' ">@Dictionary.Edit</button>
+                            <button onclick="window.location='@Url.Action("addauth", "client", new { id = Model.ClientId })' ">Add Authorization</button>
+                        </div>
+
+                        <section class="halfspace">
+                            <h3>@Model.GovtProgram.Name</h3>
+                            @if (Model.GovtValues != null && Model.GovtValues.Count > 0)
+                            {
+
+
+                                foreach (var v in Model.GovtValues)
+                                {
+
+                                    <div class="form-group">
+                                        <label>@v.Type.Label</label>
+                                        <span class="form-control">@v.Value</span>
+                                    </div>
+                                }
+                            }
+                        </section>
+                        <section class="halfspace">
+                            <h3>Payment Authorizations</h3>
+                            <div class="scrollTableContainer" style="width:588px">
+                                <div class="scrollTableArea" style="height:360px">
+                                    <table class="scrollable sortable">
+                                        <thead>
+                                            <tr>
+                                                <th><div class="tdSingleButton"></div></th>
+                                                <th><div class="DateText"><a href="#">@Dictionary.StartedOn</a></div></th>
+                                                <th><div class="DateText"><a href="#">@Dictionary.EndedOn</a></div></th>
+                                                <th><div class="NumberText"><a href="#">Units</a></div></th>
+                                                <th><div class="NameText"><a href="#">Category </a></div></th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (auths != null && auths.Count > 0)
+                                            {
+                                                auths.Sort((b, a) => a.Start.CompareTo(b.Start));
+                                                foreach (var s in auths)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <div class="tdSingleButton">
+
+                                                                <a href="javascript:RemoveAuth(@s.AuthId,'@string.Format("{0}-{1} for {2}", s.Start.ToShortDateString(),s.End.ToShortDateString(),s.ServiceCategory.Name)')"><img src="~/images/delete.png" /></a>
+
+
+                                                            </div>
+                                                        </td>
+                                                        <td><div class="DateText">@s.Start.ToShortDateString()</div></td>
+                                                        <td><div class="DateText">@s.End.ToShortDateString()</div></td>
+                                                        <td><div class="NumberText">@s.Units</div></td>
+                                                        <td><div class="NameText">@s.ServiceCategory.Name</div></td>
+
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </section>
+
+                    }
+                    <div id="modalRemAuth" style="display:none" title="Remove Payment Authorization">
+                        <p>Are you sure you want to remove the payment authorization for <span id="remAuthName"></span> ?</p>
+
+                    </div>
+                    <form method="post" id="frmRemAuth" class="form-horizontal" role="form" action="@Url.Action("RemAuth", new { id = Model.ClientId })">
+
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="AuthId" name="authid" />
+                    </form>
+
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@section scripts
+{
+    @Styles.Render("~/Content/tabs")
+    @if (token.IsAdmin || token.IsWorker || token.IsBiller)
+    {
+        <script>
+           var diagComment, diagRemFile, diagRemAuth;
+           $(document).ready(function () {
+               diagComment = $("#modalComment").dialog({
+                   autoOpen: false,
+                   width: 365,
+                   modal: true,
+                   buttons: { "@Dictionary.Create": function () { SaveComment(); }, "@Dictionary.Cancel": function () { diagComment.dialog("close"); } }
+               });
+
+
+                   diagRemFile = $("#modalRemoveFile").dialog({
+                       autoOpen: false,
+                       width: 365,
+                       modal: true,
+                       buttons: { "@Dictionary.Delete": function () { ConfirmRemoveFile(); }, "@Dictionary.Cancel": function () { diagRemFile.dialog("close"); } }
+                   });
+
+               diagRemAuth = $("#modalRemAuth").dialog({
+                       autoOpen: false,
+                       width: 365,
+                       modal: true,
+                   buttons: { "@Dictionary.Delete": function () { ConfirmRemoveAuth(); }, "@Dictionary.Cancel": function () { diagRemAuth.dialog("close"); } }
+                   });
+               if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+                   $('.ControlledTab').css("height","auto");
+               }
+
+           });
+
+           function AddComment()
+           {
+               $("#Comment").val("");
+               diagComment.dialog("open");
+
+           }
+
+
+           function RemoveAuth(id, name) {
+               $("#AuthId").val(id);
+               $("#remAuthName").text(name);
+               diagRemAuth.dialog("open");
+
+           }
+
+           function RemoveAttachment(id,name)
+           {
+               $("#fileId").val(id);
+               $("#remFileName").text(name);
+               diagRemFile.dialog("open");
+
+           }
+           function SaveComment()
+           {
+               diagComment.dialog("close");
+               submitit();
+               $("#frmComment").submit();
+           }
+           function ConfirmRemoveFile()
+           {
+               diagRemFile.dialog("close");
+               submitit();
+               $("#frmRemFile").submit();
+           }
+
+           function ConfirmRemoveAuth() {
+               diagRemAuth.dialog("close");
+               submitit();
+               $("#frmRemAuth").submit();
+           }
+
+           //teleHealth
+            $('#TeleHealth').click(function () {
+                var clientId = $('#TeleClientId').val();
+                var isTelehealth = false;
+               if ($('#TeleHealth').is(':checked') == true) {
+                   isTelehealth = true;
+               }
+              $.ajax({
+              type: 'POST',
+              url: window.location.origin + '/client/UpdateTeleHealth?clientId=' + clientId + '&isTelehealth=' + isTelehealth,
+              contentType: 'application/json; charset=utf-8',
+              dataType: 'json',
+              success: function (data) {
+              },
+              error: function (jqxhr, textstatus, errorthrown) {
+                  console.log('error teleHealth', textstatus);
+              }
+              });
+           });
+        </script>
+    }
+    <script>
+        function ShowCancelledCRs() {
+            $(".CancelledReport").toggle();
+        }
+    </script>
+    @if (activeTab.HasValue)
+    {
+        <script>
+            $(document).ready(function() { $("#tabs").tabs({active: @activeTab.Value })})
+        </script>
+    }
+}

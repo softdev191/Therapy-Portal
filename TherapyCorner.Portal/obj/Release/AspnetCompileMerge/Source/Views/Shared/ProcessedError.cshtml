@@ -1,0 +1,20 @@
+﻿@using TherapyCorner.Portal.ResourceText;
+@model SoundPower.ErrorTracking.BaseException
+
+@{
+    ViewBag.Title = @SharedPages.TCError;
+    var token = UserAuthorization.CurrentUser;
+
+}
+@{
+    if (token == null)
+    {
+        Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    }
+}
+<h2 style="color:red">@Dictionary.Error.ToUpper() </h2>
+<p>@SharedPages.ErrorNotification</p>
+<p>
+    <label>@Dictionary.Number:</label>@Model.UniqueId
+    <br /><label>@Dictionary.Message: </label>@Model.Message
+</p>

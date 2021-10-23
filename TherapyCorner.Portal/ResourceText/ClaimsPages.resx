@@ -1,0 +1,339 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AllActive" xml:space="preserve">
+    <value>All Pending</value>
+  </data>
+  <data name="AmountDue" xml:space="preserve">
+    <value>Amount Due</value>
+  </data>
+  <data name="AmountPaid" xml:space="preserve">
+    <value>Amount Paid</value>
+  </data>
+  <data name="AppointmentTime" xml:space="preserve">
+    <value>Appointment Time</value>
+  </data>
+  <data name="ClaimClosed" xml:space="preserve">
+    <value>The claim was successfully closed.</value>
+  </data>
+  <data name="ClaimReset" xml:space="preserve">
+    <value>The claim was successfully reset to the first applicable state.</value>
+  </data>
+  <data name="Claims" xml:space="preserve">
+    <value>Claims</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="ConfirmSubmit" xml:space="preserve">
+    <value>Were the claims downloaded and submitted successfully?</value>
+  </data>
+  <data name="Denied" xml:space="preserve">
+    <value>Denied</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Claim Details</value>
+  </data>
+  <data name="DownloadGovt" xml:space="preserve">
+    <value>Download Government Batch</value>
+  </data>
+  <data name="DownloadHCFA" xml:space="preserve">
+    <value>Download HCFA</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Claims Filter</value>
+  </data>
+  <data name="MaxDays" xml:space="preserve">
+    <value>Maximum Days Ago</value>
+  </data>
+  <data name="MinDays" xml:space="preserve">
+    <value>Minimum Days Ago</value>
+  </data>
+  <data name="NoActiveInsurance" xml:space="preserve">
+    <value>There are no active insurance companies on the account to process claims for.</value>
+  </data>
+  <data name="NoClaimsPendingGovtSubSelected" xml:space="preserve">
+    <value>There were no claims pending government submission selected.</value>
+  </data>
+  <data name="NoClaimsPendingInsSubSelected" xml:space="preserve">
+    <value>There were no claims pending insurance submission selected.</value>
+  </data>
+  <data name="NoClaimsProcessed" xml:space="preserve">
+    <value>No claims were marked as paid or denied.</value>
+  </data>
+  <data name="NoPendingClaims" xml:space="preserve">
+    <value>There are no pending claims for the selection.</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Paid" xml:space="preserve">
+    <value>Paid</value>
+  </data>
+  <data name="Payer" xml:space="preserve">
+    <value>Payer</value>
+  </data>
+  <data name="PayGovt" xml:space="preserve">
+    <value>Government Payment</value>
+  </data>
+  <data name="PayInsurance" xml:space="preserve">
+    <value>Insurance Payment</value>
+  </data>
+  <data name="PaymentRecorded" xml:space="preserve">
+    <value>The payment was successfully recorded.</value>
+  </data>
+  <data name="Payments" xml:space="preserve">
+    <value>Payments</value>
+  </data>
+  <data name="PayPrivate" xml:space="preserve">
+    <value>Private Payment</value>
+  </data>
+  <data name="PendGovtPay" xml:space="preserve">
+    <value>Pending Government Payment</value>
+  </data>
+  <data name="PendGovtSubmission" xml:space="preserve">
+    <value>Pending Government Submission</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending On</value>
+  </data>
+  <data name="PendInsPay" xml:space="preserve">
+    <value>Pending Insurance Payment</value>
+  </data>
+  <data name="PendInsSubmission" xml:space="preserve">
+    <value>Pending Insurance Submission</value>
+  </data>
+  <data name="PendPay" xml:space="preserve">
+    <value>Pending Payment</value>
+  </data>
+  <data name="StartOver" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="SubmissionConfirmed" xml:space="preserve">
+    <value>The claim submission has been confirmed and the claims were advanced to pending payment.</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit Claims</value>
+  </data>
+  <data name="ToPDF" xml:space="preserve">
+    <value>To PDF</value>
+  </data>
+  <data name="VerifyClose" xml:space="preserve">
+    <value>Are you sure you want to close this claim?</value>
+  </data>
+  <data name="VerifyReset" xml:space="preserve">
+    <value>Are you sure you want to reset this claim?</value>
+  </data>
+  <data name="ViewNotes" xml:space="preserve">
+    <value>View Notes</value>
+  </data>
+  <data name="ClaimsProcessed" xml:space="preserve">
+    <value>{0} claims successfully processed</value>
+  </data>
+  <data name="FileToProcess" xml:space="preserve">
+    <value>File To Process</value>
+  </data>
+  <data name="Issue" xml:space="preserve">
+    <value>Issue</value>
+  </data>
+  <data name="Issues" xml:space="preserve">
+    <value>{0} issues</value>
+  </data>
+  <data name="LineNumber" xml:space="preserve">
+    <value>Line #</value>
+  </data>
+  <data name="Lines" xml:space="preserve">
+    <value>{0} lines total</value>
+  </data>
+  <data name="NoActiveGovtPrograms" xml:space="preserve">
+    <value>There are no active government programs to collect payments from.</value>
+  </data>
+  <data name="NoFile" xml:space="preserve">
+    <value>No file was provided to process.</value>
+  </data>
+  <data name="Policy" xml:space="preserve">
+    <value>Policy #</value>
+  </data>
+  <data name="Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="ReconcileGovt" xml:space="preserve">
+    <value>Government Reconcile</value>
+  </data>
+  <data name="ReconcilePayment" xml:space="preserve">
+    <value>{0} in payments recorded</value>
+  </data>
+  <data name="Results" xml:space="preserve">
+    <value>Results</value>
+  </data>
+  <data name="Commented" xml:space="preserve">
+    <value>The comment was successfully added to the claim.</value>
+  </data>
+  <data name="PaymentVoided" xml:space="preserve">
+    <value>The payment was successfully voided.</value>
+  </data>
+  <data name="VoidedAt" xml:space="preserve">
+    <value>Voided At</value>
+  </data>
+  <data name="VoidInstr" xml:space="preserve">
+    <value>Are you sure you want to void this payment? If so please include a reason for voiding the payment.</value>
+  </data>
+  <data name="VoidPayment" xml:space="preserve">
+    <value>Void Payment</value>
+  </data>
+  <data name="PendingWaiver" xml:space="preserve">
+    <value>Pending Waiver</value>
+  </data>
+  <data name="Generating" xml:space="preserve">
+    <value>Generating</value>
+  </data>
+  <data name="PendGovtIssue" xml:space="preserve">
+    <value>Pending Government Issue</value>
+  </data>
+  <data name="PendInsSubmissionIssue" xml:space="preserve">
+    <value>Pending Insurance Issue</value>
+  </data>
+  <data name="Vetting" xml:space="preserve">
+    <value>Vetting</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="AmountReason" xml:space="preserve">
+    <value>Amount/ Reason</value>
+  </data>
+  <data name="ClaimIssueResolved" xml:space="preserve">
+    <value>The claim issue has been marked as resolved.</value>
+  </data>
+  <data name="Resolve" xml:space="preserve">
+    <value>Resolve</value>
+  </data>
+  <data name="ResolveClaim" xml:space="preserve">
+    <value>Resolve Claim Issue</value>
+  </data>
+  <data name="Vet" xml:space="preserve">
+    <value>Vet</value>
+  </data>
+  <data name="Vetted" xml:space="preserve">
+    <value>Claim was successfully marked as vetted.</value>
+  </data>
+</root>

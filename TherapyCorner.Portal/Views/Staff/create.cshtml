@@ -1,0 +1,117 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model StaffInfo
+
+@{
+    ViewBag.Title = StaffPages.Invite;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    StaffInfoList supervisors = ViewBag.Supervisors;
+    List<SelectListItem> sups = new List<SelectListItem>();
+    if (Model.Supervisor == null)
+    {
+        Model.Supervisor = new www.soundpower.biz.common.GenericEntity("-1", "Staff", null);
+    }
+    sups.Add(new SelectListItem() { Value = "-1", Text = "" });
+    foreach (var s in supervisors)
+    {
+        sups.Add(new SelectListItem() { Value = s.StaffId.ToString(), Text = s.DisplayName, Selected = Model.Supervisor.UniqueId == s.StaffId.ToString() });
+
+    }
+    www.therapycorner.com.account.FieldTypeList customFields = ViewBag.Fields;
+    List<SelectListItem> employment = new List<SelectListItem>();
+    employment.Add(new SelectListItem() { Text = Dictionary.Employee, Value = true.ToString(), Selected = Model.IsEmployee.GetValueOrDefault(false) });
+    employment.Add(new SelectListItem() { Text = Dictionary.Contractor, Value = false.ToString(), Selected = !Model.IsEmployee.GetValueOrDefault(false) });
+}
+<link rel="stylesheet" type="text/css" href="~/Content/StaffDetails.css" />
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt;@StaffPages.Invite</h2>
+@using (Html.BeginForm("create", "staff", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.StaffId)
+
+    @Html.HiddenFor(m => m.Supervisor.Context)
+   
+    <section class="halfspace form-horizontal">
+        <div class="form-group">
+            @Html.LabelFor(m => m.InviteEmail)
+            @Html.TextBoxFor(m => m.InviteEmail, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.InviteEmail, "", new { @class = "text-danger" })
+        </div>    
+        <div class="form-group">
+            @Html.LabelFor(m => m.Title)
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.StartDate)
+            @Html.TextBoxFor(m => m.StartDate, new { @class = "form-control DateText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.EmployementType</label>
+            @Html.DropDownList("IsEmployee",employment,new { @class="form-control"})
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Role</label>
+            <div style="margin-left:10px">
+                @Html.CheckBoxFor(m => m.IsAdmin) @www.therapycorner.com.company.ResStrings.Dictionary.Administrator <br />
+                @Html.CheckBoxFor(m => m.IsSupervisor) @www.therapycorner.com.company.ResStrings.Dictionary.Supervisor<br />
+                @Html.CheckBoxFor(m => m.IsProvider) @www.therapycorner.com.company.ResStrings.Dictionary.Provider<br />
+                @Html.CheckBoxFor(m => m.IsWorker) @www.therapycorner.com.company.ResStrings.Dictionary.OfficeWorker<br />
+                @Html.CheckBoxFor(m => m.IsBiller) @Dictionary.Biller<br />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>@www.therapycorner.com.company.ResStrings.Dictionary.Supervisor</label>
+            @Html.DropDownList("Supervisor.UniqueId", sups, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Supervisor, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Bio)
+            @Html.TextAreaFor(m => m.Bio, new { @class = "form-control", maxlength = "500" })
+            @Html.ValidationMessageFor(m => m.Bio, "", new { @class = "text-danger" })
+        </div>
+        <h3>@Dictionary.Disciplines </h3>
+        @Html.Action("checklist", "Discipline", new { selected = Model.Disciplines })
+    </section>
+    <section class="halfspace form-horizontal">
+        @if (customFields != null && customFields.Count > 0)
+        {
+            var x = 0;
+            ViewBag.FieldPrefix = "FieldValues";
+            www.therapycorner.com.account.FieldValue v = null;
+            foreach (var f in customFields)
+            {
+                ViewBag.FieldNumber = x;
+                v = null;
+                if (Model.FieldValues != null)
+                {
+                    v = Model.FieldValues.Find(i => i.FieldId == f.FieldId);
+                }
+
+                ViewBag.FieldValue = v == null ? null : v.Value;
+                x++;
+                @Html.Partial("_CustomFieldEditor", f)
+
+            }
+        }
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Invite</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+<script>
+
+    $(document).ready(function () {
+        $("#InviteEmail").attr("aria-required", "true");
+        $("#InviteEmail").attr("data-val-required", "@www.therapycorner.com.company.ResStrings.ValidationText.Required");
+    });
+    </script>
+
+}

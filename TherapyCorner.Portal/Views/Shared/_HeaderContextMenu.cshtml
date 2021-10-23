@@ -1,0 +1,38 @@
+﻿@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+@{
+    Session curUser = TherapyCorner.Portal.UserAuthorization.CurrentUser;
+    www.soundpower.biz.common.GenericEntity curCompany = curUser.Companies.Find(c => c.UniqueId == curUser.CurrentCompany);
+
+}
+<div class="headercontext">
+    <a href="javascript:ToggleUserMenu()" title="@SharedPages.DisplayMenu" class="UserName">
+        <img src="~/Images/usersettings.png" /><div style="color:white">
+            @curUser.User.FirstLast  <br />
+            @(curCompany ==null ? "" : curCompany.Name)
+        </div>
+    </a><div class="UserMenu" role="menu">
+        <ul class="nav nav-pills nav-stacked" role="tablist">
+            <li>@Html.ActionLink(SharedPages.EditProfile, "index", "Profile")</li>
+            @foreach (var c in curUser.Companies)
+            {
+                if (c.UniqueId == curUser.CurrentCompany)
+                {
+                    continue;
+                }
+                <li>@Html.ActionLink(c.Name, "ChangeCompany", "Home", new { id = c.UniqueId }, null)</li>
+
+            }
+
+            <li><a href="javascript:document.getElementById('logoutForm').submit()">@SharedPages.Logout</a></li>
+        </ul>
+    </div>
+</div>
+
+
+<div id="modalSessionExpired" style="display:none" title="@SharedPages.SessionExpired">
+    <p>@SharedPages.SessionEnded </p>
+  
+
+    
+</div>

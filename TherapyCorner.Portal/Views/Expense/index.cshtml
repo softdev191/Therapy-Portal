@@ -1,0 +1,120 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ExpenseSearchRequest
+
+@{
+    ViewBag.Title = ExpensePages.MyExpenses;
+    Layout = "~/Views/Shared/_LayoutFinance.cshtml";
+    ViewBag.CurArea = MenuArea.Finances;
+
+    ExpenseInfoList expenses = ViewBag.Expenses;
+
+    List<SelectListItem> statuses = new List<SelectListItem>();
+    statuses.Add(new SelectListItem { Text = Dictionary.All, Value = "0,1,2,3", Selected = Model.Status == "0,1,2,3" });
+    statuses.Add(new SelectListItem { Text = Dictionary.AllActive, Value = "0,1", Selected = Model.Status == "0,1" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Pending, Value = "0", Selected = Model.Status == "0" });
+    statuses.Add(new SelectListItem { Text = Dictionary.MoreInfo, Value = "1", Selected = Model.Status == "1" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Rejected, Value = "2", Selected = Model.Status == "2" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Approved, Value = "3", Selected = Model.Status == "3" });
+
+
+}
+
+<h2 class="breadcrumb">@ExpensePages.MyExpenses</h2>
+<p><button onclick="window.location='@Url.Action("create")'">@ExpensePages.CreateExpense</button></p>
+
+@using (Html.BeginForm("index", "expense", FormMethod.Post, new { @class = "form-horizontal", role = "form", id="frmFilter" }))
+{
+    @Html.HiddenFor(m=>m.StaffId)
+    <div class="form-inline" style="margin-bottom:10px;">
+        <div class="form-group">
+            <label>@Dictionary.From</label>
+            @Html.TextBoxFor(m => m.FromDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.FromDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.To</label>
+            @Html.TextBoxFor(m => m.ToDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.ToDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Status</label>
+            @Html.DropDownList("Status",statuses, new { @class = "form-control" })
+        </div>
+  
+        </div>
+}
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="td2Button"></th>
+            <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+            <th class="LongNameText"><a href="#">@Dictionary.Description</a></th>
+            <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+            <th class="IdText"><a href="#">@Dictionary.Status</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (expenses != null && expenses.Count > 0)
+        {
+            foreach (var e in expenses)
+            {
+                <tr>
+                    <td><div class="td2Button">
+                        @if (!string.IsNullOrWhiteSpace(e.RcptExtension))
+                        {
+                       <a href="@Url.Action("image", "expense", new { id = e.ExpenseId })" target="_blank"><img src="~/images/magnify.png" /></a>
+                        }
+                        @if (e.Status == ExpenseStatusEnum.MoreInfo)
+                        {
+                            <a href="@Url.Action("update","expense",new { id = e.ExpenseId })"><img src="~/images/edit.png" /></a>
+                        }
+                        </div>
+
+                    </td>
+                    <td>@e.MadeOn.ToShortDateString()</td>
+                    <td>@e.Description</td>
+                    <td class="NumberText">@e.Amount.ToString("c")</td>
+                    <td>@e.Status.ToString()</td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        var origFrom, origTo;
+
+        $(document).ready(function () {
+            $("#Status")[0].onchange = ChangeFilter;
+            origFrom = $("#FromDT").val();
+            origTo = $("#ToDT").val();
+            $("#FromDT")[0].onblur = LostFocus;
+            $("#ToDT")[0].onblur = LostFocus;
+            $("#FromDT").datepicker().on("change", function () { ChangeFilter(); });
+            $("#ToDT").datepicker().on("change", function () { ChangeFilter(); });
+        });
+
+        function ChangeFilter()
+        {
+            submitit();
+            $("#frmFilter").submit();
+        }
+        function LostFocus() {
+            if ($("#FromDT").val()!=origFrom || $("#ToDT").val() != origTo)
+            {
+                ChangeFilter();
+            }
+        }
+      
+    </script>
+}

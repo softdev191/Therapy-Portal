@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Payment/filter.cshtml" hash="76fac76b" filehash="ffffe1eea1c3590c" flags="110000" assembly="App_Web_4aemr5px" type="ASP._Page_Views_Payment_filter_cshtml">
+    <filedeps>
+        <filedep name="/Views/Payment/filter.cshtml" />
+    </filedeps>
+</preserve>

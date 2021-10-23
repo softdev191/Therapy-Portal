@@ -1,0 +1,60 @@
+﻿@using www.therapycorner.com.company;
+@using TherapyCorner.Portal.ResourceText;
+
+@model www.therapycorner.com.company.QuestionTypeList
+@{ 
+    if(Model!=null)
+    {
+        Model.Sort((a, b) => a.Order.GetValueOrDefault(0).CompareTo(b.Order.GetValueOrDefault(0)));
+    }
+    string prefix = ViewBag.QuestionPrefix;
+    int x = 0;
+    List<int> existingQuestions = new List<int>();
+}
+<style>
+    .OrderNumberEntry
+    {
+        width:70px;
+    }
+</style>
+<table class="sortable" id="QuestionList">
+    <thead>
+        <tr>
+            <th style="min-width:150px">@Dictionary.Question</th>
+            <th class="IdText">@QuestionPages.OrderNumber</th>
+            <th class="BoolText ">@Dictionary.Required</th>
+            <th class="BoolText ">@QuestionPages.PrepPopulate</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var p in Model)
+            {
+                string nameStart = string.Format("{0}[{1}]", prefix, x);
+                string checkedReq = p.Required.GetValueOrDefault(false) ? "checked" : "";
+                string checkedPre = p.Prepopulate.GetValueOrDefault(false) ? "checked" : "";
+                existingQuestions.Add(p.QuestionId);
+                <tr>
+                    <td>
+                        <input type="hidden" name="@string.Format("{0}.Index",prefix)" value="@x" />
+                        <input type="hidden" name="@string.Format("{0}.QuestionId",nameStart)" value="@p.QuestionId" />
+                        <input type="hidden" name="@string.Format("{0}.Label",nameStart)" value="@p.Label" />
+                        <input type="hidden" name="@string.Format("{0}.Type",nameStart)" value="@p.Type" />
+               @p.Label</td>
+                    <td class="IdText"><input type="number" class="form-control OrderNumberEntry" min="1" max="1000" name="@string.Format("{0}.Order",nameStart)" value="@p.Order.Value"   /></td>
+                    <td class="BoolText"><input type="checkbox" name="@string.Format("{0}.Required",nameStart)" @checkedReq  value="true"  /></td>
+                    <td class="BoolText"><input type="checkbox" name="@string.Format("{0}.Prepopulate",nameStart)" @checkedPre  value="true"  /></td>
+               </tr>
+
+              
+                   x++;
+               
+            }
+        }
+    </tbody>
+</table>
+<p style="margin-top:5px"><input type="text" id="NewQuestion" class="form-control NewQuestion" /><input type="hidden" id="QuestionPrefix" value="@prefix" /><input type="hidden" id="NextQuestionIndex" value="@x" /><input type="hidden" id="ExistingQuestions" value="@string.Join(",",existingQuestions)" /></p>
+
+
+

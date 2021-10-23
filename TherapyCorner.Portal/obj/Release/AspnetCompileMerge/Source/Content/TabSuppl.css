@@ -1,0 +1,41 @@
+﻿.ui-tabs .ui-tabs-panel
+{
+    border:1px solid #dddddd;
+    border-radius:5px;
+}
+
+.ui-tabs-active
+{
+    background-color:#0081c9 !important;
+}
+
+.ui-tabs
+{
+    padding:0px;
+}
+
+ .ui-tabs .ui-tabs-panel
+ {
+     border-top-left-radius:0px;
+     border-top-right-radius:0px;
+ }
+
+ ul.ui-tabs-nav
+ {
+          border-bottom-left-radius:0px;
+     border-bottom-right-radius:0px;
+ }
+@media (max-width: 600px) {
+
+    .ui-tabs .ui-tabs-panel
+    {
+        padding-left:2px;
+        padding-right: 2px;
+    }
+
+    #tabs
+    {
+        margin-left:0px;
+        margin-right:0px;
+    }
+}

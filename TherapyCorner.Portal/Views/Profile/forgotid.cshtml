@@ -1,0 +1,65 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using reCAPTCHA.MVC;
+
+@model www.therapycorner.com.account.MessageContracts.ContactInfoRequest
+@{
+    ViewBag.Title = ProfilePages.ForgotId;
+    Layout = "~/Views/Shared/_LayoutNL.cshtml";
+
+}
+
+<h2>@ProfilePages.ForgotId</h2>
+<p>@ProfilePages.ForgotIdInstr</p>
+<section >
+
+    @using (Html.BeginForm("forgotid", "Profile", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.PreferEmail);
+        <div class="form-group">
+            @Html.Recaptcha()
+            @Html.ValidationMessage("ReCaptcha", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email)
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = 50 })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="form-group">
+                <button  style="margin-left:200px" type="submit" onclick="SetPreference('true')">@ProfilePages.EmailId</button>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Mobile)
+                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", maxlength = 15 })
+                @Html.ValidationMessageFor(m => m.Mobile, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="form-group">
+                <button  style="margin-left:200px" type="submit" onclick="SetPreference('false')">@ProfilePages.TextId</button>
+            </div>
+            }
+</section>
+<h3 style="text-align:center">@Html.ActionLink(ProfilePages.Login,"login")</h3>
+@section scripts
+{
+
+
+    <script>
+        function SetPreference(value)
+        {
+            if (value == 'true')
+            {
+                $("#Mobile").val("");
+            }
+            else
+              {
+                    $("#Email").val("");
+                }
+            $("#PreferEmail").val(value);
+        }
+    </script>
+    }
+
+

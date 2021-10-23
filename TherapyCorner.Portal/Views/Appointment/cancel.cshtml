@@ -1,0 +1,102 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model AppointmentInfo
+@{
+    ViewBag.Title = CalendarPages.CancelAppointment;
+    ViewBag.CurArea = MenuArea.Clients;
+    var token = UserAuthorization.CurrentUser;
+}
+
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, Model.Client.Name), "details", "client", new { id = Model.Client.UniqueId }, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = Model.Client.UniqueId }, null) &gt;@Html.ActionLink(CalendarPages.Appointment, "details", "appointment", new { id = Model.AppointmentId }, null) &gt;@CalendarPages.CancelAppointment</h2>
+@using (Html.BeginForm("cancel", "appointment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.AppointmentId)
+    @Html.HiddenFor(m => m.Client.UniqueId)
+    @Html.HiddenFor(m => m.Client.Name)
+    @Html.HiddenFor(m => m.Client.Context)
+    @Html.HiddenFor(m => m.Provider.UniqueId)
+    @Html.HiddenFor(m => m.Provider.Name)
+    @Html.HiddenFor(m => m.Provider.Context)
+    @Html.HiddenFor(m => m.Service.UniqueId)
+    @Html.HiddenFor(m => m.Service.Name)
+    @Html.HiddenFor(m => m.Service.Context)
+    @Html.HiddenFor(m => m.End)
+    @Html.HiddenFor(m => m.Start)
+    @Html.HiddenFor(m => m.Location)
+
+    <section class="halfspace">
+        <div class="form-group">
+            <label>@CalendarPages.AppointmentTime</label><br />@string.Format("{0} - {1}", Model.Start.ToString("g"), Model.End.ToString("g"))
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Service</label><br />@Model.Service.Name
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Provider</label><br />@Model.Provider.Name
+        </div>
+    
+    </section>
+    <section class="halfspace">
+        <div class="form-group">
+            <label>@Dictionary.Status</label><br />@www.therapycorner.com.company.ResStrings.AppointmentStatus.ResourceManager.GetString(Model.Status.ToString())
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Client</label><br />@Html.ActionLink(Model.Client.Name, "details", "client", new { id = Model.Client.UniqueId }, null)
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Location</label><br />@www.therapycorner.com.company.ResStrings.Location.ResourceManager.GetString(Model.Location.GetValueOrDefault().ToString())
+        </div>
+      
+    </section>
+    <section class="halfspace">
+        @if (Model.Start <= DateTime.Now)
+        {
+            <div class="form-group">
+                <label>@www.therapycorner.com.company.ResStrings.AppointmentStatus.NoShow</label><br />
+                <input type="checkbox" id="NoShow" name="NoShow" value="true" />
+            </div>
+        }
+        <div class="form-group">
+            <label>@CalendarPages.CancellationReason</label>
+            @Html.TextBoxFor(m=>m.Reason, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m=>m.Reason)
+        </div>
+  
+
+    </section>
+
+        <p style="text-align:right">
+            <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details", "appointment", new { id = Model.AppointmentId })'">@Dictionary.Cancel</button>
+
+
+        </p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script>
+        $(document).ready(function () {
+            $("#frmData").validate(
+                {
+                    rules: {
+                        Reason: {
+                            required: true
+                        }
+                    }
+
+                });
+
+
+        });
+
+
+    </script>
+}

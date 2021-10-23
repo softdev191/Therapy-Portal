@@ -1,0 +1,174 @@
+﻿@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.ClientSearchRequest
+
+@{
+    ViewBag.Title = SharedPages.Home;
+    ViewBag.CurArea = MenuArea.Home;
+    var token = UserAuthorization.CurrentUser;
+    int? pendCredentials = ViewBag.PendingCredentials;
+    int staffId = ViewBag.StaffId;
+    int missingCredCount = ViewBag.MissingCredCount;
+    int expCredCount = ViewBag.ExpiringCount;
+
+    int? oig = ViewBag.OIG;
+
+
+
+}
+
+<section style="min-height:200px">
+    <div style="margin:5px;border:solid 1px black;padding:5px;float:right;width:300px">
+        @using (Html.BeginForm("index", "client", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken();
+            <h4>@ClientPages.QuickLookup</h4>
+            <div class="form-group">
+                <label>@www.therapycorner.com.account.ResStrings.Dictionary.LastName</label>
+                @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = "50" })
+            </div>
+            <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Search</button></p>
+
+        }
+    </div>
+    <div>
+        @if (token.IsAdmin || token.IsWorker)
+        {
+            <div class="counterbox" style="background-color:#FF9999" onclick="window.location='@Url.Action("pending","clientservice")'"><img src="~/images/spinner.gif" id="spinPendingServices" /><strong id="spPendingServices"></strong><span>@SharedPages.UnapprovedServices</span></div>
+            <div class="counterbox" style="background-color:#FF00FF" onclick="window.location='@Url.Action("needrx","clientservice")'"><img src="~/images/spinner.gif" id="spinNeedRx" /><strong id="spNeedRx"></strong><span>@SharedPages.MissingRx</span></div>
+            <div class="counterbox" style="background-color:#FFFF00" onclick="window.location='@Url.Action("needscheduling","clientservice")'"><img src="~/images/spinner.gif" id="spinScheduling" /><strong id="spScheduling"></strong><span>@SharedPages.NeedScheduling</span></div>
+
+        }
+        @if (token.IsAdmin)
+        {
+            <div class="counterbox" style="background-color:#FEC34C" onclick="window.location='@Url.Action("pending", "credential")'">@pendCredentials.GetValueOrDefault(0)<span>@SharedPages.PendingValidations</span></div>
+            <div class="counterbox" style="background-color:#800000" onclick="window.location='@Url.Action("oig", "staff")'">@oig.GetValueOrDefault(0)<span>@SharedPages.OIGExceptions</span></div>
+        }
+        @if (token.IsAdmin || token.IsBiller)
+        {
+            <div class="counterbox" style="background-color:#35d67a" onclick="window.location='@Url.Action("index","claim",new { status = TherapyCorner.Portal.Controllers.ClaimController.slClaimsReqAttn,grouping=1})'"><img src="~/images/spinner.gif" id="spinClaims" /><strong id="spClaims"></strong><span>@SharedPages.ClaimsReqAttention</span></div>
+        }
+
+        <div class="counterbox" style="background-color:#F1F1F1" onclick="window.location='@Url.Action("index","message")'">@UserAuthorization.MessageCount<span>@SharedPages.NewMessages</span></div>
+        <div class="counterbox" style="background-color:#FF033E" onclick="window.location='@Url.Action("missing","credential")'">@missingCredCount<span>@SharedPages.MissingCredentials </span></div>
+        <div class="counterbox" style="background-color:#FDEE00" onclick="window.location='@Url.Action("index","profile",new { tab = 1 })'">@expCredCount<span>@SharedPages.ExpCredentials</span></div>
+        @if (token.IsProvider || token.IsSupervisor)
+        {
+            <div class="counterbox" style="background-color:#99FFCC" onclick="window.location='@Url.Action("makeups","appointment")'"><img src="~/images/spinner.gif" id="spinMakeups" /><strong id="spMakeups"></strong><span>@SharedPages.PotMakeups </span></div>
+            <div class="counterbox" style="background-color:#32CC32" onclick="window.location='@Url.Action("pending","notes")'"><img src="~/images/spinner.gif" id="spinPendingNotes" /><strong id="spPendingNotes"></strong><span>@SharedPages.PendingNotes</span></div>
+
+            <div class="counterbox" style="background-color:#C1C1D6" onclick="window.location='@Url.Action("pending","report")'"><img src="~/images/spinner.gif" id="spinPendingReports" /><strong id="spPendingReports"></strong><span>@SharedPages.PendingReports</span></div>
+        }
+        @if (token.IsSupervisor)
+        {
+            <div class="counterbox" style="background-color:#C1D6C1" onclick="window.location='@Url.Action("pendingreview","notes")'"><img src="~/images/spinner.gif" id="spinNoteReviews" /><strong id="spNoteReviews"></strong><span>@SharedPages.NotesReview</span> </div>
+            <div class="counterbox" style="background-color:#D6C1CF" onclick="window.location='@Url.Action("pendingreview","report")'"><img src="~/images/spinner.gif" id="spinReportReviews" /><strong id="spReportReviews"></strong><span>Reports To Review</span> </div>
+
+        }
+        </div>
+
+    </section>
+
+
+    <section style="margin:10px">
+        <div id="calendar">
+        </div>
+
+    </section>
+
+
+    <section class="halfspace">
+        <h4 style="text-align:left">@string.Format(SharedPages.RolesAt, token.CompanyName)</h4>
+        <ul>
+            @if (token.IsAdmin)
+            {
+                <li>@Dictionary.Administrator</li>
+            }
+            @if (token.IsSupervisor)
+            {
+                <li>@Dictionary.Supervisor</li>
+            }
+            @if (token.IsProvider)
+            {
+                <li>@Dictionary.Provider</li>
+            }
+            @if (token.IsWorker)
+            {
+                <li>@Dictionary.OfficeWorker</li>
+            }
+             @if (token.IsBiller)
+            {
+                <li>@Dictionary.Biller</li>
+            }
+        </ul>
+    </section>
+
+
+
+    @section scripts
+{
+        @Scripts.Render("~/bundles/counterscripts")
+
+        @if (token.IsBiller || token.IsAdmin)
+        {
+            <script>
+                $(document).ready(function () {
+                    FetchClaims();
+                });
+
+            </script>
+        }
+
+  
+
+        @if (token.IsProvider || token.IsSupervisor)
+        {
+            <script>
+                $(document).ready(function () {
+                    FetchMakeups();
+                    FetchPendingNotes();
+                    FetchPendingReports();
+                });
+
+            </script>
+        }
+
+        @if (token.IsAdmin || token.IsWorker)
+        {
+            <script>
+                $(document).ready(function () {
+                    FetchScheduling();
+                    FetchNeedRx();
+                    FetchPendingServices();
+                });
+
+            </script>
+        }
+        @if (token.IsSupervisor)
+        {
+            <script>
+                $(document).ready(function () {
+                    FetchNoteReviews();
+                    FetchReportReviews();
+                });
+
+            </script>
+        }
+
+        @if (token.IsProvider || token.IsSupervisor)
+        {
+            @Scripts.Render("~/bundles/calendar")
+            @Styles.Render("~/Content/calendar")
+
+
+            <script>
+        $(document).ready(function () {
+            InitializeHomeCalendar("@Url.Action("UserMeetings","appointment", new { id = UserAuthorization.CurrentUser.UserId })");
+        });
+            </script>
+        }
+    }
+
+
+

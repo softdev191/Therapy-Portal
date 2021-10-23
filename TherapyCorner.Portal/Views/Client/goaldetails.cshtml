@@ -1,0 +1,54 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model GoalInfo
+
+@{
+    ViewBag.Title = ClientPages.GoalHistory;
+    ViewBag.CurArea = MenuArea.Clients;
+    int clientId = ViewBag.ClientId;
+    string clientName = Model.Client.Name;
+    if (Model.Updates != null && Model.Updates.Count > 0)
+    {
+        Model.Updates.Sort((b, a) => DateTime.Parse(a.Source.Name).CompareTo(DateTime.Parse(b.Source.Name)));
+    }
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, clientName), "details", "client", new { id = clientId }, null) &gt;  @ClientPages.GoalHistory</h2>
+
+<h3 style="margin-bottom:40px">
+    @Model.Statement<br />
+    <span style="float:right">@Model.Success of @Model.Attempts @Model.Units</span>
+</h3>
+@if (Model.Updates == null || Model.Updates.Count == 0)
+{
+    <p>@ClientPages.NoHistoryForGoal</p>
+}
+else
+{
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="tdSingleButton"></th>
+            <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+            <th class="NameText"><a href="#">@Dictionary.Type</a></th>
+            <th class="LongNameText">@SharedPages.Strategies</th>
+            <th class="LongNameText">@SharedPages.Progress</th>
+            <th class="LongNameText">@SharedPages.Recommendations</th>
+
+        </tr>
+    </thead>
+    @foreach (var u in Model.Updates)
+    {
+        <tr>
+            <td><div class="tdSingleButton"><a href="@Url.Action("details", u.Source.Context == "Periodic Report" ? "report" : "notes", new { id = u.Source.UniqueId })"><img src="~/images/magnify.png" /></a></div></td>
+            <td>@u.Source.Name</td>
+            <td>@u.Source.Context</td>
+            <td>@u.Strategies</td>
+            <td>@u.Progress</td>
+            <td>@u.Recommendations</td>
+         </tr>
+    }
+</table>
+}

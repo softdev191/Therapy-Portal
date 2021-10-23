@@ -1,0 +1,149 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ResolveClaimIssueRequest
+
+@{
+    ViewBag.Title = ClaimsPages.Details;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    bool forMult = Model.ClaimIds.Contains(",");
+    valuesModel.Add(new SelectListItem() { Value = "0", Text = "None - Resend", Selected = Model.Action == ResolveClaimIssueRequest.ResolveActionEnum.NoneResend });
+    valuesModel.Add(new SelectListItem() { Value = "1", Text = "None", Selected=Model.Action== ResolveClaimIssueRequest.ResolveActionEnum.None});
+    if (!forMult)
+    {
+        valuesModel.Add(new SelectListItem() { Value = "2", Text = "Pay", Selected = Model.Action == ResolveClaimIssueRequest.ResolveActionEnum.Paid });
+    }
+    valuesModel.Add(new SelectListItem() { Value = "3", Text = "Denied", Selected = Model.Action == ResolveClaimIssueRequest.ResolveActionEnum.Denied });
+
+    string cancelAction = forMult ? Url.Action("index", new { status = TherapyCorner.Portal.Controllers.ClaimController.slClaimsReqAttn }) : Url.Action("details", new { id = Model.ClaimIds });
+}
+
+<h2 class="breadcrumb">
+    @Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(ClaimsPages.Claims, "index") 
+    @if (!forMult)
+    {
+    <span>&gt;</span> @Html.ActionLink(ClaimsPages.Details, "details", new { id = Model.ClaimIds })
+
+    }
+
+    &gt; @ClaimsPages.ResolveClaim
+</h2>
+<section>
+    @using (Html.BeginForm("resolve", "claim", FormMethod.Post, new { id = "frmAdd" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ClaimIds)
+
+            <div class="form-group">
+                <label>Claims</label><br/>@Model.ClaimIds
+            </div>
+        
+        <div class="form-group">
+            <label>@Dictionary.Comment</label>
+            @Html.TextBoxFor(m => m.Comments, new { @class = "form-control", maxlength = "500" })
+            @Html.ValidationMessageFor(m => m.Comments, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>Action</label>
+            @Html.DropDownList("Action", valuesModel, new { @class = "form-control", onchange = "ActionChanged()" })
+
+        </div>
+
+
+        <div id="gpPay" class="form-group" >
+            <label>@ClaimsPages.AmountPaid</label>
+            @Html.TextBoxFor(m => m.Amount, new { @class = "form-control Number", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Amount, "", new { @class = "text-danger" })
+        </div>
+        <div id="gpDeny" class="form-group" >
+            <label>Denial Reason</label>
+            @Html.HiddenFor(m => m.DenialReason)
+            @Html.TextBoxFor(m => m.ReasonSelector, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.ReasonSelector, "", new { @class = "text-danger" })
+        </div>
+        <p style="text-align:right"><button onclick="submitit()"  type="submit">@ClaimsPages.Resolve</button><button type="button" onclick="window.location='@cancelAction'">@Dictionary.Cancel</button></p>
+    }
+</section>
+
+
+
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        var denialreasons = [];
+        $(document).ready(function () {
+
+            ActionChanged();
+
+            var addr = window.location.origin + "/claim/denialreasons";
+
+            $.ajax({
+                url: addr,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    CompleteDRSetup(data);
+                }
+            });
+        });
+        function ActionChanged()
+        {
+            var action = $("#Action").val();
+            $("#gpPay").hide();
+            $("#gpDeny").hide();
+
+            if (action == "2") { $("#gpPay").show(); }
+            if (action == "3") { $("#gpDeny").show(); }
+
+        }
+
+        function CompleteDRSetup(returndata) {
+            if (returndata.IsFailure) {
+                var msgs = ProcessResponseBase(returndata);
+                msgs.DisplayResponseResults();
+                return;
+            }
+            
+                for (var x = 0; x < returndata.EntityList.length; x++) {
+                    var r = returndata.EntityList[x];
+                    denialreasons.push({
+                        value: r.UniqueId,
+                        label: r.UniqueId + ": " + r.Name
+                    });
+                }
+
+                    $("#ReasonSelector").autocomplete({
+                        minlength: 0,
+                        source: denialreasons,
+                        select: function (event, ui) {
+                            $("#ReasonSelector").val(ui.item.label);
+                            $("#DenialReason").val(ui.item.value);
+                            $("#ReasonSelector").removeClass("alert-danger");
+
+
+                            return false;
+                        },
+                        change: function (event, ui) {
+                            if (ui.item == null) {
+                                $("#ReasonSelector").addClass("alert-danger");
+                                $("#DenialReason").val("");
+                            }
+
+
+                            return false;
+                        }
+                    });
+
+           
+        }
+ 
+    </script>
+}

@@ -1,0 +1,48 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model StaffInfo
+
+@{
+    ViewBag.Title = string.Format( StaffPages.Calendar, Model.DisplayName);
+    ViewBag.CurArea = MenuArea.Staff;
+
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    string source = Model.User == null ? Url.Action("staffmeetings", "appointment", new { id = Model.StaffId }) : Url.Action("usermeetings", "appointment", new { id = Model.User.UniqueId  });
+    var tkn = UserAuthorization.CurrentUser;
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt; @Html.ActionLink(StaffPages.StaffDetails, "details",new { id = Model.StaffId }) &gt; @ViewBag.Title</h2>
+<section>
+    <span style="float:right"><input type="checkbox" id="chkCancelled" onclick="ToggleCancelled()" /> Show Cancelled</span>
+
+@if (tkn.IsAdmin || tkn.IsWorker)
+{
+    <button onclick="window.location='@Url.Action("makeappt", new { id = Model.StaffId })'">@SharedPages.ScheduleSessions</button>
+
+}
+
+
+</section>
+<section style="margin-top:10px;">
+    <div id="calendar">
+    </div>
+
+</section>
+
+@section scripts
+{
+
+
+    @Scripts.Render("~/bundles/calendar")
+    @Styles.Render("~/Content/calendar")
+
+
+    <script>
+        $(document).ready(function () {
+            InitializeCalendar("agendaWeek", "@source","listMonth");
+        });
+    </script>
+}

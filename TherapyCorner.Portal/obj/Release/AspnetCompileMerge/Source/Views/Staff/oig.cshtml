@@ -1,0 +1,70 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model www.therapycorner.com.account.OIGMatchList
+@{
+    ViewBag.Title = SharedPages.OIGExceptions;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index") &gt;    @SharedPages.OIGExceptions</h2>
+<p><button onclick="window.location='@Url.Action("oigexport")'">@Dictionary.ToPDF</button></p>
+<style>
+    .mp
+    {
+        text-align:center
+    }
+</style>
+@if (Model == null || Model.Count == 0)
+{
+    <p style="text-align:center">@StaffPages.NoOIGMatches</p>
+}
+else
+{
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="NameText" rowspan="2"><a href="#">@Dictionary.Name</a></th>
+            <th class="IdText" rowspan="2"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.TaxId</a></th>
+            <th class="DateText" rowspan="2"><a href="#">@Dictionary.AsOf</a></th>
+            <th colspan="10">@StaffPages.MatchPoints</th>
+       </tr>
+        <tr>
+            <th class="IdText"><a href="#">NPI</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.LastName</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.FirstName</a></th>
+            <th class="IdText"><a href="#">@StaffPages.FirstInitial</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.MiddleName</a></th>
+            <th class="IdText"><a href="#">@StaffPages.MiddleInitial</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.DoB</a></th>
+            <th class="IdText"><a href="#">@Dictionary.Address</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.City</a></th>
+            <th class="IdText"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.PostalCode</a></th>
+  </tr>
+    </thead>
+    <tbody>
+        @foreach(var m in Model)
+        {
+            <tr>
+                <td>@m.FirstMILast</td>
+                <td>@m.TaxId</td>
+                <td>@m.AsOf.ToShortDateString()</td>
+                <td class="mp">@(m.MatchNPI ? "X" : "")</td>
+                <td class="mp">@(m.MatchLastName ? "X" : "")</td>
+                <td class="mp">@(m.MatchFirstName ? "X" : "")</td>
+                <td class="mp">@(m.MatchFirstInit ? "X" : "")</td>
+                <td class="mp">@(m.MatchMiddleName ? "X" : "")</td>
+                <td class="mp">@(m.MatchMiddleInit ? "X" : "")</td>
+                <td class="mp">@(m.MatchDOB ? "X" : "")</td>
+                <td class="mp">@(m.MatchAddress ? "X" : "")</td>
+                <td class="mp">@(m.MatchCity ? "X" : "")</td>
+                <td class="mp">@(m.MatchZip ? "X" : "")</td>
+         </tr>
+        }
+    </tbody>
+</table>
+}

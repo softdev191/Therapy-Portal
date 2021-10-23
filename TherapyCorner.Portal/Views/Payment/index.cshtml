@@ -1,0 +1,132 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.ClaimSearchRequest
+
+
+@{
+    ViewBag.Title = PaymentsPages.Payments;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+    string client = ViewBag.Client;
+    string insurance = ViewBag.Insurances;
+    string govt = ViewBag.GovtPrograms;
+
+    PaymentInfoList results = ViewBag.Results;
+
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @PaymentsPages.Payments</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="submitit(); frmFilter.submit();">@SharedPages.ChangeFilter</button>
+
+    <button onclick="window.location='@Url.Action("payinsurance","claim")'">@ClaimsPages.PayInsurance</button>
+    <button onclick="window.location='@Url.Action("paygovt","claim")'">@ClaimsPages.PayGovt</button>
+    <button onclick="window.location='@Url.Action("payprivate","claim")'">@ClaimsPages.PayPrivate</button>
+    <button onclick="window.location='@Url.Action("reconcilegovt","claim")'">@ClaimsPages.ReconcileGovt</button>
+
+</section>
+<section style="padding-bottom:10px">
+    @if (Model.Client.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Client')" class="close" aria-label="close">&times;</a>@client</div>
+    }
+    @if (Model.Insurance.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Insurance')" class="close" aria-label="close">&times;</a>@insurance</div>
+    }
+    @if (Model.GovernmentProgram.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('GovernmentProgram')" class="close" aria-label="close">&times;</a>@govt</div>
+    }
+
+    @if (Model.FromDays.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('FromDays')" class="close" aria-label="close">&times;</a>@string.Format(">= {0} days", Model.FromDays.Value.ToString())</div>
+    }
+    @if (Model.ToDays.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('ToDays')" class="close" aria-label="close">&times;</a>@string.Format("<= {0} days", Model.ToDays.Value.ToString())</div>
+    }
+
+</section>
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th class="IdText"><a href="#">Payment Id</a></th>
+                <th class="LongNameText"><a href="#">Source</a></th>
+                <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                <th class="LongNameText"><a href="#">@Dictionary.Comments</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (results != null && results.Count > 0)
+            {
+                foreach (var p in results)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                <a href="@Url.Action("details", "payment", new { id = p.PaymentId })"><img src="~/images/magnify.png" /></a>
+
+                            </div>
+                        </td>
+                        <td>@p.PaymentId</td>
+                        <td>@p.Description</td>
+                        <td>
+                            @p.MadeOn.ToShortDateString()
+                        </td>
+                        <td>
+                            @p.Amount.ToString("c")
+                        </td>
+
+                        <td>
+                            @p.Notes
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+</section>
+@using (Html.BeginForm("filter", "payment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    @Html.HiddenFor(m => m.ToDays)
+    @Html.HiddenFor(m => m.FromDays)
+    @Html.HiddenFor(m => m.Insurance)
+    @Html.HiddenFor(m => m.GovernmentProgram)
+    @Html.HiddenFor(m => m.Client)
+
+
+
+}
+
+
+
+
+@section scripts
+{
+
+    <script>
+
+
+        function ClearField(field) {
+            $("#" + field).remove();
+                                submitit();
+            $("#frmFilter")[0].action = '@Url.Action("index")';
+            $("#frmFilter").submit();
+                            }
+
+
+    </script>
+}

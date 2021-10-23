@@ -1,0 +1,175 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MatrixField
+
+@{
+    ViewBag.Title = SharedPages.MatrixFields;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    Model.OrderNumber = 250;
+    List<SelectListItem> sources = new List<SelectListItem>();
+    sources.Add(new SelectListItem() { Value = "0", Text = StaffMatrixPages.PersonalProfile, Selected = Model.Source.UniqueId == "0" });
+    sources.Add(new SelectListItem() { Value = "1", Text = StaffMatrixPages.StaffProfile, Selected = Model.Source.UniqueId == "1" });
+    sources.Add(new SelectListItem() { Value = "2", Text = StaffMatrixPages.Credentials, Selected = Model.Source.UniqueId == "2" });
+    sources.Add(new SelectListItem() { Value = "4", Text = StaffMatrixPages.StaticText, Selected = Model.Source.UniqueId == "4" });
+
+    List<SelectListItem> credSub = new List<SelectListItem>();
+    credSub.Add(new SelectListItem() { Value = "0", Text = www.therapycorner.com.account.ResStrings.Dictionary.CredentialId, Selected = Model.SubField != null && Model.SubField.UniqueId == "0" });
+    credSub.Add(new SelectListItem() { Value = "1", Text = www.therapycorner.com.account.ResStrings.Dictionary.ValidTo, Selected = Model.SubField != null && Model.SubField.UniqueId == "1" });
+
+    www.soundpower.biz.common.GenericEntityList list;
+    list = ViewBag.Personal;
+    List<SelectListItem> personalType = new List<SelectListItem>();
+    foreach(var p in list)
+    {
+        personalType.Add(new SelectListItem() { Value = p.UniqueId, Text = p.Name, Selected = Model.FieldId.UniqueId== p.UniqueId });
+
+    }
+
+    list = ViewBag.Staff;
+    List<SelectListItem> staffType = new List<SelectListItem>();
+    foreach (var p in list)
+    {
+        staffType.Add(new SelectListItem() { Value = p.UniqueId, Text = p.Name, Selected = Model.FieldId.UniqueId == p.UniqueId });
+
+    }
+
+
+    list = ViewBag.Credential;
+    List<SelectListItem> credType = new List<SelectListItem>();
+    foreach (var p in list)
+    {
+        credType.Add(new SelectListItem() { Value = p.UniqueId, Text = p.Name, Selected = Model.FieldId.UniqueId == p.UniqueId });
+
+    }
+
+    list = ViewBag.Custom;
+    List<SelectListItem> customType = new List<SelectListItem>();
+    if (list != null && list.Count > 0)
+    {
+        sources.Add(new SelectListItem() { Value = "3", Text = StaffMatrixPages.CustomField, Selected = Model.Source.UniqueId == "3" });
+
+        foreach (var p in list)
+        {
+            customType.Add(new SelectListItem() { Value = p.UniqueId, Text = p.Name, Selected = Model.FieldId.UniqueId == p.UniqueId });
+
+        }
+    }
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index", "staff") &gt; @Html.ActionLink(SharedPages.MatrixFields, "index") &gt; @StaffMatrixPages.AddField</h2>
+
+    @using (Html.BeginForm("Create", "StaffMatrix", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.OrderNumber)
+        @Html.HiddenFor(m => m.Source.Context)
+        @Html.HiddenFor(m => m.FieldId.UniqueId)
+        @Html.HiddenFor(m => m.FieldId.Context)   
+        
+
+        <div class="form-group">
+            <label>@StaffMatrixPages.Header</label>
+            @Html.TextBoxFor(m => m.Header, new { @class = "form-control", maxlength = "50" })
+            @Html.ValidationMessageFor(m => m.Header, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+           <label>@StaffMatrixPages.Source</label>
+            @Html.DropDownList("Source.UniqueId", sources, new { @class = "form-control", onchange="SetSource()" })
+
+
+        </div>
+        <div class="form-group">
+           <label>@StaffMatrixPages.Field</label>
+            @Html.DropDownList("PersonalType", personalType, new { @class = "form-control", style = "display:none", onchange="PersonalFieldChanged()" })
+            @Html.DropDownList("StaffType", staffType, new { @class = "form-control", style = "display:none", onchange = "StaffFieldChanged()" })
+            @Html.DropDownList("CredentialType", credType, new { @class = "form-control", style = "display:none", onchange = "CredentialFieldChanged()" })
+            @Html.DropDownList("CustomType", customType, new { @class = "form-control", style = "display:none", onchange = "CustomFieldChanged()" })
+          @Html.DropDownList("CredentialSub", credSub, new { @class = "form-control", style="display:none", onchange = "SubFieldChanged()" })
+            <input type="text" maxlength="20" id="StaticField" value="@(Model.Source.UniqueId=="4" ? Model.FieldId.UniqueId : "")" class="form-control" style="display:none" onchange="StaticFieldChanged()" />
+        </div>
+
+
+        <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+        <div id="SubInfo"></div>
+    }
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+  <script>
+      $(document).ready(function () {
+          SetSource();
+      });
+
+      function SetSource()
+      {
+          var id = $("#Source_UniqueId").val();
+          $("#PersonalType").hide();
+          $("#StaffType").hide();
+          $("#CredentialType").hide();
+          $("#CustomType").hide();
+          $("#SubInfo").html("");
+          $("#StaticField").hide();
+
+          $("#CredentialSub").hide();
+          switch (id)
+          {
+              case "0":
+                  $("#PersonalType").show();
+                  PersonalFieldChanged();
+                  break;
+              case "1":
+                  $("#StaffType").show();
+                  StaffFieldChanged();
+                  break;
+              case "3":
+                  $("#CustomType").show();
+                  CustomFieldChanged();
+                  break;
+              case "2":
+                  $("#CredentialType").show();
+                  $("#CredentialSub").show();
+                  $("#SubInfo").html("<input type='hidden' name='SubField.Context' id='SubFieldContext' value='CredentialField'/><input type='hidden' name='SubField.UniqueId' id='SubField_UniqueId' value=''/>");
+                  CredentialFieldChanged();
+                  SubFieldChanged();
+
+                  break;
+              case "4":
+                  $("#StaticField").show();
+                  $("#StaticField").val("");
+                  StaticFieldChanged();
+          }
+      }
+
+      function StaticFieldChanged() {
+          var str = $("#StaticField").val();
+          if (str == "") str = "___";
+          $("#FieldId_UniqueId").val(str);
+      }
+
+   
+      function PersonalFieldChanged()
+      {
+          $("#FieldId_UniqueId").val($("#PersonalType").val())
+      }
+
+      function CustomFieldChanged() {
+          $("#FieldId_UniqueId").val($("#CustomType").val())
+      }
+
+      function StaffFieldChanged() {
+          $("#FieldId_UniqueId").val($("#StaffType").val())
+      }
+
+      function CredentialFieldChanged() {
+          $("#FieldId_UniqueId").val($("#CredentialType").val())
+      }
+
+      function SubFieldChanged() {
+          $("#SubField_UniqueId").val($("#CredentialSub").val())
+      }
+     </script>
+}

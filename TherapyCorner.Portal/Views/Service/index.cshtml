@@ -1,0 +1,73 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model ServiceInfoList
+
+@{
+    ViewBag.Title = Dictionary.Services;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<link rel="stylesheet" type="text/css" href="~/Content/ServiceEditing.css" />
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index") &gt; @Dictionary.Services</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="window.location='@Url.Action("create")'">@ServicePages.AddRate</button>
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th style="min-width:150px"><a href="#">@Dictionary.Name</a></th>
+                <th class="HideMedium"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Discipline</a></th>
+               <th class="IdText HideMedium"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.ServiceModel</a></th>
+                <th class="IdText HideMobile"><a href="#">@Dictionary.Locations</a></th>
+                <th class="NumberText HideSmall"><a href="#">@SharedPages.ProviderCount</a></th>
+                <th class="NumberText HideMobile"><a href="#">@SharedPages.NbrClients</a></th>
+            <th class="BoolText"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.IsActive</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                    <a href="@Url.Action("update",new { id = p.ServiceId })">
+                                        <img src="~/images/edit.png" />
+                                    </a>
+                                
+                            </div>
+                        </td>
+                        <td>@p.Name</td>
+                        <td class="HideMedium">@p.Discipline.Name</td>
+                        <td class="HideMedium">@www.therapycorner.com.company.ResStrings.ServiceModel.ResourceManager.GetString(p.Model.ToString())</td>
+                        <td class="HideMobile">
+                            @if(p.AllowClient)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.AllowClient<br/>
+                            }
+                            @if (p.AllowProvider)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.AllowProvider<br />
+                            }
+                            @if (p.AllowClinic)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.AllowClinic
+                            }
+                        </td>
+                        <td class="NumberText HideSmall">@Html.ActionLink(p.ProviderCount.GetValueOrDefault(0).ToString(),"index","staff",new { services = p.ServiceId, provider=true, supervisor=true },null)</td>
+                        <td class="NumberText HideMobile">@Html.ActionLink(p.ClientCount.GetValueOrDefault(0).ToString(), "index", "client", new { service = p.ServiceId },null)</td>
+                     <td>@(p.IsActive ? Dictionary.Yes : Dictionary.No)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

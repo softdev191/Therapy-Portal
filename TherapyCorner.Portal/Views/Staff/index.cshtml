@@ -1,0 +1,156 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.StaffSearchRequest
+
+@{
+    ViewBag.Title = StaffPages.SearchStaff;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    string services = ViewBag.ServiceNames;
+    string disciplines = ViewBag.DisciplineNames;
+    StaffInfoList results = ViewBag.Results;
+}
+
+<h2 class="breadcrumb">@SharedPages.Staff</h2>
+<section style="padding-bottom:10px">
+    @if (UserAuthorization.CurrentUser.IsAdmin)
+    {
+    <button onclick="window.location='@Url.Action("create")'">@StaffPages.Invite</button>
+    }
+    <button onclick="submitit(); frmFilter.submit();">@SharedPages.ChangeFilter</button>
+</section>
+<section style="padding-bottom:10px">
+    @if (!string.IsNullOrWhiteSpace(Model.LastName))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('LastName')" class="close" aria-label="close">&times;</a>@Model.LastName</div>
+    }
+    @if (Model.Status != www.therapycorner.com.company.MessageContracts.StaffSearchRequest.StatusEnum.All)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Status')" class="close" aria-label="close">&times;</a>@Status.ResourceManager.GetString(Model.Status.ToString())</div>
+    }
+    @if (Model.Admin)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Admin')" class="close" aria-label="close">&times;</a>@www.therapycorner.com.company.ResStrings.Dictionary.Administrator</div>
+    }
+    @if (Model.Supervisor)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Supervisor')" class="close" aria-label="close">&times;</a>@www.therapycorner.com.company.ResStrings.Dictionary.Supervisor</div>
+    }
+    @if (Model.Provider)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Provider')" class="close" aria-label="close">&times;</a>@www.therapycorner.com.company.ResStrings.Dictionary.Provider</div>
+    }
+    @if (Model.OfficeWorker)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('OfficeWorker')" class="close" aria-label="close">&times;</a>@www.therapycorner.com.company.ResStrings.Dictionary.OfficeWorker</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(disciplines ))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('SearchDisciplines')" class="close" aria-label="close">&times;</a>@disciplines</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(services))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('SearchServices')" class="close" aria-label="close">&times;</a>@services</div>
+    }
+    </section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="IdText"><a href="#">@Dictionary.ID</a></th>
+                <th style="min-width:150px"><a href="#">@Dictionary.Name</a></th>
+                <th class="IdText HideMobile"><a href="#">@Dictionary.Role</a></th>
+                <th class="BoolText"><a href="#">@Dictionary.Status</a></th>
+                <th class="NumberText HideSmall"><a href="#">@SharedPages.ServiceCount</a></th>
+                <th class="NumberText HideSmall"><a href="#">@StaffPages.PendingReports</a></th>
+             </tr>
+        </thead>
+        <tbody>
+            @if (results != null && results.Count > 0)
+            {
+                foreach (var p in results)
+                {
+                    <tr>
+                        <td>
+                            <div>@Html.ActionLink(p.StaffId.ToString(),"details", new { id = p.StaffId })
+
+                            </div>
+                        </td>
+                        <td>@p.DisplayName</td>
+                         <td class="HideMobile" >
+                            @if (p.IsAdmin)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Administrator<br />
+                            }
+                            @if (p.IsSupervisor)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Supervisor<br />
+                            }
+                            @if (p.IsProvider)
+                            {
+                                @www.therapycorner.com.company.ResStrings.Dictionary.Provider
+                            }
+                             @if (p.IsWorker)
+                             {
+                                 @www.therapycorner.com.company.ResStrings.Dictionary.OfficeWorker
+                             }
+                        </td>
+                        <td >@Status.ResourceManager.GetString(p.Status.ToString())</td>
+                        <td class="NumberText HideSmall">@p.ServiceCount.GetValueOrDefault(0).ToString()</td>
+                        <td class="NumberText HideSmall">@p.ReportCount.GetValueOrDefault(0).ToString()</td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+@using (Html.BeginForm("filter", "staff", FormMethod.Post, new { @class = "form-horizontal", role = "form", id="frmFilter" }))
+{
+    @Html.HiddenFor(m=>m.LastName)
+    @Html.HiddenFor(m => m.Admin)
+    @Html.HiddenFor(m => m.OfficeWorker)
+    @Html.HiddenFor(m => m.Provider)
+    @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.Supervisor)
+
+    int x = 0;
+    if (Model.Services != null && Model.Services.Count > 0)
+    {
+        <span id="SearchServices">
+            @foreach (var s in Model.Services)
+            {
+                @Html.Raw(string.Format("<input type=\"hidden\" name=\"{0}.Index\" value=\"{1}\"/>", "Services", x))
+                @Html.Raw(string.Format("<input type=\"hidden\" name=\"Services[{0}]\" value=\"{1}\"/>", x, s))
+                x++;
+            }
+        </span>
+    }
+
+    x = 0;
+    if (Model.Disciplines != null && Model.Disciplines.Count > 0)
+    {
+        <span id="SearchDisciplines">
+            @foreach (var s in Model.Disciplines)
+            {
+                @Html.Raw(string.Format("<input type=\"hidden\" name=\"{0}.Index\" value=\"{1}\"/>", "Disciplines", x))
+                @Html.Raw(string.Format("<input type=\"hidden\" name=\"Disciplines[{0}]\" value=\"{1}\"/>", x, s))
+                x++;
+            }
+        </span>
+    }
+}
+@section scripts
+{
+    <script>
+        function ClearField(field) {
+            $("#" + field).remove();
+            submitit();
+            $("#frmFilter")[0].action = window.location;
+            $("#frmFilter").submit();
+        }
+
+    </script>
+
+}

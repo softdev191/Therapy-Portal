@@ -1,0 +1,96 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model PaymentInfo
+@{
+    ViewBag.Title = PaymentsPages.Details;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+
+    string clss = "";
+
+}
+<style>
+    .voidedpay {
+        text-decoration: line-through;
+    }
+</style>
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(PaymentsPages.Payments, "index") &gt; @PaymentsPages.Details</h2>
+<h3>@Model.Description</h3>
+
+
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Date</label><br />
+        @Model.MadeOn.ToShortDateString()
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Amount</label><br />@Model.Amount.ToString("C")
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.ID</label><br />
+        @Model.PaymentId
+    </div>
+   
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        <label>Notes</label><br />@Model.Notes
+    </div>
+  
+</section>
+<section>
+ 
+
+
+
+            <table class="sortable">
+                <thead>
+                    <tr>
+
+                        <th class="IdText "><a href="#">@Dictionary.ClaimId</a></th>
+                        <th class="DateTimeText"><a href="#">@Dictionary.Date</a></th>
+                        <th class="LongNameText"><a href="#">@Dictionary.Client</a></th>
+                        <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                        <th class="NameText "><a href="#">@ClaimsPages.Denied</a></th>
+                   
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Claims != null && Model.Claims.Count > 0)
+                    {
+                        foreach (var p in Model.Claims)
+                        {
+                            clss = p.VoidedAt.HasValue ? "voidedpay" : "";
+                            <tr class="@clss">
+                                <td>@Html.ActionLink(p.Claim.UniqueId,"details","claim",new { id = p.Claim.UniqueId },null)</td>
+                                <td>
+                                    @p.ClaimDate.Value.ToShortDateString()
+                                </td>
+                                <td>
+                                    @p.Client.Name
+                                </td>
+                                
+                                <td>
+                                    @p.Amount.GetValueOrDefault(0).ToString("c")
+                                </td>
+                                <td>
+                                    @p.DenialReason
+                                </td>
+                               
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+     </section>
+
+@section scripts
+{
+  
+}

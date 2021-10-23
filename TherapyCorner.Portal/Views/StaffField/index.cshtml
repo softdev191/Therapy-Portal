@@ -1,0 +1,61 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+
+@model FieldTypeList
+
+@{
+    ViewBag.Title = SharedPages.StaffFields;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+  
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index", "staff") &gt;@SharedPages.StaffFields</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="window.location='@Url.Action("create")'">@StaffFieldPages.Add</button>
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th style="min-width:150px"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Label</a></th>
+                <th class="IdText HideMobile"><a href="#">@Dictionary.Type</a></th>
+                <th class="BoolText "><a href="#">@www.therapycorner.com.account.ResStrings.ValidationText.Required</a></th>
+                <th class="NumberText HideMedium"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Minimum</a></th>
+                <th class="NumberText HideMedium"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Maximum</a></th>
+                <th class="IdText HideMedium"><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.Validation</a></th>
+               <th class="BoolText "><a href="#">@www.therapycorner.com.account.ResStrings.Dictionary.IsActive</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                <a href="@Url.Action("edit",new { id = p.FieldId })">
+                                    <img src="~/images/edit.png" />
+                                </a>
+
+                            </div>
+                        </td>
+                        <td>@p.Label</td>
+                        <td class="HideMobile IdText">@www.therapycorner.com.account.ResStrings.DataTypes.ResourceManager.GetString(p.Type.ToString())</td>
+                        <td class="BoolText ">@(p.Required ? Dictionary.Yes : Dictionary.No)</td>
+                     <td class="HideMedium NumberText">@p.Min</td>
+                        <td class="HideMedium NumberText">@p.Max</td>
+                        <td class="HideMedium IdText">@p.Validation</td>
+                        <td class="BoolText">@(p.IsActive.GetValueOrDefault() ? Dictionary.Yes : Dictionary.No)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

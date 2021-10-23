@@ -1,0 +1,42 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model ClientInfo
+
+@{
+    ViewBag.Title = string.Format( StaffPages.Calendar, Model.ToPerson().LastFirstMI);
+    ViewBag.CurArea = MenuArea.Clients;
+
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}, {2}", Dictionary.Details, Model.LastName, Model.FirstName), "details", new { id = Model.ClientId }) &gt; @CalendarPages.ServiceSchedule</h2>
+<section>
+    <span style="float:right"><input type="checkbox" id="chkCancelled" onclick="ToggleCancelled()" /> Show Cancelled</span>
+    <button onclick="window.location='@Url.Action("makeappt",new { id = Model.ClientId })'">@SharedPages.ScheduleSessions</button>
+
+
+
+
+</section>
+<section style="margin-top:10px;">
+    <div id="calendar">
+    </div>
+
+</section>
+
+@section scripts
+{
+
+
+    @Scripts.Render("~/bundles/calendar")
+    @Styles.Render("~/Content/calendar")
+
+
+    <script>
+        $(document).ready(function () {
+            InitializeCalendar("month", "@Url.Action("clientmeetings","appointment",new { id = Model.ClientId })","listYear");
+        });
+    </script>
+}

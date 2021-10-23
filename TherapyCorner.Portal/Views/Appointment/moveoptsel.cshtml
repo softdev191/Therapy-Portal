@@ -1,0 +1,98 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+
+@{
+    long appointmentId = ViewBag.AppointmentId;
+
+    var token = UserAuthorization.CurrentUser;
+    int? minutes = ViewBag.Minutes;
+    AppointmentSeries series = ViewBag.Series;
+    var appt = series.Appointments.Find(a => a.AppointmentId == appointmentId);
+    series.Appointments.RemoveAll(a => a.Status != AppointmentStatusEnum.Scheduled || a.Start.Date<DateTime.Today.Date);
+    series.Appointments.Sort((a, b) => a.Start.CompareTo(b.Start));
+    string chcked = "";
+}
+
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, series.Client.Name), "details", "client", new { id = series.Client.UniqueId }, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = series.Client.UniqueId }, null) &gt;@Html.ActionLink(CalendarPages.Appointment, "details", "appointment", new { id = appointmentId }, null) &gt;@CalendarPages.Move</h2>
+@using (Html.BeginForm("moveoptsel", "appointment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", appointmentId)
+    @Html.Hidden("Series", series.SeriesId)
+    @Html.Hidden("Minutes", minutes)
+
+    <p>@string.Format(CalendarPages.SeriesSelInstr,series.DayOfWeekName,series.StartTimeString)</p>
+    <p><input type="radio" name="singleOnly" value="true" checked id="radSingle"/> @string.Format(CalendarPages.JustSingle,appt.Start.ToShortDateString()) </p>
+    <p><input type="radio" name="singleOnly" value="false" id="radSeries"/> @CalendarPages.MultipleAppointments  &nbsp;&nbsp;&nbsp; <span style="font-size:smaller"><a href="javascript:SelectAll()">Select All</a>&nbsp;&nbsp;&nbsp;<a href="javascript:DeSelectAll()">Unselect All</a></span></p>
+
+    <div class="halfspace">
+        @foreach (var a in series.Appointments)
+        {
+            if (series.Appointments.IndexOf(a) % 2 > 0)
+            {
+                continue;
+
+            }
+            chcked = a.AppointmentId == appointmentId ? "checked" : "";
+
+            <input type="checkbox" name="ids" value="@a.AppointmentId" @chcked  onclick="VerifySeries()" class="chkAppts" /> @a.Start.ToShortDateString() <br/>
+        }
+    </div>
+    <div class="halfspace">
+        @foreach (var a in series.Appointments)
+        {
+            if (series.Appointments.IndexOf(a) % 2 == 0)
+            {
+                continue;
+
+            }
+            chcked = a.AppointmentId == appointmentId ? "checked" : "";
+
+            <input type="checkbox" name="ids" value="@a.AppointmentId" @chcked onclick="VerifySeries()" class="chkAppts" /> @a.Start.ToShortDateString() <br />
+        }
+    </div>
+
+
+        <p style="text-align:right">
+            <button onclick="submitit()" type="submit">@Dictionary.Continue</button><button type="button" onclick="window.location='@Url.Action("details", "appointment", new { id = appointmentId })'">@Dictionary.Cancel</button>
+
+
+        </p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script>
+        function SelectAll()
+        {
+            $(".chkAppts").prop("checked", true);
+            $("#radSeries").prop("checked", true);
+
+        }
+        function DeSelectAll() {
+            $(".chkAppts").prop("checked", false);
+            $("#radSingle").prop("checked", true);
+
+        }
+        function VerifySeries()
+        {
+            if($(".chkAppts:checked").length>0)
+            {
+                $("#radSeries").prop("checked", true);
+            }
+            else
+            {
+                $("#radSingle").prop("checked", true)
+            }
+        }
+
+
+    </script>
+}

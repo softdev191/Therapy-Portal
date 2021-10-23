@@ -1,0 +1,136 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model List<TherapyCorner.Portal.Models.PayrollGroup>
+
+
+@{
+    ViewBag.Title = PayrollPages.MyPayroll;
+    Layout = "~/Views/Shared/_LayoutFinance.cshtml";
+    ViewBag.CurArea = MenuArea.Finances;
+    www.therapycorner.com.company.MessageContracts.PayrollSearchRequest request = ViewBag.Request;
+
+
+
+}
+<style>
+    .headerbar
+    {
+        font-weight:bold;
+        background-color:lightgrey;
+        border:outset thin black;
+        padding:3px;
+        cursor:pointer;
+    }
+    .childarea
+    {
+        padding:5px;
+        display:none;
+    }
+    .tamount
+    {
+        float:right;
+    }
+    .clientarea
+    {
+        display:none;
+    }
+</style>
+<h2 class="breadcrumb">@PayrollPages.MyPayroll</h2>
+@Html.Partial("_PayrollSearchForm",request)
+    <h3 style="text-align:right">@PayrollPages.TotalPay: @Model.Sum(i=>i.Amount).ToString("c")</h3>
+<h6 style="text-align:center">@PayrollPages.ViewDetails</h6>
+    <div style="margin:10px;border:1px solid black">
+        @if(Model.Count>0)
+                    {
+                        int x = 0;
+                        int y = 0;
+                        foreach(var p in Model)
+                        {
+                            x++;
+             <div class="headerbar" onclick="ToggleArea(@x)">
+                 <span class="tamount">@p.Amount.ToString("c")</span>
+                 @p.Title
+             </div>
+             <div class="childarea sortable" id="@string.Format("Area{0}",x)">
+                 <table>
+                     <thead>
+                         <tr>
+                             <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                             <th class="IdText"><a href="#">@Dictionary.Status</a></th>
+                            <th class="NumberText"><a href="#">@PayrollPages.Count</a></th>
+                             <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                             <th class="IdText"></th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                             @foreach (var g in p.Children)
+                             {
+                                 y++;
+                                 <tr>
+                                     <td>@g.FromDT.ToShortDateString()</td>
+                                     <td>@(g.Approved ? Dictionary.Approved : Dictionary.Pending)</td>
+                                     <td class="NumberText">@g.Count.ToString("N2")</td>
+                                     <td class="NumberText">@g.Amount.ToString("c")</td>
+                                     <td><a href="javascript:ToggleLine(@y)">Toggle Clients</a></td>
+                                 </tr>
+                                 <tr class="clientarea"  id="@string.Format("Line{0}",y)">
+                                     <td colspan="5" style="padding-left:100px">
+                                         <ul>
+                                     @foreach (var c in g.Children)
+                                     {
+                                        <li>@c.Title</li>
+                                     }
+                                             </ul>
+                                     </td>
+                                 </tr>
+                             }
+                     </tbody>
+                 </table>
+             </div>
+            }
+        }
+    </div>
+
+  
+@section scripts
+{
+@Scripts.Render("~/bundles/jqueryval")
+
+<script>
+        var origFrom, origTo;
+
+        $(document).ready(function () {
+            $("#Status")[0].onchange = ChangeFilter;
+            origFrom = $("#FromDT").val();
+            origTo = $("#ToDT").val();
+            $("#FromDT")[0].onblur = LostFocus;
+            $("#ToDT")[0].onblur = LostFocus;
+            $("#FromDT").datepicker().on("change", function () { ChangeFilter(); });
+            $("#ToDT").datepicker().on("change", function () { ChangeFilter(); });
+        });
+
+        function ChangeFilter()
+        {
+            submitit();
+            $("#frmFilter").submit();
+        }
+        function LostFocus() {
+            if ($("#FromDT").val()!=origFrom || $("#ToDT").val() != origTo)
+            {
+                ChangeFilter();
+            }
+        }
+        function ToggleArea(id)
+           {
+               $("#Area"+id).toggle();
+           }
+        function ToggleLine(id) {
+            $("#Line" + id).toggle();
+        }
+</script>
+
+
+
+}

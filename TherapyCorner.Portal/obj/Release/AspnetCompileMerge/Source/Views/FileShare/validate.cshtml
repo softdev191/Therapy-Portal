@@ -1,0 +1,53 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+
+
+@model ValidationCode
+@{
+    ViewBag.Title = "Secure File Share";
+    Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    string eml = ViewBag.Email;
+    string ph = ViewBag.Mobile;
+}
+
+<h2>Secure File Share</h2>
+
+<section>
+
+    @using (Html.BeginForm("validate", "fileshare", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.UserId)
+        @Html.HiddenFor(m => m.ValidationId)
+        @Html.HiddenFor(m => m.ByEmail)
+        @Html.HiddenFor(m => m.ReturnURL)
+        <div class="form-group">
+            @Html.LabelFor(m => m.Code)
+            @Html.TextBoxFor(m => m.Code, new { @class = "form-control", maxlength = 20 })
+            @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
+
+        </div>
+
+   
+        <div class="form-group">
+            <button style="margin-left:200px" type="submit">@Dictionary.Continue</button>
+        </div>
+    }
+</section>
+<section>
+  <p style="text-align:center">
+            @Html.ActionLink(@ProfilePages.ResendCode,"index",new { id = Model.ReturnURL })
+        </p>
+    
+</section>
+<section>
+    <p>
+        @SharedPages.DoNotBookMarkSecured
+    </p>
+</section>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

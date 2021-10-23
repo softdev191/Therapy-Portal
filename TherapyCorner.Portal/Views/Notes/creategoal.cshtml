@@ -1,0 +1,142 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model GoalInfo
+
+@{
+    ViewBag.Title = ClientPages.AddGoal;
+    ViewBag.CurArea = MenuArea.Clients;
+    int clientId = ViewBag.ClientId;
+    string clientName = ViewBag.ClientName;
+    long apptId = ViewBag.ApptId;
+    string noteId = ViewBag.NotesId;
+    List<SelectListItem> listArea =  ViewBag.Areas;
+    int serviceId = ViewBag.ServiceId;
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index", "client") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, clientName), "details", "client", new { id = clientId}, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = clientId }, null) &gt; @Html.ActionLink(CalendarPages.Appointment, "details", "appointment", new { id = apptId }, null)  &gt; @Html.ActionLink(NotePages.SessionNotes, "details", "notes", new { id = noteId }, null) &gt;@NotePages.AddGoal</h2>
+@using (Html.BeginForm("creategoal", "notes", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("ClientId", clientId)
+    @Html.Hidden("AppointmentId", apptId)
+    @Html.Hidden("NoteId", noteId)
+    @Html.Hidden("ServiceId", serviceId)
+
+  @Html.HiddenFor(m=>m.Area.Context)
+
+
+    <div >
+
+        <div class="form-group">
+            <label>@Dictionary.GoalArea</label>
+            @Html.DropDownList("Area.UniqueId", listArea, new { @class = "form-control", onchange = "AreaSelected()" })
+
+
+        </div>
+
+
+        <div class="form-group">
+            <label>@Dictionary.Goal</label>
+            @Html.TextBoxFor(m => m.Statement, new { @class = "form-control", maxlength = "10000"})
+            @Html.ValidationMessageFor(m => m.Statement, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Success)
+            @Html.TextBoxFor(m => m.Success, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Success, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Attempts)
+            @Html.TextBoxFor(m => m.Attempts, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Attempts, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Units)
+            @Html.TextBoxFor(m => m.Units, new { @class = "form-control IdText", maxlength = "20" })
+            @Html.ValidationMessageFor(m => m.Units, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    
+
+        <p style="text-align:right">
+            <button id="btnSave" onclick="submitit()" type="submit" @(listArea.Count==0? "disabled" : "")>@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("details", new { id = noteId })'">@Dictionary.Cancel</button>
+
+
+        </p>
+}
+
+@section scripts
+{
+
+
+
+
+    <script>
+        var templates = [];
+        $(document).ready(function () {
+            AreaSelected();
+        });
+
+        function AreaSelected()
+        {
+            var area = $("#Area_UniqueId").val();
+            if (area == null || area == "") {
+
+                return;
+            }
+
+            TurnFreezePaneOn();
+            var addr = window.location.origin + "/goalarea/templates/" + area;
+
+            $.ajax({
+                url: addr,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    CompleteAreaSelected(data);
+                }
+            });
+        }
+
+        function CompleteAreaSelected(returndata) {
+            TurnFreezePaneOff();
+            var msgs = ProcessResponseBase(returndata);
+            msgs.DisplayResponseResults();
+            if (returndata.IsFailure) {
+
+                return;
+            }
+            templates = returndata.Goals;
+
+            var data = [];
+            if (templates != null && templates.length > 0) {
+                $.each(templates, function (index, item) {
+                    data.push({ label: item.Statement, value: item.Statement, uid: item.GoalId });
+                });
+            }
+            $("#Statement").autocomplete({
+                source: data,
+                select: function(event,ui)
+                {
+                    TemplateSelected(event, ui);
+                },
+            });
+
+        }
+
+        function TemplateSelected(event, ui)
+        {
+            if (templates != null && templates.length > 0 && ui.item != null) {
+                $.each(templates, function (index, item) {
+                    if (item.GoalId == ui.item.uid) {
+                        $("#Success").val(item.Success);
+                        $("#Attempts").val(item.Attempts);
+                        $("#Units").val(item.Units);
+                    }
+                });
+            }
+        }
+    </script>
+}

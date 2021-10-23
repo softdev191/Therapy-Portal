@@ -1,0 +1,59 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model MatrixFieldList
+
+@{
+    ViewBag.Title = SharedPages.MatrixFields;
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Staff, "index","staff") &gt; @SharedPages.MatrixFields</h2>
+
+<section style="padding-bottom:10px">
+    <button onclick="window.location='@Url.Action("create")'">@StaffMatrixPages.AddField</button>
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="tdSingleButton"></th>
+                <th class="BoolText HideMobile"><a href="#">@StaffMatrixPages.Order</a></th>
+              <th style="min-width:200px"><a href="#">@StaffMatrixPages.Header</a></th>
+                <th class="HideMedium IdText" ><a href="#">@StaffMatrixPages.Source</a></th>
+               <th class="LongNameText HideMedium"><a href="#">@StaffMatrixPages.Field</a></th>
+           </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                    <a href="@Url.Action("update",new { id = p.OrderNumber })">
+                                        <img src="~/images/edit.png" />
+                                    </a>
+                                
+                            </div>
+                        </td>
+                        <td class="HideMobile">@p.OrderNumber</td>
+                        <td >@p.Header</td>
+                        <td class="HideMedium">@p.Source.Name</td>
+                        <td class="HideMedium">@p.FieldId.Name
+                        @if(p.SubField != null)
+                        {
+                            <span>&nbsp;(@p.SubField.Name)</span>
+                        }
+                        </td>
+                        </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

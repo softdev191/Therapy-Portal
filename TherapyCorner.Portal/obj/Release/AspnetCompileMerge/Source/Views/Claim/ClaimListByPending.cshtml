@@ -1,0 +1,102 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@model ClaimInfoList
+
+@{
+    var groupings = from c in Model
+                    let pw = c.PendingWith == null ? "" : (c.PendingWith.Context == "GovtProgram" ? string.Format("g{0}", c.PendingWith.UniqueId) : string.Format("i{0}", c.PendingWith.AlternateId))
+                    group c by pw into g
+                    let lst = g.ToList()
+                    let nme = lst[0].PendingWith == null ? "" : lst[0].PendingWith.Name
+                    let isIns = lst[0].PendingWith == null ? false : (lst[0].PendingWith.Context == "GovtProgram" ? false : true)
+                    orderby nme
+                    select new { Id = g.Key, Name =isIns ? nme.Split('(')[0].TrimEnd() : nme , Value = g.Sum(i => i.AmountDue), Claims = lst };
+    int x = 0;
+}
+
+<style>
+    .headerbar {
+        font-weight: bold;
+        background-color: lightgrey;
+        border: outset thin black;
+        padding: 3px;
+        cursor: pointer;
+    }
+
+    .childarea {
+        padding: 5px;
+        display: none;
+    }
+
+    .tamount {
+        float: right;
+    }
+</style>
+@foreach (var g in groupings)
+{
+    x++;
+    <div class="headerbar" onclick="ToggleArea(@x)">
+        <span class="tamount">@g.Value.ToString("c")</span>
+        <input type="checkbox" onclick="javascript:SelectClaims(@x)" class="HeaderSelector" id="@string.Format("sc{0}", x)" /> @(string.IsNullOrWhiteSpace(g.Name) ? Dictionary.None : g.Name)
+    </div>
+    <div class="childarea sortable" id="@string.Format("Area{0}", x)">
+        <table class="sortable">
+            <thead>
+                <tr>
+                    <th class="tdSingleButton"> </th>
+                    <th class="tdSingleButton"></th>
+                    <th class="IdText"><a href="#">Claim Id</a></th>
+                    <th class="NameText"><a href="#">@Dictionary.Status</a></th>
+                    <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                    <th class="NameText "><a href="#">@Dictionary.Client</a></th>
+                    <th class="LongNameText"><a href="#">@Dictionary.Provider</a></th>
+                    <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                    <th class="NumberText"><a href="#">@ClaimsPages.Paid</a></th>
+                    <th class="LongNameText"><a href="#">@Dictionary.Comments</a></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in g.Claims)
+                {
+                    <tr>
+                        <td>
+                            <input class="@string.Format("checkclaims{0}", x)" type="checkbox" name="ids" value="@p.ClaimId" />
+
+                        </td>
+                        <td>
+                            <div class="tdSingleButton">
+
+                                <a href="@Url.Action("details", "claim", new { id = p.ClaimId })"><img src="~/images/magnify.png" /></a>
+
+                            </div>
+                        </td>
+                        <td>@p.ClaimId</td>
+                        <td>@ClaimsPages.ResourceManager.GetString(p.Status.ToString())</td>
+                        <td>
+                            @p.ClaimDate.ToShortDateString()
+                        </td>
+                        <td>
+                            @Html.ActionLink(p.Client.Name, "details", "client", new { id = p.Client.UniqueId }, null)
+                        </td>
+                        <td>
+                            @p.Provider.Name
+
+
+                        </td>
+                        <td>
+                            @p.AmountDue.ToString("c")
+                        </td>
+                        <td>
+                            @p.AmountPaid.ToString("c")
+                        </td>
+                        <td>
+                            @p.LastComment
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

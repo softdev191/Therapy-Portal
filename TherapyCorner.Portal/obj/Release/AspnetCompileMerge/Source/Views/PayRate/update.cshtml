@@ -1,0 +1,291 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model PayRate
+
+@{
+    ViewBag.Title = PayRatePages.EditRate;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Model.Periods.Sort((a, b) => a.StartDate.CompareTo(b.StartDate));
+    int pi = 0;
+    var periodscript = new System.Text.StringBuilder();
+}
+<section style="display:inline-block">
+    <h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index", "company") &gt; @Html.ActionLink(Dictionary.PayRates, "index") &gt; @PayRatePages.EditRate</h2>
+    @using (Html.BeginForm("update", "payrate", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.RateId)
+        @Html.HiddenFor(m => m.IsActive)
+        @Html.HiddenFor(m => m.BeenUsed)
+        @Html.HiddenFor(m => m.ServiceCount)
+        @Html.HiddenFor(m => m.Version)
+        <div class="halfspace ">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Name)
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", maxlength = "50" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label for="DefaultPayroll">@PayRatePages.DefaultPayroll</label>
+                @Html.TextBoxFor(m => m.DefaultPayroll, "{0:N2}", new { @class = "form-control NumberText", maxlength = "6" })
+                @Html.ValidationMessageFor(m => m.DefaultPayroll, "", new { @class = "text-danger" })
+            </div>
+            <h3>@www.therapycorner.com.company.ResStrings.Dictionary.Disciplines </h3>
+            @Html.Action("checklist", "Discipline", new { selected = Model.Disciplines })
+        </div>
+        <div class="halfspace">
+            <h3>@www.therapycorner.com.company.ResStrings.Dictionary.UnitRate</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>@www.therapycorner.com.company.ResStrings.Dictionary.StartDate </th>
+                        <th>@www.therapycorner.com.company.ResStrings.Dictionary.End </th>
+                        <th>@www.therapycorner.com.company.ResStrings.Dictionary.UnitRate  </th>
+             </tr>
+                </thead>
+                <tbody id="Periods">
+                    @foreach(var p in Model.Periods )
+                    {
+                        string dt = p.StartDate.ToShortDateString();
+      
+
+
+
+                       
+                        periodscript.AppendFormat("$('#PeriodStartDate_{0}').datepicker('option','onSelect', function(selected,event) {{ SelectStartDate({0},selected); }});\n", pi);
+                                <tr>
+
+
+                                    <td><input type="hidden"  name="Periods.Index" value="@pi" /><input type="hidden" name="@string.Format("Periods[{0}].PeriodId", pi)" value="@p.PeriodId" />
+
+
+                                    <input  id="@string.Format("PeriodStartDate_{0}",pi)" type="text"  required data-val="true" data-val-required="@www.therapycorner.com.account.ResStrings.ValidationText.Required" data-val-date="@www.therapycorner.com.account.ResStrings.ValidationText.Invalid"  maxlength="10" class="form-control DateText" name="@string.Format("Periods[{0}].StartDate",pi)" value="@dt"  onblur="ChangeStartDate(@pi)" onfocus="EnterStartDate(@pi)"  />
+                                        <span class="field-validation-valid text-danger" data-valmsg-for="@string.Format("Periods[{0}].StartDate",pi)" data-valmsg-replace="true"></span>
+                            </td>
+                            <td>
+                            @if (p.PeriodId!=-1 && pi==Model.Periods.Count -1)
+                            {
+                                dt = p.EndDate.HasValue ? p.EndDate.Value.ToShortDateString() : "";
+
+                                <input type="text" id="@string.Format("PeriodEndDate_{0}",pi)" maxlength="10" data-val="true"  data-val-date="@www.therapycorner.com.account.ResStrings.ValidationText.Invalid"  class="form-control DateText" name="@string.Format("Periods[{0}].EndDate", pi)"   value="@dt"  />
+                                <span class="field-validation-valid text-danger" data-valmsg-for="@string.Format("Periods[{0}].EndDate",pi)" data-valmsg-replace="true"></span>
+                                periodscript.AppendFormat("$('#PeriodEndDate_{0}').datepicker('option','onSelect', function(selected,event) {{ SelectEndDate({0},selected); }});\n", pi);
+
+
+
+                            }
+                            else if (p.PeriodId != -1)
+                            {
+                                <input type="text" disabled class="form-control DateText"  id="@string.Format("PeriodEndDate_{0}",pi)" name="@string.Format("Periods[{0}].EndDate", pi)" value="@p.EndDate.Value.ToShortDateString()" />
+
+                            }
+                            </td>
+                            <td>
+                               <input type="number"  maxlength="7"  data-val="true" class="form-control NumberText" name="@string.Format("Periods[{0}].UnitRate",pi)" required value="@p.UnitRate.ToString("F2")" />
+                                <span class="field-validation-valid text-danger" data-valmsg-for="@string.Format("Periods[{0}].UnitRate",pi)" data-valmsg-replace="true"></span>
+                            </td>
+                        </tr>
+                        pi++;
+                    }
+                    @{ 
+                        pi = 0;
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <p style="text-align:right">
+            <button onclick="submitit();EnableDates()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button>
+
+            @if (!Model.BeenUsed.GetValueOrDefault(true))
+            {
+                <button type="button" onclick="RemoveMe()">@Dictionary.Delete</button>
+
+            }
+            else if (!Model.IsActive)
+            {
+                <button type="button" onclick="ActivateMe()">@Dictionary.Activate</button>
+
+            }
+            else if (Model.IsActive && Model.ServiceCount.GetValueOrDefault(1) == 0)
+            {
+                <button type="button" onclick="DeactivateMe()">@Dictionary.Deactivate</button>
+
+            }
+
+        </p>
+    }
+</section>
+<div id="modalDelete" style="display:none" title="@PayRatePages.RemoveRate">
+    <p>@PayRatePages.RemoveRateInstr </p>
+    @using (Html.BeginForm("Remove", "payrate", FormMethod.Post, new { role = "form", id = "frmDel" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("RateId", Model.RateId);
+
+    }
+</div>
+
+@using (Html.BeginForm("activate", "payrate", FormMethod.Post, new { role = "form", id = "frmActivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.RateId);
+
+}
+@using (Html.BeginForm("deactivate", "payrate", FormMethod.Post, new { role = "form", id = "frmDeactivate" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", Model.RateId);
+
+}
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script>
+    var diagRemove;
+    var origDate;
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+
+    @Html.Raw(periodscript.ToString())
+});
+
+function EnterStartDate(index)
+{
+    origDate = $("#PeriodStartDate_" + index).val();
+}
+
+function ChangeStartDate(index)
+{
+    var v = $("#PeriodStartDate_" + index).val();
+    ChangeStartDate(index,v);
+}
+
+function SelectStartDate(index, v) {
+    if (v == origDate) return;
+    if (v == null || v.trim() == '') {
+        $("#PeriodStartDate_" + index).val(origDate);
+        return;
+    }
+    var dt = new Date(v);
+    if (isNaN(dt)) {
+        $("#PeriodStartDate_" + index).val(origDate);
+        return;
+    }
+    var bi = index - 1;
+    var backDate = dt;
+    var tv = "";
+    while (bi >= 0)
+    {
+        backDate.setDate(backDate.getDate() - 1);
+        $("#PeriodEndDate_" + bi).val(backDate.toLocaleDateString().replace(/[^ -~]/g, ''));
+        var sdf = $("#PeriodStartDate_" + bi);
+        tv= sdf.val();
+        var curStart = new Date(tv);
+        if (curStart < backDate)
+        {
+            break;
+        }
+        else
+        {
+            backDate.setDate(backDate.getDate() - 1);
+
+            sdf.val(backDate.toLocaleDateString().replace(/[^ -~]/g, ''));
+            bi--;
+        }
+    }
+
+    var edf = $("#PeriodEndDate_" + index);
+    var fwdDate =dt;
+    while (edf.length > 0 && edf.val()!="")
+    {
+        var curEnd = new Date(sdf.val());
+        if(curEnd>fwdDate)
+        {
+            break;
+        }
+        else
+        {
+            fwdDate.setDate(fwdDate.getDate() + 1);
+            edf.val(fwdDate.toLocaleDateString().replace(/[^ -~]/g, ''));
+            fwdDate.setDate(fwdDate.getDate() + 1);
+            index++;
+            var sdf = $("#PeriodStartDate_" + index);
+            sdf.val(fwdDate.toLocaleDateString().replace(/[^ -~]/g, ''));
+            edf = $("#PeriodEndDate_" + index);
+        }
+    }
+
+   origDate = v;
+}
+function EnableDates()
+{
+    $(".DateText").prop("disable", 'false');
+}
+function ChangeEndDate(index)
+{
+    SelectEndDate(index, $("#PeriodEndDate_" + index).val());
+
+}
+function SelectEndDate(index,v) {
+    var dt = new Date(v);
+    var endField = $("#PeriodEndDate_" + index);
+    if (endField.prop('disabled')) return;
+    if (isNaN(dt)) {
+        endField.val("");
+        return;
+    }
+    endField.prop('disabled', true);
+    var ns = dt;
+    ns.setDate(dt.getDate() + 1);
+    var nsMin = ns;
+    var minDT = new Date($("#PeriodStartDate_" + index).val());
+    minDT.setDate(minDT.getDate() + 2);
+    var nextIndex = index + 1;
+    var ni = '<tr><td><input type="hidden" name="Periods.Index" value="' + nextIndex + '"/><input type="hidden" name="Periods[' + nextIndex + '].PeriodId" value="-1"/>';
+    ni += '<input  id="PeriodStartDate_' + nextIndex + '"  type="text" maxlength="10" required data-val="true"   data-val-required="@www.therapycorner.com.account.ResStrings.ValidationText.Required" data-val-date="@www.therapycorner.com.account.ResStrings.ValidationText.Invalid" class="form-control DateText" name="Periods[' + nextIndex + '].StartDate" value="' + ns.toLocaleDateString().replace(/[^ -~]/g, '') + '"  onblur="ChangeStartDate(' + nextIndex + ')" onfocus="EnterStartDate(' + nextIndex + ')"  /><span class="field-validation-valid text-danger" data-valmsg-for="Periods[' + nextIndex + '].StartDate" data-valmsg-replace="true"></span></td><td></td>'
+    ni += '<td><input type="number"  maxlength="7"   data-val="true"  class="form-control NumberText" name="Periods[ + nextIndex + ].UnitRate" required value="0" /><span class="field-validation-valid text-danger" data-valmsg-for="Periods[' + nextIndex + '].UnitRate" data-valmsg-replace="true"></span></td></tr>'
+
+    $("#Periods").append(ni);
+
+
+    $("#PeriodStartDate_" + nextIndex).datepicker({
+        changeMonth: true,
+        changeYear: true,
+        yearRange:"c-20:c+20",
+        dateFormat: "m/d/yy",
+        onSelect: function(selected,event) { SelectStartDate(nextIndex,selected); }
+    });
+
+
+}
+    function RemoveMe()
+{
+        diagRemove.dialog("open");
+    }
+
+
+
+    function ConfirmDel() {
+        submitit();
+        diagRemove.dialog("close");
+        $("#frmDel").submit();
+    }
+    function ActivateMe() {
+        submitit();
+        $("#frmActivate").submit();
+    }
+    function DeactivateMe() {
+        submitit();
+        $("#frmDeactivate").submit();
+    }
+</script>
+}

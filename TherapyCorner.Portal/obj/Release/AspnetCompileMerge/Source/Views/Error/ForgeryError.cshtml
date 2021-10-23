@@ -1,0 +1,18 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@{
+    ViewBag.Title = SharedPages.AntiForgeryError;
+    var token = UserAuthorization.CurrentUser;
+    if (token == null)
+    {
+        Layout = "~/Views/Shared/_LayoutNL.cshtml";
+    }
+}
+
+<h2 style="color:red">@SharedPages.AntiForgeryError</h2>
+<p >
+    @SharedPages.AntiForgeryErrorInstr
+</p>

@@ -1,0 +1,98 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+
+@model www.therapycorner.com.company.MessageContracts.CreateAppointmentRequest 
+
+@{
+    ViewBag.Title = ClientPages.ScheduleAppt;
+    ViewBag.CurArea = MenuArea.Clients;
+    int clientId = ViewBag.ClientId;
+    string clientName = ViewBag.clientName;
+    List<SelectListItem> listServices = new List<SelectListItem>();
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, clientName ), "details", "client", new { id = clientId }, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = clientId }, null)  &gt; @ClientPages.ScheduleAppt</h2>
+@using (Html.BeginForm("makeappt", "client", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+  @Html.Hidden("ClientId",clientId )
+    @Html.Hidden("ClientName",clientName)
+    @Html.Hidden("ServiceId",Model.ClientServiceId)
+
+    <div class="halfspace">
+    
+            <div class="form-group">
+                <label>@Dictionary.Service</label>
+                @Html.DropDownList("ClientServiceId", listServices, new { @class = "form-control",onchange= "ServiceSelected()" })
+
+
+            </div>
+
+
+            <div class="form-group">
+                <label>@Dictionary.Date</label>
+                @Html.TextBoxFor(m => m.InitialDate, "{0:MM/dd/yyyy}", new { @class = "form-control DateText", maxlength = "10", onchange="SetLastDate()" })
+                @Html.ValidationMessageFor(m => m.InitialDate, "", new { @class = "text-danger" })
+            </div>
+        <div class="form-group">
+            <label>@CalendarPages.NbrToSchedule</label>
+            @Html.TextBoxFor(m => m.MeetingCount, new { @class = "form-control NumberText", maxlength = "2", onchange = "SetLastDate()" })
+            @Html.ValidationMessageFor(m => m.MeetingCount, "", new { @class = "text-danger" })
+            <span id="spThroughText"></span>
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.StartTime</label>
+            @Html.TextBoxFor(m => m.StartDT, "{0:h:mm tt}", new { @class = "form-control", maxlength = "10", onchange = "SetEndTime()", style= "width:118px;" })
+            @Html.ValidationMessageFor(m => m.StartDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.EndTime</label><br/>
+            <span id="spEndTime"></span>
+        </div>
+        </div>
+
+        <div class="halfspace">
+            <div class="form-group">
+                <label>@Dictionary.Provider</label><br /><span id="spProvider"></span>
+            </div>
+            <div class="form-group"> <label>@Dictionary.FreqDur</label><br/><span id="spFreqDur"></span></div>
+            <div class="form-group"> <label>@Dictionary.Location</label><br /><span id="spLocation"></span></div>
+            <div class="form-group"> <label>@CalendarPages.CurrentlyScheduled</label><br /><span id="spScheduled"></span> of <span id="spAllowed"></span> ( <span id="spLastDate"></span> )</div>
+       
+        <div>
+            <label>@Dictionary.Availability</label>
+          
+                <div id="availcalendar">
+                </div>
+
+        </div>
+         </div>
+
+
+            <p style="text-align:right">
+                <button id="btnSave" onclick="submitit()" type="submit">@Dictionary.Create</button><button type="button" onclick="window.location='@Url.Action("schedule", new { id = clientId })'">@Dictionary.Cancel</button>
+
+
+            </p>
+}
+
+
+@section scripts
+{
+
+
+   @Scripts.Render("~/bundles/calendar")
+@Styles.Render("~/Content/calendar")
+@Scripts.Render("~/bundles/createappointment")
+
+
+
+
+    <script>
+        $(document).ready(function () {
+            ClientSelected();
+        });
+    </script>
+}

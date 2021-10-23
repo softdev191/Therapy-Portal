@@ -1,0 +1,69 @@
+﻿
+   .CredTable{
+        width:908px;
+    }
+
+    .TypeText {
+        width:240px;
+    }
+
+    .CompanyList
+    {
+        width:609px;
+    }
+
+@media (max-width: 1200px) {
+        .CredTable {
+        width: 793px;
+    }
+}
+
+@media (max-width: 1000px) {
+        .CredTable {
+        width: 683px;
+    }
+            #tabs
+    {
+        width:725px;
+    }
+}
+@media (max-width: 767px) {
+
+    .CredTable {
+        width: 438px;
+    }
+    #tabs
+    {
+        width:95%;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+      .CredTable {
+        width: 368px;
+    }
+          .CompanyList
+    {
+        width:368px;
+    }
+
+    #tabs
+    {
+        width:375px;
+    }
+    .TypeText {
+        width:180px;
+    }
+    .DateText
+    {
+        width:95px;
+    }
+
+    .IdText
+    {
+        width:105px
+    }
+    
+}

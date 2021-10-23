@@ -1,0 +1,65 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.soundpower.biz.common;
+
+@model QuestionType
+
+@{
+    ViewBag.Title = QuestionPages.Add;
+    List<SelectListItem> values = new List<SelectListItem>();
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Decimal.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Decimal, Selected = Model.Type == ValueTypeEnum.Decimal });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Integer.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Integer, Selected = Model.Type == ValueTypeEnum.Integer });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.String.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.String, Selected = Model.Type == ValueTypeEnum.String });
+    values.Add(new SelectListItem() { Value = ValueTypeEnum.Boolean.ToString(), Text = www.therapycorner.com.account.ResStrings.DataTypes.Boolean, Selected = Model.Type == ValueTypeEnum.Boolean });
+
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+
+<h2 class="breadcrumb">@Html.ActionLink(TherapyCorner.Portal.ResourceText.Dictionary.Administration, "index") &gt;@Html.ActionLink(TherapyCorner.Portal.ResourceText.Dictionary.Questions,"index") &gt; @QuestionPages.Add</h2>
+
+@using (Html.BeginForm("create", "question", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Version)
+    @Html.HiddenFor(m => m.QuestionId)
+    @Html.HiddenFor(m => m.IsActive)
+
+    <section class="halfspace form-horizontal">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Label)
+            @Html.TextAreaFor(m => m.Label, new { @class = "form-control", maxlength = "100" })
+            @Html.ValidationMessageFor(m => m.Label, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@TherapyCorner.Portal.ResourceText.Dictionary.Type</label>
+            @Html.DropDownList("Type", values, new { @class = "form-control", onchange="TypeChanged()" })
+        </div>
+ 
+
+    </section>
+    <section class="halfspace form-horizontal">
+
+        <div class="form-group" id="grpMin">
+            @Html.LabelFor(m => m.Min)
+            @Html.TextBoxFor(m => m.Min, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Min, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group" id="grpMax">
+            @Html.LabelFor(m => m.Max)
+            @Html.TextBoxFor(m => m.Max, new { @class = "form-control NumberText", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Max, "", new { @class = "text-danger" })
+        </div>
+
+       
+    </section>
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@TherapyCorner.Portal.ResourceText.Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@TherapyCorner.Portal.ResourceText.Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/QuestionEditingScripts.js"></script>
+}

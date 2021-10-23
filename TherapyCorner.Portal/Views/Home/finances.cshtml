@@ -1,0 +1,74 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+@{
+    ViewBag.Title = SharedPages.MySummary ;
+    Layout = "~/Views/Shared/_LayoutFinance.cshtml";
+    ViewBag.CurArea = MenuArea.Finances;
+
+    ExpenseInfoList expenses = ViewBag.Expenses;
+    List<TherapyCorner.Portal.Models.PayrollGroup> pays = ViewBag.Payroll;
+
+}
+
+<h2 class="breadcrumb">@SharedPages.MySummary</h2>
+<section class="halfspace">
+    <h3>@ExpensePages.RecentExpenses</h3>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+                <th class="LongNameText"><a href="#">@Dictionary.Description</a></th>
+                <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+                <th class="IdText"><a href="#">@Dictionary.Status</a></th>
+        </tr>
+        </thead>
+        <tbody>
+            @if(expenses!=null && expenses.Count>0)
+            {
+                foreach(var e in expenses)
+                {
+                    <tr>
+                    <td>@e.MadeOn.ToShortDateString()</td>
+                        <td>@e.Description</td>
+                        <td class="NumberText">@e.Amount.ToString("c")</td>
+                        <td>@e.Status.ToString()</td>
+                        </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</section>
+
+<section class="halfspace">
+    <h3>@PayrollPages.MyPayroll</h3>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="DateText"><a href="#">@Dictionary.From</a></th>
+                <th class="DateText"><a href="#">@Dictionary.To</a></th>
+               <th class="LongNameText"><a href="#">@Dictionary.Description</a></th>
+                <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (pays != null && pays.Count > 0)
+            {
+                foreach (var p in pays)
+                {
+                    <tr>
+                        <td>@p.FromDT.ToShortDateString()</td>
+                        <td>@p.ToDT.ToShortDateString()</td>
+                        <td>@p.Title</td>
+                        <td class="NumberText">@p.Amount.ToString("c")</td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</section>
+
+

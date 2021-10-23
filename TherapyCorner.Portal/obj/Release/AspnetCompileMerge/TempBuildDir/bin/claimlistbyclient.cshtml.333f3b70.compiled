@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/Views/Claim/ClaimListByClient.cshtml" hash="76fac76b" filehash="fffff52aab7441e7" flags="110000" assembly="App_Web_0p1zqznw" type="ASP._Page_Views_Claim_ClaimListByClient_cshtml">
+    <filedeps>
+        <filedep name="/Views/Claim/ClaimListByClient.cshtml" />
+    </filedeps>
+</preserve>

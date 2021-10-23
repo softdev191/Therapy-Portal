@@ -1,0 +1,103 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+
+@model UserInfo
+
+@{
+    ViewBag.Title = ProfilePages.EditProfile;
+    var token = UserAuthorization.CurrentUser;
+ 
+}
+<h2 class="breadcrumb">@Html.ActionLink(ProfilePages.MyProfile, "index", "profile") &gt; @Dictionary.Edit</h2>
+@using (Html.BeginForm("edit", "Profile", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m=>m.Version)
+    @Html.HiddenFor(m=>m.UserId)
+<section class="halfspace form-horizontal">
+    <div class="form-group">
+        @Html.LabelFor(m => m.FirstName)
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.MiddleName)
+        @Html.TextBoxFor(m => m.MiddleName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.MiddleName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.LastName)
+        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Suffix)
+        @Html.TextBoxFor(m => m.Suffix, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.Suffix, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.DoB)
+        @Html.TextBoxFor(m => m.DoB, new { @class = "form-control DateText", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.DoB, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.TaxId)
+        @Html.TextBoxFor(m => m.TaxId, new { @class = "form-control", maxlength = "11" })
+        @Html.ValidationMessageFor(m => m.TaxId, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Gender)
+@Html.EditorFor(m => m.Gender)
+        </div>
+</section>
+<section class="halfspace form-horizontal">
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.MobilePhone)
+        @Html.TextBoxFor(m => m.MobilePhone, new { @class = "form-control", maxlength = "15" })
+        @Html.ValidationMessageFor(m => m.MobilePhone, "", new { @class = "text-danger" })    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.WorkPhone)
+        @Html.TextBoxFor(m => m.WorkPhone, new { @class = "form-control", maxlength = "20" })
+        @Html.ValidationMessageFor(m => m.WorkPhone, "", new { @class = "text-danger" })    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.Line1)
+        @Html.TextBoxFor(m => m.Address.Line1, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.Line1, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.Line2)
+        @Html.TextBoxFor(m => m.Address.Line2, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.Line2, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.City)
+        @Html.TextBoxFor(m => m.Address.City, new { @class = "form-control", maxlength = "50" })
+        @Html.ValidationMessageFor(m => m.Address.City, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Address.State)
+        @Html.Partial("_StateSelector", Model.Address.State)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Address.PostalCode)
+            @Html.TextBoxFor(m => m.Address.PostalCode, new { @class = "form-control", maxlength = "10" })
+            @Html.ValidationMessageFor(m => m.Address.PostalCode, "", new { @class = "text-danger" })
+        </div>
+</section>
+<p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("index")'">@Dictionary.Cancel</button></p>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+}

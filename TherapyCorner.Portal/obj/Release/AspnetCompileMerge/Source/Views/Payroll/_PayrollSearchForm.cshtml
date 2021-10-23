@@ -1,0 +1,32 @@
+﻿@using www.therapycorner.com.company.MessageContracts;
+@using TherapyCorner.Portal.ResourceText;
+@model PayrollSearchRequest
+
+@{ 
+    var statuses = new List<SelectListItem>();
+    statuses.Add(new SelectListItem() { Value = "0", Text = Dictionary.All, Selected = Model.Status==0 });
+    statuses.Add(new SelectListItem() { Value = PayrollSearchRequest.STATUS_PENDING.ToString(), Text = Dictionary.Pending, Selected = Model.Status == PayrollSearchRequest.STATUS_PENDING });
+    statuses.Add(new SelectListItem() { Value = PayrollSearchRequest.STATUS_ACTIVE.ToString(), Text = Dictionary.Approved, Selected = Model.Status == PayrollSearchRequest.STATUS_ACTIVE  });
+
+}
+@using (Html.BeginForm("index", "payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form", id="frmFilter" }))
+{
+    @Html.HiddenFor(m => m.StaffId)
+    <div class="form-inline" style="margin-bottom:10px;">
+        <div class="form-group">
+            <label>@Dictionary.From</label>
+            @Html.TextBoxFor(m => m.FromDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.FromDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.To</label>
+            @Html.TextBoxFor(m => m.ToDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.ToDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Status</label>
+            @Html.DropDownList("Status", statuses, new { @class = "form-control" })
+        </div>
+
+    </div>
+}

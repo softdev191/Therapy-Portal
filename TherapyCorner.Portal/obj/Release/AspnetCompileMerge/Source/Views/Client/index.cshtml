@@ -1,0 +1,164 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+
+@model www.therapycorner.com.company.MessageContracts.ClientSearchRequest
+
+
+@{
+    ViewBag.Title = SharedPages.Clients;
+    ViewBag.CurArea = MenuArea.Clients;
+    string services = ViewBag.ServiceNames;
+    string insurance = ViewBag.Insurances;
+    string govt = ViewBag.GovtPrograms;
+    string staff = ViewBag.Staff;
+    ClientInfoList results = ViewBag.Results;
+    www.therapycorner.com.account.Session token = UserAuthorization.CurrentUser;
+}
+
+<h2 class="breadcrumb">@SharedPages.Clients</h2>
+<section style="padding-bottom:10px">
+    @if (token.IsAdmin || token.IsWorker)
+    {
+    <button onclick="window.location='@Url.Action("create")'">@ClientPages.NewClient</button>
+    }
+    <button onclick="submitit(); frmFilter.submit();">@SharedPages.ChangeFilter</button>
+</section>
+<section style="padding-bottom:10px">
+    @if (!string.IsNullOrWhiteSpace(Model.LastName))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('LastName')" class="close" aria-label="close">&times;</a>@Model.LastName</div>
+    }
+    @if (Model.Status != www.therapycorner.com.company.MessageContracts.ClientSearchRequest.StatusEnum.All)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Status')" class="close" aria-label="close">&times;</a>@Status.ResourceManager.GetString(Model.Status.ToString())</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Physician))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Physician')" class="close" aria-label="close">&times;</a>@Model.Physician</div>
+    }
+    @if (Model.Provider.HasValue)
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('Provider')" class="close" aria-label="close">&times;</a>@staff</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(services))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('SearchServices')" class="close" aria-label="close">&times;</a>@services</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(insurance))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('SearchInsurance')" class="close" aria-label="close">&times;</a>@insurance</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(govt))
+    {
+        <div class="well well-sm"><a href="javascript:ClearField('SearchGovt')" class="close" aria-label="close">&times;</a>@govt</div>
+    }
+</section>
+
+<section>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="IdText"><a href="#">@Dictionary.ID</a></th>
+                <th style="min-width:150px"><a href="#">@Dictionary.Name</a></th>
+                <th class="IdText HideMobile"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.Phone</a></th>
+                <th class="NameText HideMobile"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.DrName</a></th>
+                <th class="IdText HideSmall"><a href="#">@www.therapycorner.com.company.ResStrings.Dictionary.DrPhone</a></th>
+               <th class="BoolText HideMobile"><a href="#">@Dictionary.Insurance</a></th>
+                <th class="BoolText HideMobile"><a href="#">@Dictionary.GovtAssist</a></th>
+                <th class="BoolText"><a href="#">@Dictionary.Status</a></th>
+          </tr>
+        </thead>
+        <tbody>
+            @if (results != null && results.Count > 0)
+            {
+                foreach (var p in results)
+                {
+                    <tr>
+                        <td>
+                            <div>
+                                @Html.ActionLink(p.ClientId.ToString(), "details", new { id = p.ClientId })
+
+                        </div>
+                    </td>
+                    <td>@p.LastName, @p.FirstName @(string.IsNullOrWhiteSpace(p.MiddleName) ? "" : p.MiddleName.Substring(0,1))</td>
+                    <td class="IdText HideMobile">@p.Phone
+                    </td>
+                        <td class="NameText HideMobile">
+                            @p.DrName
+                    </td>
+                        <td class="IdText HideSmall">
+                            @p.DrPhone
+                    </td>
+                        <td class="BoolText HideMobile">
+                            @(p.InsuranceCount.GetValueOrDefault(0)>0 ? Dictionary.Yes : Dictionary.No)
+                        </td>
+                        <td class="BoolText HideMobile">
+                            @(p.GovtProgram != null ? Dictionary.Yes : Dictionary.No)
+                        </td>
+                    <td>@Status.ResourceManager.GetString(p.Status.ToString())</td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+@using (Html.BeginForm("filter", "client", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    @Html.HiddenFor(m => m.LastName)
+    @Html.HiddenFor(m => m.Physician)
+      @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.Provider)
+    int x = 0;
+    if (Model.Services != null && Model.Services.Count > 0)
+    {
+        <span id="SearchServices">
+            @foreach (var s in Model.Services)
+            {
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"{0}.Index\" value=\"{1}\"/>", "Services", x))
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"Services[{0}]\" value=\"{1}\"/>", x, s))
+            x++;
+            }
+        </span>
+    }
+
+    x = 0;
+    if (Model.InsuranceCompanies != null && Model.InsuranceCompanies.Count > 0)
+    {
+        <span id="SearchInsurance">
+            @foreach (var s in Model.InsuranceCompanies)
+            {
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"{0}.Index\" value=\"{1}\"/>", "InsuranceCompanies", x))
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"InsuranceCompanies[{0}]\" value=\"{1}\"/>", x, s))
+            x++;
+            }
+            </span>
+    }
+
+    x = 0;
+    if (Model.GovernmentPrograms != null && Model.GovernmentPrograms.Count > 0)
+    {
+        <span id="SearchGovt">
+            @foreach (var s in Model.GovernmentPrograms)
+            {
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"{0}.Index\" value=\"{1}\"/>", "GovernmentPrograms", x))
+            @Html.Raw(string.Format("<input type=\"hidden\" name=\"GovernmentPrograms[{0}]\" value=\"{1}\"/>", x, s))
+            x++;
+            }
+            </span>
+            }
+            }
+
+@section scripts
+{
+    <script>
+        function ClearField(field) {
+            $("#" + field).remove();
+            submitit();
+            $("#frmFilter")[0].action = window.location;
+            $("#frmFilter").submit();
+        }
+
+    </script>
+
+}

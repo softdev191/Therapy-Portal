@@ -1,0 +1,130 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+@using TherapyCorner.Portal.Controllers
+
+@model www.therapycorner.com.company.MessageContracts.ClaimSearchRequest
+@{
+    ViewBag.Title = ClaimsPages.Filter;
+    ViewBag.CurArea = MenuArea.Billing;
+    Layout = "~/Views/Shared/_LayoutBilling.cshtml";
+
+    List<SelectListItem> statuses = new List<SelectListItem>();
+    statuses.Add(new SelectListItem() { Value = "", Text = Status.All, Selected = string.IsNullOrWhiteSpace(Model.Statuses) });
+    statuses.Add(new SelectListItem() { Value = ClaimController.slClaimsReqAttn, Text = SharedPages.ClaimsReqAttention, Selected = Model.Statuses == ClaimController.slClaimsReqAttn });
+    statuses.Add(new SelectListItem() { Value = ClaimController.slPendingClaims , Text = ClaimsPages.AllActive, Selected = Model.Statuses == ClaimController.slPendingClaims });
+    statuses.Add(new SelectListItem() { Value = "8", Text = ClaimsPages.Generating, Selected = Model.Statuses == "8" });
+    statuses.Add(new SelectListItem() { Value = "9", Text = ClaimsPages.Vetting, Selected = Model.Statuses == "9" });
+    statuses.Add(new SelectListItem() { Value = "0", Text = ClaimsPages.PendInsSubmission, Selected = Model.Statuses == "0" });
+    statuses.Add(new SelectListItem() { Value = "1", Text = ClaimsPages.PendInsPay, Selected = Model.Statuses == "1" });
+    statuses.Add(new SelectListItem() { Value = "10", Text = ClaimsPages.PendInsSubmissionIssue, Selected = Model.Statuses == "10" });
+    statuses.Add(new SelectListItem() { Value = "2", Text = ClaimsPages.PendGovtSubmission, Selected = Model.Statuses == "2" });
+    statuses.Add(new SelectListItem() { Value = "3", Text = ClaimsPages.PendGovtPay, Selected = Model.Statuses == "3" });
+    statuses.Add(new SelectListItem() { Value = "11", Text = ClaimsPages.PendGovtIssue, Selected = Model.Statuses == "11" });
+    statuses.Add(new SelectListItem() { Value = "4", Text = ClaimsPages.PendPay, Selected = Model.Statuses == "4" });
+    statuses.Add(new SelectListItem() { Value = "5", Text = ClaimsPages.Paid, Selected = Model.Statuses == "5" });
+    statuses.Add(new SelectListItem() { Value = "6", Text = ClaimsPages.Closed, Selected = Model.Statuses == "6" });
+    statuses.Add(new SelectListItem() { Value = "7", Text = ClaimsPages.PendingWaiver, Selected = Model.Statuses == "7" });
+
+    List<SelectListItem> grouping = new List<SelectListItem>();
+    grouping.Add(new SelectListItem() { Value = "0", Text = Dictionary.None, Selected = Model.Grouping.GetValueOrDefault(0).ToString()=="0" });
+    grouping.Add(new SelectListItem() { Value = "2", Text = Dictionary.Client, Selected = Model.Grouping.GetValueOrDefault(0).ToString() == "2" });
+    grouping.Add(new SelectListItem() { Value = "1", Text = Dictionary.PendingWith, Selected = Model.Grouping.GetValueOrDefault(0).ToString() == "1" });
+
+
+    List<SelectListItem> govts = new List<SelectListItem>();
+    govts.Add(new SelectListItem() { Value = "", Text = Status.All, Selected = !Model.GovernmentProgram.HasValue });
+    ReferencedGovernmentProgramList programs = ViewBag.Govt;
+    foreach(var g in programs)
+    {
+        govts.Add(new SelectListItem() { Value = g.ProgramId.ToString(), Text = g.Name, Selected = Model.GovernmentProgram.GetValueOrDefault(-1) == g.ProgramId });
+
+    }
+
+    List<SelectListItem> insurance = new List<SelectListItem>();
+    insurance.Add(new SelectListItem() { Value = "", Text = Status.All, Selected = !Model.Insurance.HasValue });
+    ReferencedInsuranceCompanyList companies = ViewBag.Insurance;
+    foreach (var g in companies)
+    {
+        insurance.Add(new SelectListItem() { Value = g.CompanyId.ToString(), Text = g.Name, Selected = Model.Insurance.GetValueOrDefault(-1) == g.CompanyId });
+
+    }
+    string client = ViewBag.ClientName;
+
+
+
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Billing, "billing", "home") &gt; @Html.ActionLink(ClaimsPages.Claims, "index") &gt; @SharedPages.ChangeFilter</h2>
+
+@using (Html.BeginForm("index", "claim", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.ClaimId</label>
+        @Html.TextBoxFor(m=>m.ClaimId, new { @class = "form-control", maxlength = "16" })
+
+    </div><div class="form-group">
+        <label>@Dictionary.Client</label>
+        @Html.TextBox("ClientName", client, new { @class = "form-control", maxlength = "50" })
+
+    </div>
+    <div class="form-group">
+        <label>@ClaimsPages.MinDays</label>
+        @Html.TextBoxFor(m => m.FromDays, new { @class = "form-control NumberText", maxlength = "3" })
+    </div>
+    <div class="form-group">
+        <label>@ClaimsPages.MaxDays</label>
+        @Html.TextBoxFor(m => m.ToDays, new { @class = "form-control NumberText", maxlength = "3" })
+    </div>
+</section>
+<section class="halfspace">
+    <div class="form-group">
+        <label>@Dictionary.Grouping</label>
+        @Html.DropDownList("Grouping", grouping, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Status</label>
+        @Html.DropDownList("Statuses", statuses, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>@Dictionary.GovtPrograms</label>
+        @Html.DropDownList("GovernmentProgram", govts, new { @class = "form-control" })
+
+
+    </div>
+    <div class="form-group">
+        <label>@Dictionary.Insurance</label>
+        @Html.DropDownList("Insurance", insurance, new { @class = "form-control" })
+
+
+    </div>
+</section>
+
+    <p style="text-align:right"><button onclick="submitit()" type="submit">@Dictionary.Search</button><button type="button" onclick="window.history.back()">@Dictionary.Cancel</button></p>
+
+    <div id="SelClientContainer">
+
+    </div>
+}
+
+@section scripts
+{
+
+    @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/ClientSelectionScripts.js"></script>
+    <script src="~/Scripts/trumbowyg.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            InitializeClient("ClientName", "SelClient");
+           
+        });
+
+
+    </script>
+
+  
+}

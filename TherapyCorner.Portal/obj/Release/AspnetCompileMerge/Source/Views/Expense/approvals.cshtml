@@ -1,0 +1,255 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model ExpenseSearchRequest
+
+@{
+    ViewBag.Title = ExpensePages.ExpenseApprovals;
+    Layout = "~/Views/Shared/_LayoutFinance.cshtml";
+    ViewBag.CurArea = MenuArea.Finances;
+
+    ExpenseInfoList expenses = ViewBag.Expenses;
+
+    List<SelectListItem> statuses = new List<SelectListItem>();
+    statuses.Add(new SelectListItem { Text = Dictionary.All, Value = "0,1,2,3", Selected = Model.Status == "0,1,2,3" });
+    statuses.Add(new SelectListItem { Text = Dictionary.AllActive, Value = "0,1", Selected = Model.Status == "0,1" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Pending, Value = "0", Selected = Model.Status == "0" });
+    statuses.Add(new SelectListItem { Text = Dictionary.MoreInfo, Value = "1", Selected = Model.Status == "1" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Rejected, Value = "2", Selected = Model.Status == "2" });
+    statuses.Add(new SelectListItem { Text = Dictionary.Approved, Value = "3", Selected = Model.Status == "3" });
+
+    List<SelectListItem> staff = ViewBag.Staff;
+}
+
+<h2 class="breadcrumb">@ExpensePages.ExpenseApprovals</h2>
+
+@using (Html.BeginForm("approvals", "expense", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmFilter" }))
+{
+    <div class="form-inline" style="margin-bottom:10px;">
+        <div class="form-group">
+            <label>@Dictionary.From</label>
+            @Html.TextBoxFor(m => m.FromDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.FromDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.To</label>
+            @Html.TextBoxFor(m => m.ToDT, new { @class = "form-control DateText", maxlength = 10 })
+            @Html.ValidationMessageFor(m => m.ToDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.Status</label>
+            @Html.DropDownList("Status", statuses, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@SharedPages.Staff</label>
+            @Html.DropDownList("StaffId", staff, new { @class = "form-control" })
+        </div>
+    </div>
+}
+
+<table class="sortable">
+    <thead>
+        <tr>
+            <th class="NameText"></th>
+            <th class="DateText"><a href="#">@Dictionary.Date</a></th>
+            <th class="NameText"><a href="#">@SharedPages.Staff</a></th>
+           <th class="LongNameText"><a href="#">@Dictionary.Description</a></th>
+            <th class="NumberText"><a href="#">@Dictionary.Amount</a></th>
+            <th class="IdText"><a href="#">@Dictionary.Status</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (expenses != null && expenses.Count > 0)
+        {
+            foreach (var e in expenses)
+            {
+                <tr>
+                    <td>
+                        <div class="NameText">
+                            @if (!string.IsNullOrWhiteSpace(e.RcptExtension))
+                            {
+                                <a href="@Url.Action("image", "expense", new { id = e.ExpenseId })" target="_blank"><img src="~/images/magnify.png" /></a>
+                            }
+                            @if (e.Status == ExpenseStatusEnum.Pending)
+                            {
+                                <a href="javascript:Approve(@e.ExpenseId)"><img src="~/images/check.png" /></a>
+                                <a href="javascript:MoreInfo(@e.ExpenseId)"><img src="~/images/edit.png" /></a>
+
+                           <a href="javascript:Reject(@e.ExpenseId)"><img src="~/images/delete.png" /></a>
+                            }
+                        </div>
+
+                    </td>
+                    <td id="@string.Format("MO{0}",e.ExpenseId)">@e.MadeOn.ToShortDateString()</td>
+                    <td id="@string.Format("Stff{0}",e.ExpenseId)">@e.MadeBy.Name</td>
+                    <td >@e.Description</td>
+                <td id="@string.Format("Amnt{0}",e.ExpenseId)" class="NumberText">@e.Amount.ToString("c")</td>
+                    <td>@e.Status.ToString()</td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+
+<div id="modalApprove" style="display:none" title="@Dictionary.Approve">
+    <p>Are you sure you want to approve the following expense? </p>
+    <ul>
+        <li id="apprDate"></li>
+      <li id="apprStaff"></li>
+        <li id="apprAmount"></li>
+
+    </ul>
+    @using (Html.BeginForm("approve", "expense", FormMethod.Post, new { role = "form", id = "frmApprove" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("ApproveId", "")
+
+    }
+</div>
+<div id="modalReject" style="display:none" title="@Dictionary.Reject">
+    <p>Please supply your reason for rejecting this expense </p>
+    <ul>
+        <li id="rejDate"></li>
+        <li id="rejStaff"></li>
+        <li id="rejAmount"></li>
+
+    </ul>
+    @using (Html.BeginForm("reject", "expense", FormMethod.Post, new { role = "form", id = "frmReject" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("RejectId", "")
+        <div class="form-group">
+            @Html.TextArea("Reason", new { id = "RejectReason", style = "width:300px;height:100px" })
+            <span class="text-danger" style="display:none" id="rejectError" >@www.therapycorner.com.account.ResStrings.ValidationText.Required</span>
+  </div>
+    }
+</div>
+<div id="modalMoreInfo" style="display:none" title="More Information Needed">
+    <p>Please supply what additional information you need for this expense </p>
+    <ul>
+        <li id="moDate"></li>
+        <li id="moStaff"></li>
+        <li id="moAmount"></li>
+
+    </ul>
+    @using (Html.BeginForm("moreinfo", "expense", FormMethod.Post, new { role = "form", id = "frmMO" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("MoreInfoId", "")
+        <div class="form-group">
+            @Html.TextArea("Reason", new { id = "MOReason", style="width:300px;height:100px"})
+            <span class="text-danger" style="display:none" id="moError">@www.therapycorner.com.account.ResStrings.ValidationText.Required</span>
+        </div>
+    }
+</div>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        var origFrom, origTo;
+        var diagApprove,diagReject,diagMO;
+
+        $(document).ready(function () {
+            $("#Status")[0].onchange = ChangeFilter;
+            $("#StaffId")[0].onchange = ChangeFilter;
+            origFrom = $("#FromDT").val();
+            origTo = $("#ToDT").val();
+            $("#FromDT")[0].onblur = LostFocus;
+            $("#ToDT")[0].onblur = LostFocus;
+            $("#FromDT").datepicker().on("change", function () { ChangeFilter(); });
+            $("#ToDT").datepicker().on("change", function () { ChangeFilter(); });
+
+            diagApprove = $("#modalApprove").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmApprove(); }, "No": function () { diagApprove.dialog("close"); } }
+            });
+
+            diagReject = $("#modalReject").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmReject(); }, "No": function () { diagReject.dialog("close"); } }
+            });
+            diagMO = $("#modalMoreInfo").dialog({
+                autoOpen: false,
+                width: 365,
+                modal: true,
+                buttons: { "Yes": function () { ConfirmMO(); }, "No": function () { diagMO.dialog("close"); } }
+            });
+        });
+
+        function ChangeFilter()
+        {
+            submitit();
+            $("#frmFilter").submit();
+        }
+        function LostFocus() {
+            if ($("#FromDT").val()!=origFrom || $("#ToDT").val() != origTo)
+            {
+                ChangeFilter();
+            }
+        }
+
+        function Approve(id)
+        {
+            $("#ApproveId").val(id);
+            $("#apprDate").text($("#MO"+id).text());
+            $("#apprStaff").text($("#Stff" + id).text());
+            $("#apprAmount").text($("#Amnt" + id).text());
+            diagApprove.dialog("open");
+        }
+
+        function Reject(id) {
+            $("#RejectId").val(id);
+            $("#rejDate").text($("#MO" + id).text());
+            $("#rejStaff").text($("#Stff" + id).text());
+            $("#rejAmount").text($("#Amnt" + id).text());
+            $("#RejectReason").val("");
+            diagReject.dialog("open");
+        }
+
+        function MoreInfo(id) {
+            $("#MoreInfoId").val(id);
+            $("#moDate").text($("#MO" + id).text());
+            $("#moStaff").text($("#Stff" + id).text());
+            $("#moAmount").text($("#Amnt" + id).text());
+            $("#MOReason").val("");
+            $("#moError").hide();
+            diagMO.dialog("open");
+        }
+
+        function ConfirmMO()
+        {
+            if ($("#MOReason").val()=="")
+            {
+                $("#moError").show();
+                return;
+            }
+            diagMO.dialog("close");
+            submitit();
+            $("#frmMO").submit();
+        }
+
+        function ConfirmReject() {
+            if ($("#RejectReason").val() == "") {
+                $("#RejectError").show();
+                return;
+            }
+            diagReject.dialog("close");
+            submitit();
+            $("#frmReject").submit();
+        }
+
+        function ConfirmApprove() {
+          
+            submitit();
+            $("#frmApprove").submit();
+        }
+    </script>
+}

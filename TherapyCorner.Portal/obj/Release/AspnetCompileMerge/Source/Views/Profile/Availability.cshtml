@@ -1,0 +1,119 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+@model Availability 
+
+@{
+    string companyName = ViewBag.CompanyName;
+    string companyId = ViewBag.CompanyId;
+    ViewBag.Title = string.Format(ProfilePages.EditAvailability,companyName);
+    var token = UserAuthorization.CurrentUser;
+    AvailabilityList availabilities = ViewBag.AvailList;
+
+
+    List<SelectListItem> valuesModel = new List<SelectListItem>();
+    valuesModel.Add(new SelectListItem() { Value = "0", Text = DayOfWeek.Sunday.ToString(), Selected = Model.DayName == DayOfWeek.Sunday  });
+    valuesModel.Add(new SelectListItem() { Value = "1", Text = DayOfWeek.Monday.ToString(), Selected = Model.DayName == DayOfWeek.Monday });
+    valuesModel.Add(new SelectListItem() { Value = "2", Text = DayOfWeek.Tuesday.ToString(), Selected = Model.DayName == DayOfWeek.Tuesday });
+    valuesModel.Add(new SelectListItem() { Value = "3", Text = DayOfWeek.Wednesday.ToString(), Selected = Model.DayName == DayOfWeek.Wednesday });
+    valuesModel.Add(new SelectListItem() { Value = "4", Text = DayOfWeek.Thursday.ToString(), Selected = Model.DayName == DayOfWeek.Thursday });
+    valuesModel.Add(new SelectListItem() { Value = "5", Text = DayOfWeek.Friday.ToString(), Selected = Model.DayName == DayOfWeek.Friday });
+    valuesModel.Add(new SelectListItem() { Value = "6", Text = DayOfWeek.Saturday.ToString(), Selected = Model.DayName == DayOfWeek.Saturday });
+
+}
+<h2 class="breadcrumb">@Html.ActionLink(ProfilePages.MyProfile, "index", "profile") &gt; @ViewBag.Title</h2>
+<section>
+
+</section>
+<table>
+    <thead>
+        <tr>
+            <th class="tdSingleButton">&nbsp;</th>
+            <th class="NameText">@Dictionary.DayOfWeek</th>
+            <th class="TimeEntry">@Dictionary.StartTime</th>
+            <th class="TimeEntry">@Dictionary.EndTime</th>
+       </tr>
+    </thead>
+    <tbody>
+        @foreach(var a in availabilities)
+        {
+            <tr>
+                <td><div><a href="javascript:RemoveAvailability(@a.AvailabilityId,'@a.DayName','@a.StartTimeString')"><img src="~/images/delete.png" /></a></div></td>
+                <td>@a.DayName</td>
+                <td>@a.StartTimeString</td>
+                <td>@a.EndTimeString</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@using (Html.BeginForm("availability", "Profile", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken();
+    @Html.HiddenFor(m => m.AvailabilityId)
+    @Html.HiddenFor(m => m.CompanyId)
+    <h3>Add Availability Window</h3>
+    <section class="form-horizontal">
+        <div class="form-group" style="display:inline-block">
+            @Html.LabelFor(m => m.Day)
+            @Html.DropDownList("Day", valuesModel, new { @class = "form-control NameText" })
+        </div>
+        <div class="form-group" style="display:inline-block">
+            <label for="StartTime">@Dictionary.StartTime </label>
+            <input type="text" data-val="true" data-val-required="@Dictionary.Required" class="form-control TimeEntry" value="@Model.StartTimeString" id="StartTimeText" name="StartTimeText" />
+            @Html.ValidationMessage("StartTimeText", new { @class = "text-danger" })
+        </div>
+        <div class="form-group" style="display:inline-block">
+            <label for="EndTime">@Dictionary.EndTime </label>
+            <input type="text" data-val="true" data-val-required="@Dictionary.Required" class="form-control TimeEntry" value="@Model.EndTimeString" id="StartTimeText" name="EndTimeText" />
+            @Html.ValidationMessage("EndTimeText", new { @class = "text-danger" })
+        </div>
+        <div class="form-group"  style="display:inline-block;vertical-align:bottom">
+            <button type="submit" >@Dictionary.Add</button>
+        </div>
+    </section>
+    <p></p>
+
+}
+<div id="modalDelete" style="display:none" title="@ProfilePages.RemoveAvailability">
+    <p>@ProfilePages.RemoveAvailConfirm <span id="rDay"></span>&nbsp;<span id="rStart"></span> </p>    
+</div>
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+    var diagRemove;
+
+$(document).ready(function () {
+    diagRemove = $("#modalDelete").dialog({
+        autoOpen: false,
+        width: 365,
+        modal: true,
+        buttons: { "Yes": function () { ConfirmDel(); }, "No": function () { diagRemove.dialog("close"); } }
+    });
+  
+   
+});
+var delId;
+
+
+
+function RemoveAvailability(id,dy,strt)
+{
+    $("#rDay").text(dy);
+    $("#rStart").text(strt);
+    diagRemove.dialog("open");
+    delId=id;
+}
+function ConfirmDel() {
+    submitit();
+    window.location = "@Url.Action("RemoveAvailability",new { id = "" })"+"/" + delId + "?company=@companyId";
+                  }
+
+     
+
+
+    </script>
+}

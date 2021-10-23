@@ -1,0 +1,261 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.account;
+
+@model IntegrationChoiceList
+
+@{
+    ViewBag.Title = SettingsPages.Integrations;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var accountingChoice = Model.Find(c => c.Area.UniqueId == "1");
+
+    CompanyInfo company = ViewBag.Company;
+    int? tab = ViewBag.Tab;
+    var clearingHouses = StaticData.ClearingHouses;
+    ClearingHouseInfo curClearingHouse = null;
+    var token = UserAuthorization.CurrentUser;
+    List<SelectListItem> optionsCH = new List<SelectListItem>();
+    foreach (var c in clearingHouses)
+    {
+
+        optionsCH.Add(new SelectListItem() { Value = c.ClearingHouseId.ToString(), Text = c.Name, Selected = c.ClearingHouseId == token.ClearingHouse.GetValueOrDefault(1) });
+        if (token.ClearingHouse.GetValueOrDefault(1) == c.ClearingHouseId)
+        {
+            curClearingHouse = c;
+        }
+    }
+}
+
+<h2 class="breadcrumb">@Html.ActionLink(Dictionary.Administration, "index") &gt; @SettingsPages.Integrations</h2>
+
+<div id="tabs">
+    <ul>
+
+        <li><a href="#tabs-1">@SettingsPages.Accounting</a></li>
+
+        <li><a href="#tabs-2">@Dictionary.ClearingHouse</a></li>
+        <li><a href="#tabs-3">API</a></li>
+
+    </ul>
+
+    <div id="tabs-1" style="height:550px" class="ControlledTab">
+        @if (accountingChoice == null || accountingChoice.IntegrationId == -1)
+        {
+            <p>@SettingsPages.NoAccountingIntegration</p>
+            <p style="text-align:center">
+                <a href="javascript:LinkQB()" title="Connect to QuickBooks"><img style="width:292px" src="~/images/C2QB_green_btn_lg_default.png" /></a>
+            </p>
+        }
+        else
+        {
+            var attId = accountingChoice.Values.Find(a => a.AttributeId == 1);
+            var att = accountingChoice.Values.Find(a => a.AttributeId == 3);
+            var exp = DateTime.Parse(att.Value);
+
+            <h4 style="text-align:left">@SettingsPages.QuickBooks</h4>
+
+            <div class="halfspace">
+                <div class="form-group">
+                    <label>@SettingsPages.CompanyID</label><br /><span>@attId.Value</span>
+                    <p style="font-size:smaller;font-style:italic">@SettingsPages.QBCompanyHelp </p>
+                </div>
+
+                <div class="form-group">
+                    @if (exp < DateTime.UtcNow.AddDays(14))
+                    {
+
+                        <p style="font-size:smaller;font-style:italic">@SettingsPages.QBRenewHelp </p>
+
+
+                    }
+                    <button onclick="LinkQB()" type="button">@SettingsPages.RefreshLink</button>
+                </div>
+                <div class="form-group">
+                    <button onclick="RemoveLink()" type="button">@SettingsPages.RemoveLink</button>
+                </div>
+                <div class="form-group">
+                    <button onclick="window.location='@Url.Action("SyncQB")'" type="button">Sync Now</button>
+                </div>
+            </div>
+            <div class="halfspace">
+                @using (Html.BeginForm("integrations", "settings", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmSave" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("Area.UniqueId", accountingChoice.Area.UniqueId)
+                    @Html.Hidden("Area.Context", accountingChoice.Area.Context)
+                    @Html.Hidden("IntegrationId", accountingChoice.IntegrationId)
+                    @Html.Hidden("Name", accountingChoice.Name)
+                    int x = 0;
+                    foreach (var av in accountingChoice.Values)
+                    {
+                        @Html.Hidden("Values.Index", x)
+
+                        @Html.Hidden(string.Format("Values[{0}].AttributeId", x), av.AttributeId)
+                        @Html.Hidden(string.Format("Values[{0}].Label", x), av.Label)
+                        string clss = "form-control";
+                        if (av.AttributeId == 11)
+                        {
+                            clss += " DateText";
+                        }
+                        if (av.AttributeId < 6)
+                        {
+                            @Html.Hidden(string.Format("Values[{0}].Value", x), av.Value)
+
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <label>@av.Label</label>@Html.TextBox(string.Format("Values[{0}].Value", x), av.Value, new { @class = clss })
+                            </div>
+                        }
+                        x++;
+                    }
+                    <div class="form-group">
+                        <button>@Dictionary.Save</button>
+                    </div>
+                }
+            </div>
+        }
+        @using (Html.BeginForm("integrations", "settings", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmRemove" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Area.UniqueId", "1")
+            @Html.Hidden("Area.Context", "IntegrationArea")
+            @Html.Hidden("IntegrationId", "-1")
+            @Html.Hidden("Name", "None")
+        }
+    </div>
+    <div id="tabs-2" style="height:550px" class="ControlledTab">
+        @using (Html.BeginForm("updateClearingHouse", "settings", FormMethod.Post, new { id = "frmAdd" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label>Clearing House</label> Office Ally
+                @Html.Hidden("ClearingHouse.ClearingHouseId",token.ClearingHouse.GetValueOrDefault(1).ToString())
+             
+            </div>
+            @Html.Partial("ClearingHouseForm", company)
+            <p style="text-align:center">
+                <button onclick="submitit()" type="submit">@Dictionary.Save</button>
+
+            </p>
+        }
+    </div>
+    <div id="tabs-3" style="height:550px" class="ControlledTab">
+        <p>@SettingsPages.APIInstructions</p>
+
+        @if (!string.IsNullOrWhiteSpace(company.APICode))
+        {
+            <p><button onclick="ResetAPI()">@SettingsPages.ResetAPI</button><button onclick="ClearAPI()">@SettingsPages.ClearAPI</button></p>
+
+            <p>@SettingsPages.APISettingInfo</p>
+            <ul>
+                <li><strong>CompanyID</strong> : @company.CompanyId</li>
+                <li><strong>Code</strong> : @company.APICode</li>
+            </ul>
+
+            <p>@string.Format(SettingsPages.APIAccessInfo, SiteUtilities.APIHelpAddress)</p>
+        }
+        else
+        {
+            <p><button onclick="SetAPI()">@SettingsPages.SetAPI</button></p>
+        }
+
+        @using (Html.BeginForm("SetAPI", "settings", FormMethod.Post, new { id = "frmAPI" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("Version",company.Version)
+
+        }
+        <div id="modalSetAPI" style="display:none" title="@SettingsPages.SetAPI">
+            <p>@SettingsPages.ConfirmSetAPI </p>
+
+        </div>
+        <div id="modalClearAPI" style="display:none" title="@SettingsPages.ClearAPI">
+            <p>@SettingsPages.ConfirmClearAPI </p>
+
+        </div>
+        <div id="modalResetAPI" style="display:none" title="@SettingsPages.ResetAPI">
+            <p>@SettingsPages.ConfirmResetAPI </p>
+
+        </div>
+    </div>
+
+</div>
+    @section scripts
+{
+        @Styles.Render("~/Content/tabs")
+        <script>
+            var diagAPISet, diagAPIClear, diagAPIReset;
+    
+            $(document).ready(function () {
+                
+
+                diagAPISet = $("#modalSetAPI").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmSetAPI(); }, "No": function () { diagAPISet.dialog("close"); } }
+                });
+                diagAPIReset = $("#modalResetAPI").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmResetAPI(); }, "No": function () { diagAPIReset.dialog("close"); } }
+                });
+                diagAPIClear = $("#modalClearAPI").dialog({
+                    autoOpen: false,
+                    width: 365,
+                    modal: true,
+                    buttons: { "Yes": function () { ConfirmClearAPI(); }, "No": function () { diagAPIClear.dialog("close"); } }
+                });
+            })
+
+            function SetAPI() {
+                diagAPISet.dialog("open");
+            }
+            function ResetAPI() {
+                diagAPIReset.dialog("open");
+            }
+            function ClearAPI() {
+                diagAPIClear.dialog("open");
+            }
+            function ConfirmSetAPI() {
+                submitit();
+                diagAPISet.dialog("close");
+                $("#frmAPI").attr("action", "@Url.Action("SetAPI")");
+                $("#frmAPI").submit();
+            }
+            function ConfirmResetAPI() {
+                            submitit();
+                diagAPIReset.dialog("close");
+                $("#frmAPI").attr("action", "@Url.Action("ResetAPI")");
+                $("#frmAPI").submit();
+            }
+            function ConfirmClearAPI() {
+                    submitit();
+                diagAPIClear.dialog("close");
+                $("#frmAPI").attr("action", "@Url.Action("ClearAPI")");
+                $("#frmAPI").submit();
+            }
+        function LinkQB()
+        {
+            submitit();
+            window.location = '@Url.Action("InitiateQBLink")';
+        }
+        function RemoveLink()
+        {
+            submitit();
+            frmRemove.submit();
+        }
+        </script>
+
+        @if(tab.HasValue)
+        {
+             <script>
+            $(document).ready(function() { $("#tabs").tabs({active: @tab.Value })})
+        </script>
+        }
+    }
+

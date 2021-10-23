@@ -1,0 +1,24 @@
+﻿@using www.soundpower.biz.common;
+@model GenericEntityList
+@{ 
+    int x = 0;
+
+}
+<div class="DiagnosisList">
+    @if (Model!=null && Model.Count>0)
+    {
+        foreach(var d in Model)
+        {
+           <div id="@string.Format("DiagnosisEntry{0}",x)"> <a href="javascript:RemoveDiagnosis(@x)"><img  class="DiagBtn" src="~/images/delete.png"/></a> @d.Name  <span>(@d.UniqueId)</span>
+           <input type="hidden" name="Diagnosis.Index" value="@x"/>
+           <input type="hidden" name="Diagnosis[@x].UniqueId" value="@d.UniqueId"/>
+           <input type="hidden" name="Diagnosis[@x].Name" value="@d.Name"/>
+               <input type="hidden" name="Diagnosis[@x].Context" value="Diagnosis" />
+
+    </div>
+            x++;
+        }
+    }
+</div>
+<input type="hidden" id="DiagnosisCount" value="@x"/>
+<input type="text" id="NewDiagnoses"  class="form-control NewDiagnosis" /><a href="javascript:AddDiagnosis()"><img class="DiagBtn" src="~/images/add.png"/></a>

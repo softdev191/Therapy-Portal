@@ -1,0 +1,98 @@
+﻿@using TherapyCorner.Portal.Models
+@using TherapyCorner.Portal.ResourceText;
+@using www.therapycorner.com.company;
+@using www.therapycorner.com.company.MessageContracts;
+
+@model MoveSeriesRequest
+@{
+
+    var token = UserAuthorization.CurrentUser;
+    string clientId = ViewBag.ClientId;
+    string clientName = ViewBag.ClientName;
+    string serviceName = ViewBag.ServiceName;
+    string[] ids = Model.AppointmentIds.Split(',');
+    double duration = ViewBag.Duration;
+    string staff = ViewBag.Staff;
+    string dts = ViewBag.OrigDates ;
+
+    List<SelectListItem> listDays = new List<SelectListItem>();
+    for (int x=0;x<=6;x++)
+    {
+        listDays.Add(new SelectListItem() { Text = ((DayOfWeek)x).ToString(), Value = x.ToString(), Selected = x == Model.DayOfWeek });
+    }
+
+}
+
+
+<h2 class="breadcrumb">@Html.ActionLink(SharedPages.Clients, "index") &gt; @Html.ActionLink(string.Format("{0}: {1}", Dictionary.Details, clientName), "details", "client", new { id = clientId }, null) &gt; @Html.ActionLink(CalendarPages.ServiceSchedule, "schedule", "client", new { id = clientId}, null) &gt;@Html.ActionLink(CalendarPages.Appointment, "details", "appointment", new { id = ids[0] }, null) &gt;@CalendarPages.Move</h2>
+@using (Html.BeginForm("moveseries", "appointment", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmData" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SeriesId)
+    @Html.HiddenFor(m => m.AppointmentIds)
+    @Html.HiddenFor(m => m.MaxDate)
+    @Html.HiddenFor(m => m.MinDate)
+    @Html.Hidden("ServiceName", serviceName)
+    @Html.Hidden("ClientName", clientName)
+    @Html.Hidden("ClientId", clientId)
+    @Html.Hidden("Duration", duration)
+    @Html.Hidden("Staff", staff)
+
+    <div class="form-group">
+        <label>@Dictionary.Service</label><br />@serviceName
+    </div>
+    <div class="halfspace">
+        <div class="form-group">
+            <label>@Dictionary.DayOfWeek</label>
+            @Html.DropDownList("DayOfWeek", listDays, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.StartTime</label>
+            @Html.TextBoxFor(m => m.StartDT, "{0:h:mm tt}", new { @class = "form-control", maxlength = "10", onchange = "SetMakeupEndTime()", style = "width:118px;" })
+            @Html.ValidationMessageFor(m => m.StartDT, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>@Dictionary.EndTime</label><br />
+            <span id="spEndTime"></span>
+        </div>
+    </div>
+    <div class="halfspace">
+        <div class="form-group">
+            <label>Original Dates</label><br/>
+            <span>@dts</span>
+        </div>
+        <div>
+            <label>@Dictionary.Availability</label>
+
+            <div id="availcalendar">
+            </div>
+
+        </div>
+    </div>
+ 
+
+
+        <p style="text-align:right">
+            <button onclick="submitit()" type="submit">@Dictionary.Save</button><button type="button" onclick="window.location='@Url.Action("details", "appointment", new { id = ids[0] })'">@Dictionary.Cancel</button>
+
+
+        </p>
+}
+
+@section scripts
+{
+
+@Scripts.Render("~/bundles/calendar")
+@Styles.Render("~/Content/calendar")
+@Scripts.Render("~/bundles/createappointment")
+
+    <script>
+        $(document).ready(function () {
+            InitializeSeries(@duration);
+            SetAvailability(@clientId,@staff, @((int)(Model.MaxDate.Subtract(Model.MinDate).TotalDays/7)),'@Model.MinDate' );
+
+        });
+
+
+    </script>
+}
